@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>学习勇士大冒险 · 游戏大厅</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Microsoft YaHei','PingFang SC',sans-serif;background:linear-gradient(180deg,#312e81 0%,#1e1b4b 45%,#0f0f23 100%);min-height:100vh;display:flex;justify-content:center;align-items:center;padding:20px;user-select:none}
+.wrap{width:100%;max-width:420px;text-align:center}
+.hero{font-size:64px;margin-bottom:10px;animation:bounce 2s infinite}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+h1{font-size:28px;color:#fff;text-shadow:0 0 20px rgba(139,92,246,.6);margin-bottom:6px}
+.sub{color:#a5b4fc;font-size:14px;margin-bottom:26px}
+.card{display:flex;align-items:center;gap:14px;background:rgba(30,27,75,.85);border:1px solid rgba(139,92,246,.35);border-radius:16px;padding:16px 18px;margin-bottom:14px;text-decoration:none;transition:transform .15s,box-shadow .15s;text-align:left}
+.card:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(99,102,241,.35)}
+.card .icon{font-size:38px;flex-shrink:0}
+.card .info{flex:1}
+.card .name{font-size:17px;font-weight:bold;color:#fff;margin-bottom:3px}
+.card .desc{font-size:12px;color:#a5b4fc}
+.card .go{color:#c7d2fe;font-size:20px;flex-shrink:0}
+.card.hot{border-color:#ec4899;background:linear-gradient(135deg,rgba(236,72,153,.16),rgba(30,27,75,.9))}
+.badge{display:inline-block;background:#ec4899;color:#fff;font-size:10px;padding:2px 8px;border-radius:10px;margin-left:6px;vertical-align:2px}
+.foot{color:#64748b;font-size:11px;margin-top:22px;line-height:1.7}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="hero">🦉</div>
+  <h1>学习勇士大冒险</h1>
+  <div class="sub">四年级上册 · 英语 + 奥数 每日特训</div>
+
+  <a class="card hot" href="study-quest-game.html">
+    <div class="icon">🏆</div>
+    <div class="info">
+      <div class="name">学习勇士大冒险<span class="badge">推荐</span></div>
+      <div class="desc">英语 + 奥数 合并版 · 家长中心 · 奖励商店 · 双科积分</div>
+    </div>
+    <div class="go">›</div>
+  </a>
+
+  <a class="card" href="english-quest-game.html">
+    <div class="icon">📚</div>
+    <div class="info">
+      <div class="name">英语勇士大冒险</div>
+      <div class="desc">单词闯关特训 · 听写 · 人教PEP版 Unit 1~6</div>
+    </div>
+    <div class="go">›</div>
+  </a>
+
+  <a class="card" href="aoshu-classroom-test-game.html">
+    <div class="icon">🧮</div>
+    <div class="info">
+      <div class="name">奥数勇士大冒险</div>
+      <div class="desc">课堂测试特训 · 27关随机出题 · 图形化解题演示</div>
+    </div>
+    <div class="go">›</div>
+  </a>
+
+  <div class="foot">每个游戏独立存档 · 数据保存在本机浏览器<br/>离线也可玩：把 html 文件下载后双击打开</div>
+</div>
+</body>
+</html>
