@@ -1,0 +1,1141 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>英语勇士大冒险 · 单词闯关特训</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:'Microsoft YaHei','PingFang SC',sans-serif;background:linear-gradient(135deg,#1a1a2e,#16213e);min-height:100vh;display:flex;justify-content:center;align-items:center;overflow:hidden;user-select:none}
+#game{width:100%;max-width:500px;height:100vh;max-height:900px;background:#0f0f23;position:relative;overflow:hidden;box-shadow:0 0 40px rgba(99,102,241,.3)}
+@media(min-width:501px){#game{border-radius:20px;height:90vh}}
+.screen{position:absolute;top:0;left:0;width:100%;height:100%;display:none;flex-direction:column;overflow-y:auto}
+.screen.active{display:flex}
+.top-bar{background:linear-gradient(90deg,#4338ca,#6d28d9);color:#fff;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;font-size:13px;flex-shrink:0}
+.top-bar .stat{display:flex;align-items:center;gap:4px}
+.back-btn{background:none;border:none;color:#fff;font-size:18px;cursor:pointer;padding:2px 6px}
+.music-btn{background:none;border:none;color:#fff;font-size:16px;cursor:pointer;padding:2px 6px}
+
+/* 主菜单 */
+#menu{background:linear-gradient(180deg,#312e81 0%,#1e1b4b 50%,#0f0f23 50%);justify-content:center;align-items:center;padding:20px}
+.game-title{font-size:34px;font-weight:bold;color:#fff;text-shadow:0 0 20px rgba(139,92,246,.6);margin-bottom:6px;text-align:center}
+.game-sub{color:#a5b4fc;font-size:15px;margin-bottom:30px;text-align:center}
+.menu-hero{font-size:72px;margin-bottom:24px;animation:bounce 2s infinite}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+.menu-btn{width:250px;padding:14px 20px;margin:7px 0;border:none;border-radius:50px;font-size:17px;font-weight:bold;cursor:pointer;color:#fff;display:flex;align-items:center;justify-content:center;gap:8px;transition:transform .15s}
+.menu-btn:active{transform:scale(.95)}
+.menu-btn.p1{background:linear-gradient(135deg,#f472b6,#ec4899);box-shadow:0 4px 15px rgba(236,72,153,.4)}
+.menu-btn.p2{background:linear-gradient(135deg,#60a5fa,#3b82f6);box-shadow:0 4px 15px rgba(59,130,246,.4)}
+.menu-btn.p3{background:linear-gradient(135deg,#34d399,#10b981);box-shadow:0 4px 15px rgba(16,185,129,.4)}
+.menu-foot{position:absolute;bottom:16px;color:#64748b;font-size:11px}
+
+/* 选关 */
+.unit-tabs{display:flex;overflow-x:auto;padding:8px;gap:6px;background:#1e1b4b;flex-shrink:0;border-bottom:2px solid #312e81}
+.unit-tab{padding:7px 14px;border-radius:18px;background:#312e81;color:#a5b4fc;font-size:12px;font-weight:bold;cursor:pointer;white-space:nowrap;border:2px solid transparent}
+.unit-tab.active{background:#6d28d9;color:#fff;border-color:#8b5cf6}
+.unit-tab.lock{background:#1e293b;color:#475569}
+.level-list{padding:12px;flex:1}
+.level-card{background:#1e1b4b;border-radius:14px;padding:14px;margin-bottom:10px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:transform .15s;border:2px solid transparent}
+.level-card:active{transform:scale(.98)}
+.level-card.lock{opacity:.45;cursor:not-allowed}
+.level-card.done{border-color:#10b981}
+.level-num{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:bold;flex-shrink:0}
+.level-card.lock .level-num{background:#334155}
+.level-info{flex:1}
+.level-name{font-size:15px;font-weight:bold;color:#e0e7ff;margin-bottom:3px}
+.level-desc{font-size:11px;color:#818cf8}
+.level-stars{font-size:14px;letter-spacing:1px}
+
+/* 战斗 */
+#battle{background:linear-gradient(180deg,#0f0f23,#1a1a2e)}
+.battle-top{padding:10px 14px;display:flex;justify-content:space-between;align-items:center;flex-shrink:0}
+.hearts{font-size:20px;letter-spacing:3px}
+.combo{color:#fbbf24;font-size:14px;font-weight:bold;text-shadow:0 0 8px rgba(251,191,36,.5)}
+.arena{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px;position:relative}
+.monster-area{text-align:center;margin-bottom:16px}
+.monster{font-size:60px;display:inline-block;transition:transform .2s}
+.monster.hit{animation:shake .3s}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px) rotate(-4deg)}75%{transform:translateX(8px) rotate(4deg)}}
+.monster-name{color:#f87171;font-size:14px;font-weight:bold;margin-top:6px}
+.hp-bg{width:180px;height:14px;background:#334155;border-radius:7px;margin:6px auto 0;overflow:hidden;border:2px solid #475569}
+.hp-fg{height:100%;background:linear-gradient(90deg,#ef4444,#f87171);transition:width .5s;border-radius:5px}
+.q-box{background:#f8fafc;border-radius:14px;padding:16px;width:100%;max-width:400px;box-shadow:0 4px 20px rgba(0,0,0,.4)}
+.q-tag{display:inline-block;padding:2px 8px;border-radius:8px;font-size:10px;font-weight:bold;margin-bottom:8px}
+.tag-n{background:#dbeafe;color:#1e40af}.tag-e{background:#fef3c7;color:#92400e}.tag-b{background:#fee2e2;color:#991b1b}
+.q-text{font-size:16px;font-weight:bold;color:#1e293b;line-height:1.6;margin-bottom:12px;min-height:44px;white-space:pre-line}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.opt-btn{padding:12px 10px;border:2px solid #c7d2fe;border-radius:10px;background:#fff;font-size:15px;font-weight:bold;color:#1e293b;cursor:pointer;transition:all .15s;text-align:center}
+.opt-btn:active{transform:scale(.95)}
+.opt-btn.ok{background:#10b981;border-color:#059669;color:#fff}
+.opt-btn.no{background:#ef4444;border-color:#dc2626;color:#fff}
+.opt-btn:disabled{cursor:default}
+.fill-in{width:100%;padding:12px;font-size:18px;border:2px solid #c7d2fe;border-radius:10px;text-align:center;font-weight:bold;outline:none}
+.fill-in:focus{border-color:#6366f1}
+.fill-btn{width:100%;margin-top:8px;padding:12px;border:none;border-radius:10px;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;font-size:16px;font-weight:bold;cursor:pointer}
+.hint-cn{font-size:13px;color:#64748b;margin-bottom:10px;line-height:1.5}
+.dual-row{display:flex;gap:8px;align-items:center;justify-content:center;margin-bottom:4px}
+.dual-lab{font-weight:bold;color:#6366f1;font-size:16px}
+.dual-in{width:34%;min-width:90px;padding:12px 6px}
+.lsn-btn{width:100%;margin-bottom:8px;padding:14px;border:none;border-radius:10px;background:linear-gradient(135deg,#f59e0b,#f97316);color:#fff;font-size:17px;font-weight:bold;cursor:pointer}
+.lsn-btn:active{transform:scale(.97)}
+.items-bar{display:flex;justify-content:center;gap:10px;padding:8px;flex-shrink:0}
+.item-btn{width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.1);border:2px solid rgba(255,255,255,.2);font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;position:relative}
+.item-btn .cnt{position:absolute;top:-3px;right:-3px;background:#ef4444;color:#fff;font-size:9px;font-weight:bold;width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center}
+.item-btn:disabled{opacity:.4;cursor:not-allowed}
+
+/* 反馈弹窗 */
+.fb-overlay{position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;z-index:100;padding:16px}
+.fb-overlay.show{display:flex}
+.fb-box{background:#fff;border-radius:18px;padding:20px;width:100%;max-width:420px;max-height:85vh;overflow-y:auto;animation:pop .3s}
+@keyframes pop{0%{transform:scale(.6);opacity:0}100%{transform:scale(1);opacity:1}}
+.fb-icon{font-size:42px;text-align:center;margin-bottom:6px}
+.fb-title{font-size:20px;font-weight:bold;text-align:center;margin-bottom:4px}
+.fb-title.c{color:#059669}.fb-title.w{color:#dc2626}
+.fb-stars{font-size:16px;color:#f59e0b;text-align:center;font-weight:bold;margin-bottom:10px}
+.fb-exp{font-size:13px;color:#475569;line-height:1.6;background:#f1f5f9;padding:10px;border-radius:8px;margin-bottom:12px}
+/* 解题演示 */
+.demo-title{font-size:14px;font-weight:bold;color:#4338ca;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.demo-steps{margin-bottom:12px}
+.demo-step{background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:10px;margin-bottom:8px;opacity:0;transform:translateX(-10px);transition:all .4s}
+.demo-step.show{opacity:1;transform:translateX(0)}
+.demo-step-hd{font-size:12px;font-weight:bold;color:#6d28d9;margin-bottom:4px}
+.demo-step-bd{font-size:13px;color:#334155;line-height:1.6}
+/* 线段图 */
+.line-diagram{display:flex;align-items:center;gap:0;margin:8px 0;flex-wrap:wrap}
+.seg{height:28px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:bold;color:#fff;position:relative;border:1px solid rgba(0,0,0,.1)}
+.seg-label{font-size:10px;color:#64748b;text-align:center;margin-top:2px}
+/* 表格演示 */
+.demo-table{width:100%;border-collapse:collapse;font-size:12px;margin:6px 0}
+.demo-table th,.demo-table td{border:1px solid #cbd5e1;padding:5px 6px;text-align:center}
+.demo-table th{background:#e0e7ff;color:#3730a3;font-weight:bold}
+.demo-table tr.hl{background:#fef3c7}
+/* 计算步骤 */
+.calc-step{font-family:'Courier New',monospace;font-size:14px;color:#1e293b;padding:4px 0;border-bottom:1px dashed #e2e8f0}
+.calc-step:last-child{border-bottom:none}
+.calc-step .hl{color:#dc2626;font-weight:bold}
+.calc-step .res{color:#059669;font-weight:bold}
+/* 网格演示 */
+.grid-demo{display:inline-grid;gap:2px;margin:6px 0}
+.grid-cell{width:24px;height:24px;background:#e0e7ff;border:1px solid #c7d2fe;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:bold;color:#4338ca;border-radius:3px}
+.grid-cell.tree{background:#10b981;color:#fff}
+.grid-cell.hl{background:#fbbf24;color:#78350f}
+.fb-btn{width:100%;padding:12px;border:none;border-radius:10px;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;font-size:16px;font-weight:bold;cursor:pointer}
+
+/* 结算 */
+#result{background:linear-gradient(180deg,#312e81,#1e1b4b);justify-content:center;align-items:center;padding:24px}
+.r-card{background:#fff;border-radius:20px;padding:24px 20px;width:100%;max-width:380px;text-align:center;box-shadow:0 10px 40px rgba(0,0,0,.4)}
+.r-title{font-size:24px;font-weight:bold;color:#1e293b;margin-bottom:4px}
+.r-sub{font-size:14px;color:#64748b;margin-bottom:16px}
+.r-stars{font-size:40px;margin-bottom:16px;letter-spacing:6px}
+.r-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.r-stat{background:#f1f5f9;border-radius:10px;padding:12px}
+.r-stat-v{font-size:20px;font-weight:bold;color:#4338ca}
+.r-stat-l{font-size:11px;color:#64748b;margin-top:2px}
+.r-bonus{background:linear-gradient(135deg,#fef3c7,#fde68a);border-radius:10px;padding:12px;margin-bottom:16px;font-size:15px;font-weight:bold;color:#92400e}
+.r-actions{display:flex;gap:8px}
+.r-btn{flex:1;padding:12px;border:none;border-radius:10px;font-size:14px;font-weight:bold;cursor:pointer;color:#fff}
+.r-btn.a{background:linear-gradient(135deg,#6366f1,#8b5cf6)}
+.r-btn.b{background:linear-gradient(135deg,#34d399,#10b981);color:#064e3b}
+
+/* 商店 */
+#shop{background:#0f0f23}
+.shop-hd{background:linear-gradient(135deg,#f59e0b,#ea580c);color:#fff;padding:18px;text-align:center;flex-shrink:0}
+.shop-hd h2{font-size:20px;margin-bottom:2px}
+.shop-list{padding:12px;flex:1}
+.shop-item{background:#1e1b4b;border-radius:14px;padding:14px;margin-bottom:10px;display:flex;align-items:center;gap:12px}
+.shop-icon{font-size:36px;flex-shrink:0}
+.shop-info{flex:1}
+.shop-name{font-size:15px;font-weight:bold;color:#e0e7ff;margin-bottom:2px}
+.shop-desc{font-size:11px;color:#818cf8}
+.shop-price{font-size:15px;font-weight:bold;color:#fbbf24;margin-bottom:4px}
+.shop-btn{padding:7px 14px;border:none;border-radius:18px;font-size:12px;font-weight:bold;cursor:pointer;color:#fff;background:linear-gradient(135deg,#f59e0b,#ea580c);white-space:nowrap}
+.shop-btn:disabled{background:#475569;cursor:not-allowed}
+.shop-item.pend{border:2px solid #f59e0b}
+.shop-item.appr{border:2px solid #10b981}
+.stag{display:inline-block;padding:1px 6px;border-radius:6px;font-size:9px;font-weight:bold;margin-top:2px}
+.stag.p{background:#fef3c7;color:#92400e}.stag.a{background:#d1fae5;color:#065f46}
+
+/* 家长后台 */
+#parent{background:#0f0f23}
+.parent-hd{background:linear-gradient(135deg,#374151,#1f2937);color:#fff;padding:14px 18px;flex-shrink:0}
+.parent-hd h2{font-size:17px;margin-bottom:2px}
+.parent-hd p{font-size:11px;opacity:.7}
+.p-tabs{display:flex;background:#1e1b4b;border-bottom:2px solid #312e81;flex-shrink:0}
+.p-tab{flex:1;padding:10px;text-align:center;font-size:12px;font-weight:bold;color:#818cf8;cursor:pointer;border-bottom:3px solid transparent}
+.p-tab.active{color:#a5b4fc;border-bottom-color:#8b5cf6}
+.p-content{padding:12px;flex:1}
+.p-sec{display:none}.p-sec.active{display:block}
+.p-card{background:#1e1b4b;border-radius:12px;padding:14px;margin-bottom:10px}
+.p-label{font-size:13px;font-weight:bold;color:#e0e7ff;margin-bottom:6px}
+.p-desc{font-size:11px;color:#818cf8;margin-bottom:8px}
+.p-sel,.p-inp{width:100%;padding:9px;border:2px solid #312e81;border-radius:8px;font-size:13px;background:#0f0f23;color:#e0e7ff;outline:none}
+.p-sel option{background:#1e1b4b}
+.rw-item{display:flex;align-items:center;gap:6px;margin-bottom:6px}
+.rw-item input{flex:1;padding:7px;border:1px solid #312e81;border-radius:6px;font-size:12px;background:#0f0f23;color:#e0e7ff}
+.rw-item input[type=number]{width:60px;flex:none}
+.rw-del{width:28px;height:28px;border:none;border-radius:50%;background:#7f1d1d;color:#fca5a5;font-size:14px;cursor:pointer;flex-shrink:0}
+.add-rw{width:100%;padding:9px;border:2px dashed #475569;border-radius:8px;background:transparent;color:#94a3b8;font-size:13px;cursor:pointer;margin-top:6px}
+.save-btn{width:100%;padding:12px;border:none;border-radius:10px;background:linear-gradient(135deg,#34d399,#10b981);color:#064e3b;font-size:15px;font-weight:bold;cursor:pointer;margin-top:12px}
+.pend-item{background:#1e1b4b;border-radius:10px;padding:12px;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.pend-info{flex:1}
+.pend-name{font-size:13px;font-weight:bold;color:#e0e7ff}
+.pend-meta{font-size:11px;color:#818cf8;margin-top:2px}
+.appr-btn,.rej-btn{padding:6px 12px;border:none;border-radius:7px;font-size:12px;font-weight:bold;cursor:pointer;color:#fff}
+.appr-btn{background:#059669}.rej-btn{background:#dc2626}
+.stat-row{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid #312e81;font-size:13px}
+.stat-row:last-child{border-bottom:none}
+.stat-row .l{color:#94a3b8}.stat-row .v{font-weight:bold;color:#e0e7ff}
+.prog-bg{width:100%;height:8px;background:#334155;border-radius:4px;margin-top:4px;overflow:hidden}
+.prog-fg{height:100%;background:linear-gradient(90deg,#6366f1,#8b5cf6);border-radius:4px;transition:width .5s}
+
+/* 锁定 */
+#lock{background:linear-gradient(180deg,#0f0f23,#1a1a2e);justify-content:center;align-items:center;padding:24px;text-align:center}
+.lock-icon{font-size:72px;margin-bottom:16px;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
+.lock-title{font-size:26px;font-weight:bold;color:#fff;margin-bottom:10px}
+.lock-desc{font-size:15px;color:#94a3b8;line-height:1.8;margin-bottom:24px}
+.lock-cd{font-size:42px;font-weight:bold;color:#fbbf24;margin-bottom:24px;text-shadow:0 0 16px rgba(251,191,36,.5)}
+.lock-btn{padding:12px 32px;border:none;border-radius:22px;background:rgba(255,255,255,.1);color:#fff;font-size:15px;cursor:pointer;border:1px solid rgba(255,255,255,.2)}
+
+.fstar{position:absolute;font-size:22px;pointer-events:none;animation:fup 1s ease-out forwards;z-index:50}
+@keyframes fup{0%{transform:translateY(0) scale(1);opacity:1}100%{transform:translateY(-70px) scale(1.4);opacity:0}}
+.toast{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,.85);color:#fff;padding:10px 20px;border-radius:8px;font-size:13px;z-index:999;display:none;animation:tin .3s}
+@keyframes tin{0%{opacity:0;transform:translate(-50%,-50%) scale(.8)}100%{opacity:1;transform:translate(-50%,-50%) scale(1)}}
+.toast.show{display:block}
+.screen::-webkit-scrollbar{width:4px}
+.screen::-webkit-scrollbar-thumb{background:#4338ca;border-radius:2px}
+</style>
+</head>
+<body>
+<div id="game">
+
+<!-- 主菜单 -->
+<div id="menu" class="screen active">
+  <div class="game-title">英语勇士大冒险</div>
+  <div class="game-sub">四年级上册 · 人教PEP版 Unit 1~6 英语特训</div>
+  <div class="menu-hero">🦉</div>
+  <button class="menu-btn p1" onclick="goLevels()">⚔️ 开始挑战</button>
+  <button class="menu-btn p2" onclick="goShop()">🎁 奖励商店</button>
+  <button class="menu-btn p3" onclick="parentLogin()">👨‍👩‍👧 家长中心</button>
+  <div class="menu-foot">每天20分钟，英语更棒</div>
+</div>
+
+<!-- 选关 -->
+<div id="levels" class="screen">
+  <div class="top-bar">
+    <button class="back-btn" onclick="show('menu')">←</button>
+    <div class="stat"><span>⭐</span><span id="lv-stars">0</span></div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <button class="music-btn" id="music-toggle" onclick="toggleMusic()">🎵</button>
+      <div class="stat"><span>⏱️</span><span id="lv-time">20:00</span></div>
+    </div>
+  </div>
+  <div class="unit-tabs" id="u-tabs"></div>
+  <div class="level-list" id="lv-list"></div>
+</div>
+
+<!-- 战斗 -->
+<div id="battle" class="screen">
+  <div class="battle-top">
+    <button class="back-btn" onclick="exitBattle()">←</button>
+    <div class="hearts" id="b-hearts">❤️❤️❤️</div>
+    <div class="combo" id="b-combo"></div>
+  </div>
+  <div class="arena" id="arena">
+    <div class="monster-area">
+      <div class="monster" id="monster">👾</div>
+      <div class="monster-name" id="m-name">小怪</div>
+      <div class="hp-bg"><div class="hp-fg" id="m-hp" style="width:100%"></div></div>
+    </div>
+    <div class="q-box" id="q-box"></div>
+  </div>
+  <div class="items-bar" id="items-bar"></div>
+  <div class="fb-overlay" id="fb">
+    <div class="fb-box">
+      <div class="fb-icon" id="fb-icon">🎉</div>
+      <div class="fb-title" id="fb-title">回答正确！</div>
+      <div class="fb-stars" id="fb-stars"></div>
+      <div class="fb-exp" id="fb-exp"></div>
+      <button class="fb-btn" onclick="nextQ()">继续</button>
+    </div>
+  </div>
+</div>
+
+<!-- 结算 -->
+<div id="result" class="screen">
+  <div class="r-card">
+    <div class="r-title" id="r-title">关卡通过！</div>
+    <div class="r-sub" id="r-sub"></div>
+    <div class="r-stars" id="r-stars">⭐⭐⭐</div>
+    <div class="r-grid">
+      <div class="r-stat"><div class="r-stat-v" id="r-correct">0</div><div class="r-stat-l">答对题数</div></div>
+      <div class="r-stat"><div class="r-stat-v" id="r-acc">0%</div><div class="r-stat-l">正确率</div></div>
+      <div class="r-stat"><div class="r-stat-v" id="r-combo">0</div><div class="r-stat-l">最高连击</div></div>
+      <div class="r-stat"><div class="r-stat-v" id="r-time">0s</div><div class="r-stat-l">用时</div></div>
+    </div>
+    <div class="r-bonus" id="r-bonus">获得智慧星：+0 ⭐</div>
+    <div class="r-actions">
+      <button class="r-btn b" onclick="goLevels()">返回选关</button>
+      <button class="r-btn a" onclick="nextLevel()">下一关</button>
+    </div>
+  </div>
+</div>
+
+<!-- 商店 -->
+<div id="shop" class="screen">
+  <div class="shop-hd">
+    <h2>🎁 奖励商店</h2>
+    <div>我的智慧星：<span id="shop-stars">0</span> ⭐</div>
+  </div>
+  <div class="top-bar" style="background:transparent;padding:6px 12px">
+    <button class="back-btn" onclick="show('menu')" style="color:#a5b4fc">← 返回</button>
+    <span style="color:#64748b;font-size:11px">兑换后需家长审核</span>
+  </div>
+  <div class="shop-list" id="shop-list"></div>
+</div>
+
+<!-- 家长后台 -->
+<div id="parent" class="screen">
+  <div class="parent-hd"><h2>👨‍👩‍👧 家长中心</h2><p>管理学习进度、奖励兑换和查看报告</p></div>
+  <div class="p-tabs">
+    <div class="p-tab active" onclick="pTab('progress',this)">进度设置</div>
+    <div class="p-tab" onclick="pTab('rewards',this)">奖励管理</div>
+    <div class="p-tab" onclick="pTab('audit',this)">兑换审核</div>
+    <div class="p-tab" onclick="pTab('report',this)">学习报告</div>
+  </div>
+  <div class="p-content">
+    <div class="p-sec active" id="p-progress">
+      <div class="p-card">
+        <div class="p-label">📚 当前教学进度</div>
+        <div class="p-desc">设置孩子当前学到的英语单元，自动解锁对应关卡</div>
+        <select class="p-sel" id="set-unit">
+          <option value="1">Unit 1：Helping at home（在家帮忙）</option>
+          <option value="2">Unit 2：My friends（我的朋友们）</option>
+          <option value="3">Unit 3：Places we live in（我们居住的地方）</option>
+          <option value="4">Unit 4：Helping in the community（在社区里帮忙）</option>
+          <option value="5">Unit 5：The weather and us（天气与我们）</option>
+          <option value="6">Unit 6：Changing for the seasons（随四季变换）</option>
+        </select>
+      </div>
+      <div class="p-card">
+        <div class="p-label">⏱️ 每日游玩时长</div>
+        <div class="p-desc">建议保持20分钟</div>
+        <select class="p-sel" id="set-time">
+          <option value="900">15分钟</option>
+          <option value="1200" selected>20分钟（推荐）</option>
+          <option value="1500">25分钟</option>
+          <option value="1800">30分钟</option>
+        </select>
+      </div>
+      <div class="p-card">
+        <div class="p-label">⭐ 当前智慧星</div>
+        <div class="p-desc">直接修改孩子的智慧星余额（可增可减），保存后立即生效</div>
+        <input class="p-inp" id="set-stars" type="number" min="0" step="1" placeholder="输入新的智慧星数值">
+      </div>
+      <div class="p-card">
+        <div class="p-label">🔄 重置数据</div>
+        <div class="p-desc">清除所有进度（不可恢复）</div>
+        <button class="save-btn" style="background:linear-gradient(135deg,#7f1d1d,#991b1b);color:#fca5a5" onclick="resetAll()">重置所有数据</button>
+      </div>
+      <button class="save-btn" onclick="saveSettings()">💾 保存设置</button>
+    </div>
+    <div class="p-sec" id="p-rewards">
+      <div class="p-card">
+        <div class="p-label">🎁 可兑换奖励</div>
+        <div id="rw-list"></div>
+        <button class="add-rw" onclick="addReward()">+ 添加新奖励</button>
+      </div>
+      <button class="save-btn" onclick="saveRewards()">💾 保存奖励设置</button>
+    </div>
+    <div class="p-sec" id="p-audit"><div id="audit-list"></div></div>
+    <div class="p-sec" id="p-report">
+      <div class="p-card">
+        <div class="p-label">📊 今日数据</div>
+        <div class="stat-row"><span class="l">答题数量</span><span class="v" id="rp-tq">0</span></div>
+        <div class="stat-row"><span class="l">答对数量</span><span class="v" id="rp-tc">0</span></div>
+        <div class="stat-row"><span class="l">正确率</span><span class="v" id="rp-ta">0%</span></div>
+        <div class="stat-row"><span class="l">游玩时长</span><span class="v" id="rp-tt">0分钟</span></div>
+        <div class="stat-row"><span class="l">获得智慧星</span><span class="v" id="rp-ts">0</span></div>
+      </div>
+      <div class="p-card">
+        <div class="p-label">📈 累计数据</div>
+        <div class="stat-row"><span class="l">总答题数</span><span class="v" id="rp-q">0</span></div>
+        <div class="stat-row"><span class="l">总正确率</span><span class="v" id="rp-a">0%</span></div>
+        <div class="stat-row"><span class="l">已通关卡</span><span class="v" id="rp-l">0</span></div>
+        <div class="stat-row"><span class="l">累计智慧星</span><span class="v" id="rp-s">0</span></div>
+      </div>
+      <div class="p-card">
+        <div class="p-label">🎯 各单元掌握度</div>
+        <div id="unit-prog"></div>
+      </div>
+    </div>
+  </div>
+  <div style="padding:0 12px 12px"><button class="save-btn" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff" onclick="show('menu')">返回主菜单</button></div>
+</div>
+
+<!-- 锁定 -->
+<div id="lock" class="screen">
+  <div class="lock-icon">🌙</div>
+  <div class="lock-title">今天的挑战结束啦</div>
+  <div class="lock-desc">你已经玩了20分钟啦<br/>保护眼睛，休息一下<br/>明天继续挑战英语怪兽！</div>
+  <div class="lock-cd" id="lock-cd">--:--:--</div>
+  <button class="lock-btn" onclick="show('menu')">返回主菜单</button>
+</div>
+
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+// ==================== BGM 音乐系统 ====================
+let audioCtx = null, musicOn = true, musicTimer = null, musicStep = 0;
+function initAudio(){if(!audioCtx){try{audioCtx=new(window.AudioContext||window.webkitAudioContext)()}catch(e){}}}
+function playTone(freq,dur,type='square',vol=0.08){
+  if(!audioCtx||!musicOn)return;
+  const o=audioCtx.createOscillator(),g=audioCtx.createGain();
+  o.type=type;o.frequency.value=freq;
+  g.gain.setValueAtTime(vol,audioCtx.currentTime);
+  g.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+dur);
+  o.connect(g);g.connect(audioCtx.destination);
+  o.start();o.stop(audioCtx.currentTime+dur);
+}
+// 主旋律（C大调欢快旋律）
+const melody=[523,659,784,659,523,587,659,523,784,880,784,659,523,659,587,523];
+const bass=[262,262,330,330,262,262,196,196,262,262,330,330,262,262,196,196];
+function playMusicStep(){
+  if(!musicOn||!audioCtx)return;
+  const i=musicStep%melody.length;
+  playTone(melody[i],0.28,'square',0.06);
+  playTone(bass[i],0.5,'triangle',0.05);
+  musicStep++;
+}
+function startMusic(){
+  initAudio();
+  if(audioCtx&&audioCtx.state==='suspended')audioCtx.resume();
+  if(musicTimer)clearInterval(musicTimer);
+  musicTimer=setInterval(playMusicStep,320);
+}
+function stopMusic(){if(musicTimer){clearInterval(musicTimer);musicTimer=null}}
+function toggleMusic(){
+  musicOn=!musicOn;
+  document.getElementById('music-toggle').textContent=musicOn?'🎵':'🔇';
+  if(musicOn)startMusic();else stopMusic();
+  showToast(musicOn?'🎵 音乐已开启':'🔇 音乐已关闭');
+}
+// 音效
+function sfxCorrect(){initAudio();playTone(523,0.1,'square',0.1);setTimeout(()=>playTone(659,0.1,'square',0.1),80);setTimeout(()=>playTone(784,0.15,'square',0.1),160)}
+function sfxWrong(){initAudio();playTone(200,0.2,'sawtooth',0.08);setTimeout(()=>playTone(150,0.25,'sawtooth',0.08),100)}
+function sfxClick(){initAudio();playTone(800,0.05,'square',0.05)}
+function sfxWin(){initAudio();[523,659,784,1047].forEach((f,i)=>setTimeout(()=>playTone(f,0.2,'square',0.1),i*120))}
+
+// ==================== 英语听写 TTS 语音 ====================
+let ttsVoice=null;
+function pickVoice(){
+  if(!('speechSynthesis' in window))return;
+  const vs=speechSynthesis.getVoices();
+  ttsVoice=vs.find(v=>/^en[-_]US/i.test(v.lang))||vs.find(v=>/^en/i.test(v.lang))||null;
+}
+if('speechSynthesis' in window){speechSynthesis.onvoiceschanged=pickVoice;pickVoice()}
+function speakWord(){
+  if(!('speechSynthesis' in window)){showToast('当前浏览器不支持语音听写');return}
+  const b=S.battle;if(!b)return;
+  const q=b.questions[b.qi];
+  speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(q.word);
+  u.lang='en-US';u.rate=0.7;u.pitch=1;
+  if(!ttsVoice)pickVoice();
+  if(ttsVoice)u.voice=ttsVoice;
+  speechSynthesis.speak(u);
+}
+function pressSpeak(){
+  const b=S.battle;if(!b)return;
+  b.plays=(b.plays||0)+1;
+  speakWord();
+  const btn=document.getElementById('lsn-btn');
+  const qt=document.querySelector('.q-text');
+  if(!qt)return;
+  if(b.plays>=3){
+    if(qt.dataset.locked!=='1'){
+      qt.dataset.locked='1';
+      qt.textContent='中文提示：'+b.questions[b.qi].cn;
+      if(btn)btn.textContent='🔊 播放发音（可多听几遍）';
+      showToast('📖 中文提示已显示',2000);
+    }
+  }else if(btn){
+    btn.textContent='🔊 播放发音（再听'+(3-b.plays)+'次显示中文）';
+  }
+}
+
+// ==================== 题目数据（人教PEP四上英语） ====================
+const LEVELS=[
+// ==================== Unit 1 Helping at home（在家帮忙） ====================
+{id:'1-1',unit:1,name:'重点单词 · 听写',monster:'👾',mName:'单词小妖',questions:[
+{type:'listen',diff:'n',cn:'工作；职业',word:'job',pts:10},
+{type:'listen',diff:'n',cn:'医生',word:'doctor',pts:10},
+{type:'listen',diff:'n',cn:'护士',word:'nurse',pts:10},
+{type:'listen',diff:'n',cn:'农场主；农民',word:'farmer',pts:10},
+{type:'listen',diff:'n',cn:'工人',word:'worker',pts:10},
+{type:'listen',diff:'n',cn:'烹饪；煮',word:'cook',pts:10},
+{type:'listen',diff:'n',cn:'打扫；干净的',word:'clean',pts:10},
+{type:'listen',diff:'n',cn:'扫',word:'sweep',pts:10},
+{type:'listen',diff:'n',cn:'地板；地面',word:'floor',pts:10},
+{type:'listen',diff:'n',cn:'人；人们',word:'people',pts:10}
+]},
+{id:'1-2',unit:1,name:'重点短语 · 填空',monster:'👻',mName:'短语幽灵',questions:[
+{type:'fill',diff:'n',q:"help ______ home",hint:"在家帮忙",answer:"at",pts:10},
+{type:'fill',diff:'n',q:"office ______",hint:"公司职员",answer:"worker",pts:10},
+{type:'fill',diff:'n',q:"teach ______",hint:"教汉语",answer:"Chinese",pts:10},
+{type:'fill',diff:'n',q:"do some ______",hint:"做一些家务活",answer:"chores",pts:10},
+{type:'fill',diff:'n',q:"clean the ______",hint:"打扫房间",answer:"room",pts:10},
+{type:'fill',diff:'n',q:"make a ______",hint:"制作一个礼物",answer:"gift",pts:10},
+{type:'fill',diff:'n',q:"look ______",hint:"照顾",answer:"after",pts:10},
+{type:'fill',diff:'n',q:"sweep the ______",hint:"扫地",answer:"floor",pts:10},
+{type:'fill',diff:'n',q:"have ______",hint:"玩得开心",answer:"fun",pts:10},
+{type:'fill',diff:'n',q:"The Double Ninth ______",hint:"重阳节",answer:"Festival",pts:10}
+]},
+{id:'1-3',unit:1,name:'重点句子 · 双空填空',monster:'🧟',mName:'句子僵尸',questions:[
+{type:'fill',diff:'e',q:"—Is this your father? —Yes, it ______. He's a ______ teacher.",hint:"这是你的父亲吗？是的，他是一位体育老师。",answers:["is","PE"],pts:10},
+{type:'fill',diff:'e',q:"—What's your mother's ______? —She's a ______.",hint:"你妈妈做什么工作？她是一位医生。",answers:["job","doctor"],pts:10},
+{type:'fill',diff:'e',q:"Mum and Dad are ______ and tired. We can do some ______.",hint:"妈妈和爸爸又忙又累。我们可以做一些家务活。",answers:["busy","chores"],pts:10},
+{type:'fill',diff:'e',q:"The Double Ninth Festival is ______. We can ______ the room for them.",hint:"重阳节就要到了。我们可以帮他们打扫房间。",answers:["coming","clean"],pts:10},
+{type:'fill',diff:'e',q:"—How can you help your ______? —We can ______ the floor.",hint:"你能如何帮助家人？我们可以扫地。",answers:["family","sweep"],pts:10}
+]},
+{id:'1-4',unit:1,name:'重点语法 · 双空填空',monster:'👹',mName:'语法魔王',questions:[
+{type:'fill',diff:'b',q:"—What's his ______? —He is a ______.",hint:"他的职业是什么？他是一名司机。（询问职业）",answers:["job","driver"],pts:10},
+{type:'fill',diff:'b',q:"—What ______ you do? —I'm a ______.",hint:"你是做什么的？我是一名厨师。（do/does）",answers:["do","cook"],pts:10},
+{type:'fill',diff:'b',q:"I ______ cook, but I can clean the ______.",hint:"我不会做饭，但我会打扫地板。（情态动词否定）",answers:["can't|cannot","floor"],pts:10},
+{type:'fill',diff:'b',q:"—Can you clean the ______? —Yes, I ______.",hint:"你能打扫房间吗？是的，我能。（情态动词问答）",answers:["room","can"],pts:10},
+{type:'fill',diff:'b',q:"—What ______ she do? —She's a ______.",hint:"她是做什么的？她是一名护士。（三单形式 does）",answers:["does","nurse"],pts:10}
+]},
+// ==================== Unit 2 My friends（我的朋友们） ====================
+{id:'2-1',unit:2,name:'重点单词 · 听写',monster:'👾',mName:'单词小妖',questions:[
+{type:'listen',diff:'n',cn:'强壮的',word:'strong',pts:10},
+{type:'listen',diff:'n',cn:'头发',word:'hair',pts:10},
+{type:'listen',diff:'n',cn:'友好的',word:'kind',pts:10},
+{type:'listen',diff:'n',cn:'文静的',word:'quiet',pts:10},
+{type:'listen',diff:'n',cn:'最好的',word:'best',pts:10},
+{type:'listen',diff:'n',cn:'阅读',word:'read',pts:10},
+{type:'listen',diff:'n',cn:'游戏',word:'game',pts:10},
+{type:'listen',diff:'n',cn:'足球运动',word:'football',pts:10},
+{type:'listen',diff:'n',cn:'篮球运动',word:'basketball',pts:10},
+{type:'listen',diff:'n',cn:'总是',word:'always',pts:10}
+]},
+{id:'2-2',unit:2,name:'重点短语 · 填空',monster:'👻',mName:'短语幽灵',questions:[
+{type:'fill',diff:'n',q:"a new ______",hint:"一个新朋友",answer:"friend",pts:10},
+{type:'fill',diff:'n',q:"tall and ______",hint:"又高又壮",answer:"strong",pts:10},
+{type:'fill',diff:'n',q:"nice short ______",hint:"漂亮的短发",answer:"hair",pts:10},
+{type:'fill',diff:'n',q:"short and ______",hint:"又矮又瘦",answer:"thin",pts:10},
+{type:'fill',diff:'n',q:"go ______",hint:"离开",answer:"away",pts:10},
+{type:'fill',diff:'n',q:"help me with ______",hint:"帮助我学英语",answer:"English",pts:10},
+{type:'fill',diff:'n',q:"your ______ friend",hint:"你最好的朋友",answer:"best",pts:10},
+{type:'fill',diff:'n',q:"make me ______",hint:"让我开心",answer:"smile",pts:10},
+{type:'fill',diff:'n',q:"read ______",hint:"阅读书籍",answer:"books",pts:10},
+{type:'fill',diff:'n',q:"play ______ together",hint:"一起玩游戏",answer:"games",pts:10}
+]},
+{id:'2-3',unit:2,name:'重点句子 · 双空填空',monster:'🧟',mName:'句子僵尸',questions:[
+{type:'fill',diff:'e',q:"—What's your friend's ______? —______ name is Zhang Peng.",hint:"你的朋友叫什么名字？他的名字叫张鹏。",answers:["name","His"],pts:10},
+{type:'fill',diff:'e',q:"He's tall and ______. He has nice short ______ too.",hint:"他又高又壮。他还有一头漂亮的短发。",answers:["strong","hair"],pts:10},
+{type:'fill',diff:'e',q:"—Who's your ______ friend? —Chen Jie. She often makes me ______.",hint:"谁是你最好的朋友？陈杰。她经常逗我笑。",answers:["best","smile"],pts:10},
+{type:'fill',diff:'e',q:"He often helps me with ______. We often ______ books together.",hint:"他经常帮我学英语。我们经常一起读书。",answers:["English","read"],pts:10},
+{type:'fill',diff:'e',q:"She likes weiqi, but I like ball ______. We often ______ football.",hint:"她喜欢围棋，但我喜欢球类运动。我们经常踢足球。",answers:["games","play"],pts:10}
+]},
+{id:'2-4',unit:2,name:'重点语法 · 双空填空',monster:'👹',mName:'语法魔王',questions:[
+{type:'fill',diff:'b',q:"This is my friend. ______ is strong, and ______ hair is nice.",hint:"这是我的朋友。他很强壮，他的头发很漂亮。（主格/物主代词）",answers:["He","his"],pts:10},
+{type:'fill',diff:'b',q:"My friend ______ short hair. He is ______.",hint:"我的朋友留短发。他很文静。",answers:["has","quiet"],pts:10},
+{type:'fill',diff:'b',q:"We ______ games together. He ______ long hair.",hint:"我们一起做游戏。他留着长发。",answers:["play","has"],pts:10},
+{type:'fill',diff:'b',q:"______ name is John. ______ is my best friend.",hint:"他的名字叫约翰。他是我最好的朋友。",answers:["His","He"],pts:10},
+{type:'fill',diff:'b',q:"They often ______ basketball. ______ favourite player is tall.",hint:"他们经常打篮球。他们最喜欢的球员个子很高。",answers:["play","Their"],pts:10}
+]},
+// ==================== Unit 3 Places we live in（我们居住的地方） ====================
+{id:'3-1',unit:3,name:'重点单词 · 听写',monster:'👾',mName:'单词小妖',questions:[
+{type:'listen',diff:'n',cn:'下午',word:'afternoon',pts:10},
+{type:'listen',diff:'n',cn:'游乐场；操场',word:'playground',pts:10},
+{type:'listen',diff:'n',cn:'公园',word:'park',pts:10},
+{type:'listen',diff:'n',cn:'医院',word:'hospital',pts:10},
+{type:'listen',diff:'n',cn:'商店',word:'shop',pts:10},
+{type:'listen',diff:'n',cn:'厕所；卫生间',word:'toilet',pts:10},
+{type:'listen',diff:'n',cn:'图书馆',word:'library',pts:10},
+{type:'listen',diff:'n',cn:'最喜欢的',word:'favourite',pts:10},
+{type:'listen',diff:'n',cn:'照片',word:'photo',pts:10},
+{type:'listen',diff:'n',cn:'散步；行走',word:'walk',pts:10}
+]},
+{id:'3-2',unit:3,name:'重点短语 · 填空',monster:'👻',mName:'短语幽灵',questions:[
+{type:'fill',diff:'n',q:"take a ______",hint:"散步",answer:"walk",pts:10},
+{type:'fill',diff:'n',q:"bus ______",hint:"公共汽车车站",answer:"stop",pts:10},
+{type:'fill',diff:'n',q:"see a ______",hint:"看医生",answer:"doctor",pts:10},
+{type:'fill',diff:'n',q:"go back ______",hint:"回家",answer:"home",pts:10},
+{type:'fill',diff:'n',q:"a ______ club",hint:"一个太极俱乐部",answer:"Taiji",pts:10},
+{type:'fill',diff:'n',q:"read ______",hint:"读故事",answer:"stories",pts:10},
+{type:'fill',diff:'n',q:"buy ______ and books",hint:"购买礼物和书籍",answer:"gifts",pts:10},
+{type:'fill',diff:'n',q:"do some ______",hint:"做一些运动",answer:"sports",pts:10},
+{type:'fill',diff:'n',q:"go ______",hint:"去购物",answer:"shopping",pts:10},
+{type:'fill',diff:'n',q:"my favourite ______",hint:"我最喜欢的地方",answer:"place",pts:10}
+]},
+{id:'3-3',unit:3,name:'重点句子 · 双空填空',monster:'🧟',mName:'句子僵尸',questions:[
+{type:'fill',diff:'e',q:"There is a ______. We all play ______.",hint:"那里有一个游乐场。我们都在那里玩。",answers:["playground","there"],pts:10},
+{type:'fill',diff:'e',q:"There is a ______ in your community. I often take a ______ there.",hint:"你的社区里有一个公园。我经常在那里散步。",answers:["park","walk"],pts:10},
+{type:'fill',diff:'e',q:"My favourite ______ in my community is the museum. I often read a ______ in the library.",hint:"社区里我最喜欢的地方是博物馆。我经常在图书馆读故事。",answers:["place","story"],pts:10},
+{type:'fill',diff:'e',q:"—Where is the ______ stop? —It's over ______.",hint:"公共汽车站在哪里？就在那边。",answers:["bus","there"],pts:10},
+{type:'fill',diff:'e',q:"In the ______, I often go to the ______ to buy gifts and books.",hint:"下午我经常去商店买礼物和书。",answers:["afternoon","shop"],pts:10}
+]},
+{id:'3-4',unit:3,name:'重点语法 · 双空填空',monster:'👹',mName:'语法魔王',questions:[
+{type:'fill',diff:'b',q:"There ______ a girl and two boys in the ______.",hint:"照片里有一个女孩和两个男孩。（there be 就近原则）",answers:["is","photo"],pts:10},
+{type:'fill',diff:'b',q:"There ______ two boys in the ______.",hint:"公园里有两个男孩。（there are 复数）",answers:["are","park"],pts:10},
+{type:'fill',diff:'b',q:"There ______ any doctor in the ______.",hint:"医院里没有医生。（否定句）",answers:["isn't|is not","hospital"],pts:10},
+{type:'fill',diff:'b',q:"He ______ a walk on the street in the ______.",hint:"他下午在街上散步。（三单形式）",answers:["takes","afternoon"],pts:10},
+{type:'fill',diff:'b',q:"I often ______ gifts in the ______.",hint:"我经常在商店里买礼物。",answers:["buy","shop"],pts:10}
+]},
+// ==================== Unit 4 Helping in the community（在社区里帮忙） ====================
+{id:'4-1',unit:4,name:'重点单词 · 听写',monster:'👾',mName:'单词小妖',questions:[
+{type:'listen',diff:'n',cn:'司机',word:'driver',pts:10},
+{type:'listen',diff:'n',cn:'厨师',word:'cook',pts:10},
+{type:'listen',diff:'n',cn:'警察',word:'police',pts:10},
+{type:'listen',diff:'n',cn:'消防队员',word:'firefighter',pts:10},
+{type:'listen',diff:'n',cn:'清洁工',word:'cleaner',pts:10},
+{type:'listen',diff:'n',cn:'志愿者',word:'volunteer',pts:10},
+{type:'listen',diff:'n',cn:'每人',word:'everyone',pts:10},
+{type:'listen',diff:'n',cn:'讲述；告诉',word:'tell',pts:10},
+{type:'listen',diff:'n',cn:'床',word:'bed',pts:10},
+{type:'listen',diff:'n',cn:'为什么',word:'why',pts:10}
+]},
+{id:'4-2',unit:4,name:'重点短语 · 填空',monster:'👻',mName:'短语幽灵',questions:[
+{type:'fill',diff:'n',q:"a school ______ driver",hint:"一位校车司机",answer:"bus",pts:10},
+{type:'fill',diff:'n',q:"sing old ______",hint:"唱老歌",answer:"songs",pts:10},
+{type:'fill',diff:'n',q:"an important ______",hint:"一份重要的工作",answer:"job",pts:10},
+{type:'fill',diff:'n',q:"clean the ______",hint:"打扫社区",answer:"community",pts:10},
+{type:'fill',diff:'n',q:"at the bus ______",hint:"在公共汽车站",answer:"stop",pts:10},
+{type:'fill',diff:'n',q:"delivery ______",hint:"快递员",answer:"worker",pts:10},
+{type:'fill',diff:'n',q:"police ______",hint:"警察；警员",answer:"officer",pts:10},
+{type:'fill',diff:'n',q:"make the ______",hint:"铺床",answer:"bed",pts:10},
+{type:'fill',diff:'n',q:"tell funny ______",hint:"讲有趣的故事",answer:"stories",pts:10},
+{type:'fill',diff:'n',q:"stay ______",hint:"保持安全",answer:"safe",pts:10}
+]},
+{id:'4-3',unit:4,name:'重点句子 · 双空填空',monster:'🧟',mName:'句子僵尸',questions:[
+{type:'fill',diff:'e',q:"Our neighbour is a ______. He often ______ people.",hint:"我们的邻居是一名消防员。他经常帮助别人。",answers:["firefighter","helps"],pts:10},
+{type:'fill',diff:'e',q:"He's a school bus ______. He takes ______ to school every day.",hint:"他是一名校车司机。他每天送我们去学校。",answers:["driver","us"],pts:10},
+{type:'fill',diff:'e',q:"Chen Jie is ______ the ______.",hint:"陈杰正在铺床。（现在进行时）",answers:["making","bed"],pts:10},
+{type:'fill',diff:'e',q:"Look! Some students are cleaning the room in an ______ people's home. ______ is happy.",hint:"看！一些学生正在老人家里打扫房间。每个人都很开心。",answers:["old","Everyone"],pts:10},
+{type:'fill',diff:'e',q:"Liu Jia's father is a bus ______. Look! He is ______ our school bus.",hint:"刘佳的爸爸是一名公交车司机。看！他正在开我们的校车。",answers:["driver","driving"],pts:10}
+]},
+{id:'4-4',unit:4,name:'重点语法 · 双空填空',monster:'👹',mName:'语法魔王',questions:[
+{type:'fill',diff:'b',q:"Look! Chen Jie is making the ______. Her mother ______ cooking dinner.",hint:"看！陈杰正在铺床。她妈妈正在做饭。（现在进行时）",answers:["bed","is"],pts:10},
+{type:'fill',diff:'b',q:"Listen! They ______ singing old songs. The ______ is driving the bus.",hint:"听！他们正在唱老歌。司机正在开公交车。",answers:["are","driver"],pts:10},
+{type:'fill',diff:'b',q:"I ______ doing my homework. ______ is reading a book.",hint:"我正在做作业。每个人都在看书。",answers:["am","Everyone"],pts:10},
+{type:'fill',diff:'b',q:"cook → ______（现在分词）　tell → ______（现在分词）",hint:"直接加 ing。",answers:["cooking","telling"],pts:10},
+{type:'fill',diff:'b',q:"make → ______（现在分词）　Mrs Green is ______ a funny story.",hint:"make 去e加ing；tell 直接加ing。",answers:["making","telling"],pts:10}
+]},
+// ==================== Unit 5 The weather and us（天气与我们） ====================
+{id:'5-1',unit:5,name:'重点单词 · 听写',monster:'👾',mName:'单词小妖',questions:[
+{type:'listen',diff:'n',cn:'天气',word:'weather',pts:10},
+{type:'listen',diff:'n',cn:'阳光充足的',word:'sunny',pts:10},
+{type:'listen',diff:'n',cn:'阴雨的',word:'rainy',pts:10},
+{type:'listen',diff:'n',cn:'多云的',word:'cloudy',pts:10},
+{type:'listen',diff:'n',cn:'多风的',word:'windy',pts:10},
+{type:'listen',diff:'n',cn:'多雪的',word:'snowy',pts:10},
+{type:'listen',diff:'n',cn:'热的',word:'hot',pts:10},
+{type:'listen',diff:'n',cn:'冷的',word:'cold',pts:10},
+{type:'listen',diff:'n',cn:'风筝',word:'kite',pts:10},
+{type:'listen',diff:'n',cn:'雪人',word:'snowman',pts:10}
+]},
+{id:'5-2',unit:5,name:'重点短语 · 填空',monster:'👻',mName:'短语幽灵',questions:[
+{type:'fill',diff:'n',q:"fly a ______",hint:"放风筝",answer:"kite",pts:10},
+{type:'fill',diff:'n',q:"see a ______",hint:"看电影",answer:"film",pts:10},
+{type:'fill',diff:'n',q:"make a ______",hint:"堆雪人",answer:"snowman",pts:10},
+{type:'fill',diff:'n',q:"play ______",hint:"打篮球",answer:"basketball",pts:10},
+{type:'fill',diff:'n',q:"cool and ______",hint:"凉爽且晴朗",answer:"sunny",pts:10},
+{type:'fill',diff:'n',q:"warm and ______",hint:"温暖且多风",answer:"windy",pts:10},
+{type:'fill',diff:'n',q:"go to the ______",hint:"去图书馆",answer:"library",pts:10},
+{type:'fill',diff:'n',q:"make ______ at home",hint:"在家做卡片",answer:"cards",pts:10},
+{type:'fill',diff:'n',q:"thirsty and ______",hint:"又渴又饿",answer:"hungry",pts:10},
+{type:'fill',diff:'n',q:"in different ______",hint:"在不同的天气",answer:"weather",pts:10}
+]},
+{id:'5-3',unit:5,name:'重点句子 · 双空填空',monster:'🧟',mName:'句子僵尸',questions:[
+{type:'fill',diff:'e',q:"—What's the ______ like in Sydney? —It's quite ______ today.",hint:"悉尼的天气怎么样？今天阳光明媚。",answers:["weather","sunny"],pts:10},
+{type:'fill',diff:'e',q:"It's only two ______ in Beijing. It's very ______ there.",hint:"北京只有两度。那里非常冷。",answers:["degrees","cold"],pts:10},
+{type:'fill',diff:'e',q:"—It's ______ now. —It's OK. We can go and see a ______.",hint:"现在正在下雨。没关系，我们可以去看电影。",answers:["raining","film"],pts:10},
+{type:'fill',diff:'e',q:"There is a new ______ on. Let's go and ______ it.",hint:"有一部新电影上映。我们一起去看吧。",answers:["film","see"],pts:10},
+{type:'fill',diff:'e',q:"It's ______ and sunny here. Let's ______ a kite.",hint:"这里又热又晴朗。我们放风筝吧。",answers:["hot","fly"],pts:10}
+]},
+{id:'5-4',unit:5,name:'重点语法 · 双空填空',monster:'👹',mName:'语法魔王',questions:[
+{type:'fill',diff:'b',q:"rain → ______（多雨的）　The ______ is bad today.",hint:"名词+y 变形容词。今天天气不好。",answers:["rainy","weather"],pts:10},
+{type:'fill',diff:'b',q:"sun → ______（形容词）　cloud → ______（形容词）",hint:"sun 双写n再加y；cloud 直接加y。",answers:["sunny","cloudy"],pts:10},
+{type:'fill',diff:'b',q:"friend → ______（友好的）　wind → ______（多风的）",hint:"friend+ly；wind+y。",answers:["friendly","windy"],pts:10},
+{type:'fill',diff:'b',q:"—______ is the weather like today? —It's ______ and cool.",hint:"今天天气怎么样？凉爽宜人。（询问天气）",answers:["What","cool"],pts:10},
+{type:'fill',diff:'b',q:"—How is the ______ today? —It's ______ and hot.",hint:"今天天气怎么样？晴朗炎热。",answers:["weather","sunny"],pts:10}
+]},
+// ==================== Unit 6 Changing for the seasons（随四季变换） ====================
+{id:'6-1',unit:6,name:'重点单词 · 听写',monster:'👾',mName:'单词小妖',questions:[
+{type:'listen',diff:'n',cn:'毛衣',word:'sweater',pts:10},
+{type:'listen',diff:'n',cn:'短袜',word:'sock',pts:10},
+{type:'listen',diff:'n',cn:'衬衫',word:'shirt',pts:10},
+{type:'listen',diff:'n',cn:'大衣；外套',word:'coat',pts:10},
+{type:'listen',diff:'n',cn:'连衣裙',word:'dress',pts:10},
+{type:'listen',diff:'n',cn:'季节',word:'season',pts:10},
+{type:'listen',diff:'n',cn:'冬天',word:'winter',pts:10},
+{type:'listen',diff:'n',cn:'春天',word:'spring',pts:10},
+{type:'listen',diff:'n',cn:'夏天',word:'summer',pts:10},
+{type:'listen',diff:'n',cn:'秋天',word:'autumn',pts:10}
+]},
+{id:'6-2',unit:6,name:'重点短语 · 填空',monster:'👻',mName:'短语幽灵',questions:[
+{type:'fill',diff:'n',q:"in different ______",hint:"在不同的季节",answer:"seasons",pts:10},
+{type:'fill',diff:'n',q:"full of ______",hint:"充满生机",answer:"life",pts:10},
+{type:'fill',diff:'n',q:"wear a ______",hint:"穿一件外套",answer:"coat",pts:10},
+{type:'fill',diff:'n',q:"enjoy ______",hint:"品尝月饼",answer:"mooncakes",pts:10},
+{type:'fill',diff:'n',q:"which ______",hint:"哪个季节",answer:"season",pts:10},
+{type:'fill',diff:'n',q:"swim in the ______",hint:"在海里游泳",answer:"sea",pts:10},
+{type:'fill',diff:'n',q:"make a ______",hint:"堆雪人",answer:"snowman",pts:10},
+{type:'fill',diff:'n',q:"eat ______",hint:"吃海鲜",answer:"seafood",pts:10},
+{type:'fill',diff:'n',q:"get ______",hint:"聚会",answer:"together",pts:10},
+{type:'fill',diff:'n',q:"pack for their winter ______",hint:"为他们的寒假打包行装",answer:"holidays",pts:10}
+]},
+{id:'6-3',unit:6,name:'重点句子 · 双空填空',monster:'🧟',mName:'句子僵尸',questions:[
+{type:'fill',diff:'e',q:"—Whose ______ is this, Mum? —It's your ______.",hint:"妈妈，这是谁的毛衣？是你爸爸的。",answers:["sweater","dad's"],pts:10},
+{type:'fill',diff:'e',q:"—Can I wear this new ______ today? —Yes, but wear a ______ too. It's cold outside.",hint:"我今天可以穿这件新衬衫吗？可以，但也要穿件外套。外面很冷。",answers:["shirt","coat"],pts:10},
+{type:'fill',diff:'e',q:"—Which ______ do you like? —Winter. It ______ a lot.",hint:"你喜欢哪个季节？冬天。经常下雪。",answers:["season","snows"],pts:10},
+{type:'fill',diff:'e',q:"—I like winter. I can play in the ______. —I like winter too. There are many ______.",hint:"我喜欢冬天。我可以在雪里玩。我也喜欢冬天，有许多节日。",answers:["snow","festivals"],pts:10},
+{type:'fill',diff:'e',q:"Then ______ comes again. It's full of ______.",hint:"接着春天又来了。它充满生机。",answers:["spring","life"],pts:10}
+]},
+{id:'6-4',unit:6,name:'重点语法 · 双空填空',monster:'👹',mName:'语法魔王',questions:[
+{type:'fill',diff:'b',q:"This is my ______. That is ______（你的）.",hint:"这是我的外套。那是你的。（名词性物主代词）",answers:["coat","yours"],pts:10},
+{type:'fill',diff:'b',q:"His ______ is blue. ______ is yellow（她的）.",hint:"他的毛衣是蓝色的。她的（毛衣）是黄色的。",answers:["sweater","Hers"],pts:10},
+{type:'fill',diff:'b',q:"______ sweater is red. Lily's ______ is yellow.",hint:"埃米的毛衣是红色的。莉莉的连衣裙是黄色的。（名词所有格）",answers:["Amy's","dress"],pts:10},
+{type:'fill',diff:'b',q:"______ Day is in June. In ______, it often snows.",hint:"儿童节在六月。冬天经常下雪。",answers:["Children's","winter"],pts:10},
+{type:'fill',diff:'b',q:"—______ sweater is that? —It's ______（蒂姆的）.",hint:"那是谁的毛衣？是蒂姆的。",answers:["Whose","Tim's"],pts:10}
+]},
+// ==================== Unit 7 国庆特别节目 ====================
+{id:'7-1',unit:7,name:'10.1 听写与填空',monster:'🎆',mName:'国庆小妖',questions:[
+{type:'listen',diff:'n',cn:'爱好',word:'hobby',pts:10},
+{type:'listen',diff:'n',cn:'博物馆',word:'museum',pts:10},
+{type:'listen',diff:'n',cn:'电影院',word:'cinema',pts:10},
+{type:'listen',diff:'n',cn:'山',word:'mountain',pts:10},
+{type:'fill',diff:'n',q:"My ______ is reading. I often go to the ______ on Saturday.",hint:"我的爱好是阅读。周六我经常去博物馆。",answers:["hobby","museum"],pts:10},
+{type:'fill',diff:'n',q:"We watch films at the ______. We climb the ______ in autumn.",hint:"我们在电影院看电影。秋天我们去爬山。",answers:["cinema","mountain"],pts:10}
+]},
+{id:'7-2',unit:7,name:'10.2 听写与填空',monster:'🎇',mName:'国庆小妖',questions:[
+{type:'listen',diff:'n',cn:'放松',word:'relax',pts:10},
+{type:'listen',diff:'n',cn:'受伤',word:'hurt',pts:10},
+{type:'listen',diff:'n',cn:'受伤（短语）',word:'get hurt',pts:10},
+{type:'fill',diff:'n',q:"Music helps us ______ after class.",hint:"课后音乐帮助我们放松。",answer:"relax",pts:10},
+{type:'fill',diff:'n',q:"Be careful, or you will ______ ______!",hint:"小心点，否则你会受伤！",answers:["get","hurt"],pts:10}
+]},
+{id:'7-3',unit:7,name:'10.3 听写与填空',monster:'🧨',mName:'国庆小妖',questions:[
+{type:'listen',diff:'n',cn:'保持；呆在',word:'stay',pts:10},
+{type:'listen',diff:'n',cn:'直的',word:'straight',pts:10},
+{type:'listen',diff:'n',cn:'晚的，迟的',word:'late',pts:10},
+{type:'listen',diff:'n',cn:'远的',word:'far',pts:10},
+{type:'listen',diff:'n',cn:'有名的',word:'famous',pts:10},
+{type:'fill',diff:'n',q:"Go ______ and don't be ______ for class.",hint:"直走，上课不要迟到。",answers:["straight","late"],pts:10},
+{type:'fill',diff:'n',q:"The school is not ______ from my home. I ______ at home on Sunday.",hint:"学校离我家不远。周日我待在家里。",answers:["far","stay"],pts:10}
+]},
+{id:'7-4',unit:7,name:'10.4 听写与填空',monster:'🎆',mName:'国庆小妖',questions:[
+{type:'listen',diff:'n',cn:'希望',word:'hope',pts:10},
+{type:'listen',diff:'n',cn:'邀请',word:'invite',pts:10},
+{type:'listen',diff:'n',cn:'收集',word:'collect',pts:10},
+{type:'fill',diff:'n',q:"I ______ my friends to my party. I ______ you can come.",hint:"我邀请朋友们来参加派对。我希望你能来。",answers:["invite","hope"],pts:10},
+{type:'fill',diff:'n',q:"______ stamps is my hobby. I ______ them every Sunday.",hint:"收集邮票是我的爱好。我每周日收集邮票。",answers:["Collecting|collecting","collect"],pts:10}
+]},
+{id:'7-5',unit:7,name:'10.5 听写与填空',monster:'🎇',mName:'国庆小妖',questions:[
+{type:'listen',diff:'n',cn:'重的',word:'heavy',pts:10},
+{type:'listen',diff:'n',cn:'轻的；灯',word:'light',pts:10},
+{type:'listen',diff:'n',cn:'清楚的',word:'clear',pts:10},
+{type:'listen',diff:'n',cn:'努力的',word:'hard-working',pts:10},
+{type:'fill',diff:'n',q:"The bag is too ______. This box is ______, so I can carry it.",hint:"这个包太重了。这个箱子很轻，我搬得动。",answers:["heavy","light"],pts:10},
+{type:'fill',diff:'n',q:"The water is ______. We can see the fish. She is a ______ student.",hint:"水很清澈，我们能看见鱼。她是一个努力的学生。",answers:["clear","hard-working|hardworking"],pts:10}
+]},
+{id:'7-6',unit:7,name:'10.6 听写与填空',monster:'🧨',mName:'国庆小妖',questions:[
+{type:'listen',diff:'n',cn:'建造',word:'build',pts:10},
+{type:'listen',diff:'n',cn:'从不',word:'never',pts:10},
+{type:'listen',diff:'n',cn:'可怜的；贫穷的',word:'poor',pts:10},
+{type:'listen',diff:'n',cn:'在…附近',word:'near',pts:10},
+{type:'listen',diff:'n',cn:'在…旁边',word:'next to',pts:10},
+{type:'fill',diff:'n',q:"Birds ______ nests in spring. The ______ boy has no home.",hint:"鸟儿在春天筑巢。可怜的男孩没有家。",answers:["build","poor"],pts:10},
+{type:'fill',diff:'n',q:"I ______ stay up late. My home is ______ the park.",hint:"我从不熬夜。我家在公园附近。",answers:["never","near"],pts:10},
+{type:'fill',diff:'n',q:"The cinema is ______ ______ the museum.",hint:"电影院在博物馆旁边。",answers:["next","to"],pts:10}
+]}
+];
+
+// ==================== 游戏状态 ====================
+let S={stars:0,totalStars:0,curUnit:7,dailyLimit:1200,todayTime:0,lastDate:'',unlocked:['1-1','7-1','7-2','7-3','7-4','7-5','7-6'],completed:{},pending:[],approved:[],used:[],earnedQ:[],rewards:[
+{id:'r1',icon:'🎮',name:'周末多玩30分钟游戏',desc:'延长游戏时间30分钟',price:100,auto:false},
+{id:'r2',icon:'📺',name:'周末多看30分钟电视',desc:'延长看电视30分钟',price:80,auto:false},
+{id:'r3',icon:'🧹',name:'免做一次家务',desc:'免除一次家务任务',price:60,auto:false},
+{id:'r4',icon:'🍭',name:'一份小零食',desc:'当天提供小零食',price:50,auto:false},
+{id:'r5',icon:'🎬',name:'选择周末家庭电影',desc:'本周电影由你选',price:40,auto:true},
+{id:'r6',icon:'🍽️',name:'选择晚餐菜品',desc:'指定一天晚餐主菜',price:30,auto:true},
+],items:{revive:1,time:2,hint:3},stats:{tq:0,tc:0,todayQ:0,todayC:0,todayS:0},battle:null};
+
+const SK='english_quest_save_v1';
+function save(){S.lastDate=todayStr();localStorage.setItem(SK,JSON.stringify(S))}
+function load(){
+  let d=localStorage.getItem(SK);
+  if(!d){ // 首次运行：自动继承旧版游戏（奥数勇士大冒险）的存档——家长设置、智慧星、道具、奖励全部保留；关卡进度按英语从第1关重新开始
+    const old=localStorage.getItem('aoshu_quest_save_v1')||localStorage.getItem('aoshu_classroom_test_save_v1');
+    if(old){try{const o=JSON.parse(old);o.battle=null;o.unlocked=['1-1','7-1','7-2','7-3','7-4','7-5','7-6'];o.completed={};o.curUnit=7;Object.assign(S,o);localStorage.setItem(SK,JSON.stringify(S));d=localStorage.getItem(SK)}catch(e){}}
+  }
+  if(d){try{S=Object.assign(S,JSON.parse(d));if(S.curUnit>7)S.curUnit=7;if(S.curUnit<7)S.curUnit=7;['7-1','7-2','7-3','7-4','7-5','7-6'].forEach(function(id){if(!S.unlocked.includes(id))S.unlocked.push(id)});if(S.lastDate!==todayStr()){S.todayTime=0;S.stats.todayQ=0;S.stats.todayC=0;S.stats.todayS=0;S.items.revive=Math.min(3,S.items.revive+1)}}catch(e){}}
+  if(!Array.isArray(S.earnedQ))S.earnedQ=[];
+}
+function todayStr(){const d=new Date();return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate()}
+function resetAll(){if(confirm('确定重置所有数据？不可恢复！')){localStorage.removeItem(SK);location.reload()}}
+function showToast(m,t=2000){const el=document.getElementById('toast');el.textContent=m;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),t)}
+function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');if(id==='menu'&&S.todayTime>=S.dailyLimit)showLock()}
+
+// ==================== 选关 ====================
+let curTab=1;
+function goLevels(){initAudio();startMusic();show('levels');renderLevels()}
+function renderLevels(){
+  document.getElementById('lv-stars').textContent=S.stars;
+  const m=Math.floor((S.dailyLimit-S.todayTime)/60),s=(S.dailyLimit-S.todayTime)%60;
+  document.getElementById('lv-time').textContent=String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+  const tabs=document.getElementById('u-tabs');
+  const units=[...new Set(LEVELS.map(l=>l.unit))];
+  const un={1:'Helping at home',2:'My friends',3:'Places we live in',4:'Helping in the community',5:'The weather and us',6:'Changing for the seasons',7:'国庆特别节目'};
+  tabs.innerHTML=units.map(u=>{const lock=u>S.curUnit;return `<div class="unit-tab ${u===curTab?'active':''} ${lock?'lock':''}" onclick="${lock?'':`switchU(${u})`}">${lock?'🔒 ':''}第${u}单元</div>`}).join('');
+  const list=document.getElementById('lv-list');
+  const lvs=LEVELS.filter(l=>l.unit===curTab);
+  list.innerHTML=lvs.map((lv,i)=>{
+    const unlk=S.unlocked.includes(lv.id);
+    const done=S.completed[lv.id];
+    const st=done?done.stars:0;
+    return `<div class="level-card ${unlk?'':'lock'} ${done?'done':''}" onclick="${unlk?`startBattle('${lv.id}')`:''}">
+      <div class="level-num">${unlk?(i+1):'🔒'}</div>
+      <div class="level-info"><div class="level-name">${lv.name}</div><div class="level-desc">${lv.unit===7?10:lv.questions.length}道题 · ${done?'已通关':'未通关'}</div></div>
+      <div class="level-stars">${'⭐'.repeat(st)+'☆'.repeat(3-st)}</div>
+    </div>`;
+  }).join('');
+}
+function switchU(u){curTab=u;renderLevels()}
+
+// ==================== 战斗 ====================
+let bTimer=null,bStart=0;
+function startBattle(id){
+  if(S.todayTime>=S.dailyLimit){showLock();return}
+  const lv=LEVELS.find(l=>l.id===id);
+  // 随机抽题：从题库中抽取 count 道题（可扩展接口：每关设置 count 字段，默认8）
+  const pool=lv.questions.slice();
+  const count=lv.count||pool.length;
+  const picked=[];
+  if(lv.unit===7){
+    // 国庆特别节目：听写在前、填空收尾；总题数不足10道时循环补足听写题
+    let ls=lv.questions.filter(q=>q.type==='listen');
+    const fs=lv.questions.filter(q=>q.type!=='listen');
+    if(ls.length===0)ls=lv.questions.slice();
+    ls.sort(()=>Math.random()-0.5);
+    const srcL=ls.slice();
+    let i=0;
+    while(ls.length+fs.length<10&&srcL.length>0){ls.push(srcL[i%srcL.length]);i++}
+    picked.push(...ls,...fs);
+  }else{
+    while(picked.length<count&&pool.length>0){
+      const idx=Math.floor(Math.random()*pool.length);
+      picked.push(pool.splice(idx,1)[0]);
+    }
+  }
+  S.battle={id,lv,questions:picked,qi:0,hearts:3,correct:0,wrong:0,combo:0,maxCombo:0,earned:0,answered:0,itemsUsed:0};
+  // 听写关自动关闭背景音乐，避免影响听写；非听写关强制恢复BGM
+  if(lv.questions.some(q=>q.type==='listen')){stopMusic()}else if(musicOn)startMusic();
+  bStart=Date.now();show('battle');renderBattle();startBTimer();sfxClick()
+}
+function startBTimer(){if(bTimer)clearInterval(bTimer);bTimer=setInterval(()=>{S.todayTime++;if(S.todayTime>=S.dailyLimit){clearInterval(bTimer);showToast('今日时间到，完成本题后结束')}},1000)}
+function renderBattle(){
+  const b=S.battle,lv=b.lv,q=b.questions[b.qi],total=b.questions.length;
+  document.getElementById('b-hearts').textContent='❤️'.repeat(b.hearts)+'🖤'.repeat(3-b.hearts);
+  document.getElementById('b-combo').textContent=b.combo>=2?`🔥 ${b.combo}连击！`:'';
+  document.getElementById('monster').textContent=lv.monster;
+  document.getElementById('m-name').textContent=`${lv.mName} (${b.qi+1}/${total})`;
+  document.getElementById('m-hp').style.width=(100-b.qi/total*100)+'%';
+  renderItems();
+  const box=document.getElementById('q-box');
+  const tag=q.diff==='b'?'tag-b':q.diff==='e'?'tag-e':'tag-n';
+  const tn=q.diff==='b'?'BOSS题':q.diff==='e'?'精英题':'普通题';
+  const isL=q.type==='listen';
+  let h=`<span class="q-tag ${tag}">${tn}</span><div class="q-text">${isL?'🎧 仔细听，写出你听到的单词':q.q}</div>`;
+  if(isL){
+    b.plays=0;
+    h+=`<button class="lsn-btn" id="lsn-btn" onclick="pressSpeak()">🔊 播放发音（听3次后显示中文提示）</button>`;
+  }else if(q.hint){
+    h+=`<div class="hint-cn">中文提示：${q.hint}</div>`;
+  }
+  const isDual=!!q.answers;
+  if(isDual){
+    h+=`<div class="dual-row"><span class="dual-lab">①</span><input class="fill-in dual-in" id="f-ans1" placeholder="第1空" autocomplete="off" autocapitalize="off" spellcheck="false" onkeypress="if(event.key==='Enter')document.getElementById('f-ans2').focus()"><span class="dual-lab">②</span><input class="fill-in dual-in" id="f-ans2" placeholder="第2空" autocomplete="off" autocapitalize="off" spellcheck="false" onkeypress="if(event.key==='Enter')ansFill()"></div><button class="fill-btn" onclick="ansFill()">提交答案</button>`;
+  }else{
+    h+=`<input class="fill-in" id="f-ans" placeholder="${isL?'写出听到的单词':'输入答案'}" autocomplete="off" autocapitalize="off" spellcheck="false" onkeypress="if(event.key==='Enter')ansFill()"><button class="fill-btn" onclick="ansFill()">提交答案</button>`;
+  }
+  box.innerHTML=h;
+  setTimeout(()=>{const f=document.getElementById('f-ans')||document.getElementById('f-ans1');if(f)f.focus()},100);
+  if(isL)setTimeout(speakWord,400);
+}
+function renderItems(){
+  const bar=document.getElementById('items-bar');
+  const items=[{k:'revive',i:'💖',c:S.items.revive},{k:'time',i:'⏳',c:S.items.time},{k:'hint',i:'📜',c:S.items.hint}];
+  bar.innerHTML=items.map(it=>`<button class="item-btn" onclick="useItem('${it.k}')" ${it.c<=0?'disabled':''}>${it.i}<span class="cnt">${it.c}</span></button>`).join('');
+}
+function useItem(k){
+  const b=S.battle;
+  if(b.itemsUsed>=2){showToast('每局限用2个道具');return}
+  if(S.items[k]<=0)return;
+  if(k==='revive'){if(b.hearts>=3){showToast('心已满');return}b.hearts++;S.items.revive--;showToast('💖 恢复1颗心')}
+  else if(k==='hint'){
+    const q=b.questions[b.qi];let mask='';
+    if(q.type==='listen')mask=maskOf(q.word);
+    else if(q.answers)mask=q.answers.map(a=>maskOf(String(a).split('|')[0])).join(' ／ ');
+    else mask=maskOf(q.answer);
+    S.items.hint--;showToast('📜 首字母提示：'+mask,4000)
+  }
+  else if(k==='time'){S.items.time--;showToast('⏳ 时间延长')}
+  b.itemsUsed++;renderItems();save()
+}
+function maskOf(a){return String(a).split('').map((c,i)=>(i===0||c===' '||c==="'")?c:'_').join('')}
+function ansChoice(i){
+  const b=S.battle,q=b.questions[b.qi],ok=i===q.answer;
+  document.querySelectorAll('.opt-btn').forEach(b=>b.disabled=true);
+  document.getElementById('o'+i).classList.add(ok?'ok':'no');
+  if(!ok)document.getElementById('o'+q.answer).classList.add('ok');
+  if(ok){document.getElementById('monster').classList.add('hit');setTimeout(()=>document.getElementById('monster').classList.remove('hit'),300)}
+  setTimeout(()=>procAns(ok,q),500)
+}
+function normAns(s){return (s==null?'':String(s)).trim().toLowerCase().replace(/[\u2019\u2018]/g,"'").replace(/[\u201C\u201D]/g,'"').replace(/[.!?,;:]+$/g,'').replace(/\s+/g,' ')}
+function qKey(q){if(q.type==='listen')return 'L:'+q.word;if(q.answers)return 'D:'+q.q+'|'+q.answers.join('|');return 'F:'+q.q+'|'+q.answer}
+function matchOne(v,spec){return String(spec).split('|').some(p=>v===normAns(p))}
+function ansFill(){
+  const b=S.battle,q=b.questions[b.qi];
+  let ok=false;
+  if(q.answers){
+    const v1=normAns(document.getElementById('f-ans1').value);
+    const v2=normAns(document.getElementById('f-ans2').value);
+    ok=matchOne(v1,q.answers[0])&&matchOne(v2,q.answers[1]);
+    document.getElementById('f-ans1').disabled=true;
+    document.getElementById('f-ans2').disabled=true;
+  }else{
+    const v=normAns(document.getElementById('f-ans').value);
+    const ans=q.type==='listen'?q.word:q.answer;
+    ok=matchOne(v,ans)||(q.alts&&q.alts.some(a=>v===normAns(a)));
+    document.getElementById('f-ans').disabled=true;
+  }
+  document.querySelector('.fill-btn').disabled=true;
+  if(ok){document.getElementById('monster').classList.add('hit');setTimeout(()=>document.getElementById('monster').classList.remove('hit'),300)}
+  setTimeout(()=>procAns(ok,q),500)
+}
+function procAns(ok,q){
+  const b=S.battle;
+  b.answered++;S.stats.tq++;S.stats.todayQ++;
+  let e=0,first=true;
+  if(ok){
+    b.correct++;b.combo++;b.maxCombo=Math.max(b.maxCombo,b.combo);
+    S.stats.tc++;S.stats.todayC++;
+    const key=qKey(q);
+    first=!S.earnedQ.includes(key);
+    e=first?(q.pts||10):Math.floor((q.pts||10)/2);
+    if(first)S.earnedQ.push(key);
+    b.earned+=e;S.stars+=e;S.totalStars+=e;S.stats.todayS+=e;
+    sfxCorrect();showFStar(e);
+  }else{b.wrong++;b.hearts--;b.combo=0;sfxWrong()}
+  showFB(ok,e,q,first);save()
+}
+function showFStar(n){
+  const a=document.getElementById('arena');
+  const s=document.createElement('div');s.className='fstar';s.textContent=`+${n}⭐`;
+  s.style.left='50%';s.style.top='40%';a.appendChild(s);setTimeout(()=>s.remove(),1000)
+}
+
+// ==================== 答案反馈 ====================
+function showFB(ok,e,q,half){
+  document.getElementById('fb-icon').textContent=ok?'🎉':'📖';
+  document.getElementById('fb-title').textContent=ok?'回答正确！':'答错了，记住正确答案';
+  document.getElementById('fb-title').className='fb-title '+(ok?'c':'w');
+  document.getElementById('fb-stars').textContent=ok?(half?`+${e} ⭐`:`+${e} ⭐（重复·半分）`):'';
+  const isL=q.type==='listen';
+  const ansTxt=isL?`${q.word}（${q.cn}）`:q.answers?`${q.answers.map(a=>String(a).split('|')[0]).join(' ／ ')}${q.hint?'　'+q.hint:''}`:`${q.answer}${q.hint?'　'+q.hint:''}`;
+  document.getElementById('fb-exp').textContent=ok?`✅ ${ansTxt}`:`正确答案：${ansTxt}`;
+  document.getElementById('fb').classList.add('show');
+}
+function nextQ(){
+  document.getElementById('fb').classList.remove('show');
+  const b=S.battle;
+  if(b.hearts<=0){endBattle(false);return}
+  b.qi++;
+  if(b.qi>=b.questions.length){endBattle(true);return}
+  if(S.todayTime>=S.dailyLimit){endBattle(true);return}
+  renderBattle()
+}
+function exitBattle(){if(confirm('退出当前关卡？进度不保存')){if(bTimer)clearInterval(bTimer);if(musicOn)startMusic();goLevels()}}
+
+// ==================== 结算 ====================
+function endBattle(pass){
+  if(bTimer)clearInterval(bTimer);
+  if(musicOn)startMusic();
+  const b=S.battle,t=Math.floor((Date.now()-bStart)/1000);
+  let stars=0;
+  if(pass){
+    stars=1;
+    const acc=b.correct/b.answered;
+    if(acc>=0.8)stars=2;
+    if(acc>=0.9&&b.maxCombo>=5)stars=3;
+    if(stars>=2){b.earned+=20;S.stars+=20}
+    if(stars>=3){b.earned+=30;S.stars+=30}
+    const bonus=b.lv.unit<=2?20:b.lv.unit<=4?35:50;
+    b.earned+=bonus;S.stars+=bonus;
+    const prev=S.completed[b.id];
+    if(!prev||prev.stars<stars)S.completed[b.id]={stars,date:todayStr()};
+    const idx=LEVELS.findIndex(l=>l.id===b.id);
+    if(idx>=0&&idx+1<LEVELS.length){
+      const nx=LEVELS[idx+1];
+      if(!S.unlocked.includes(nx.id))S.unlocked.push(nx.id);
+      if(nx.unit>S.curUnit)S.curUnit=nx.unit;
+    }
+    sfxWin();
+  }else{b.earned=Math.floor(b.earned*0.5)}
+  document.getElementById('r-title').textContent=pass?'🎉 关卡通过！':'💔 挑战失败';
+  document.getElementById('r-sub').textContent=b.lv.name;
+  document.getElementById('r-stars').textContent=pass?('⭐'.repeat(stars)+'☆'.repeat(3-stars)):'☆☆☆';
+  document.getElementById('r-correct').textContent=`${b.correct}/${b.answered}`;
+  document.getElementById('r-acc').textContent=b.answered>0?Math.round(b.correct/b.answered*100)+'%':'0%';
+  document.getElementById('r-combo').textContent=b.maxCombo;
+  document.getElementById('r-time').textContent=t+'s';
+  document.getElementById('r-bonus').textContent=`获得智慧星：+${b.earned} ⭐`;
+  save();show('result')
+}
+function nextLevel(){
+  const b=S.battle;
+  const idx=LEVELS.findIndex(l=>l.id===b.id);
+  if(idx>=0&&idx+1<LEVELS.length){
+    const nx=LEVELS[idx+1];
+    if(S.unlocked.includes(nx.id)){startBattle(nx.id);return}
+  }
+  goLevels()
+}
+
+// ==================== 商店 ====================
+function goShop(){show('shop');renderShop()}
+function renderShop(){
+  document.getElementById('shop-stars').textContent=S.stars;
+  let h='';
+  if(S.pending.length>0){
+    h+='<div style="font-size:13px;font-weight:bold;color:#fbbf24;margin-bottom:6px">⏳ 待审核</div>';
+    S.pending.forEach(r=>{h+=`<div class="shop-item pend"><div class="shop-icon">${r.icon}</div><div class="shop-info"><div class="shop-name">${r.name}</div><span class="stag p">等待家长审核</span></div></div>`});
+  }
+  const active=S.approved.filter(r=>!S.used.includes(r.id));
+  if(active.length>0){
+    h+='<div style="font-size:13px;font-weight:bold;color:#34d399;margin-bottom:6px;margin-top:10px">✅ 已获得</div>';
+    active.forEach(r=>{h+=`<div class="shop-item appr"><div class="shop-icon">${r.icon}</div><div class="shop-info"><div class="shop-name">${r.name}</div><span class="stag a">已批准，点击使用</span></div><button class="shop-btn" style="background:#10b981" onclick="useReward('${r.id}')">使用</button></div>`});
+  }
+  h+='<div style="font-size:13px;font-weight:bold;color:#a5b4fc;margin-bottom:6px;margin-top:10px">🎁 可兑换</div>';
+  S.rewards.forEach(r=>{
+    const can=S.stars>=r.price;
+    h+=`<div class="shop-item"><div class="shop-icon">${r.icon}</div><div class="shop-info"><div class="shop-name">${r.name}</div><div class="shop-desc">${r.desc}</div><div class="shop-price">${r.price} ⭐</div></div><button class="shop-btn" ${can?'':'disabled'} onclick="redeem('${r.id}')">兑换</button></div>`;
+  });
+  document.getElementById('shop-list').innerHTML=h;
+}
+function redeem(id){
+  const r=S.rewards.find(x=>x.id===id);
+  if(!r||S.stars<r.price){showToast('智慧星不足');return}
+  S.stars-=r.price;
+  const p={id:'p'+Date.now(),rid:r.id,icon:r.icon,name:r.name,price:r.price,auto:r.auto,date:todayStr()};
+  if(r.auto){S.approved.push(p);showToast('✅ 兑换成功！已自动批准')}
+  else{S.pending.push(p);showToast('⏳ 已申请，等待家长审核')}
+  save();renderShop()
+}
+function useReward(id){if(confirm('确定使用这个奖励？')){S.used.push(id);save();renderShop();showToast('🎉 奖励已使用！')}}
+
+// ==================== 家长后台 ====================
+function parentLogin(){
+  const p=prompt('请输入家长密码（默认：1234）');
+  if(p==='1234'||p===null){show('parent');renderPSettings();renderRewards();renderAudit();renderReport()}
+  else showToast('密码错误')
+}
+function pTab(name,el){
+  document.querySelectorAll('.p-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.p-sec').forEach(s=>s.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('p-'+name).classList.add('active');
+  if(name==='report')renderReport();if(name==='audit')renderAudit()
+}
+function renderPSettings(){document.getElementById('set-unit').value=S.curUnit;document.getElementById('set-time').value=S.dailyLimit;document.getElementById('set-stars').value=S.stars}
+function saveSettings(){
+  const u=parseInt(document.getElementById('set-unit').value);
+  const t=parseInt(document.getElementById('set-time').value);
+  const st=Math.max(0,Math.floor(parseInt(document.getElementById('set-stars').value)||0));
+  if(u>S.curUnit){for(let i=1;i<=u;i++){const f=LEVELS.find(l=>l.unit===i);if(f&&!S.unlocked.includes(f.id))S.unlocked.push(f.id)}}
+  S.curUnit=u;S.dailyLimit=t;S.stars=st;save();showToast('✅ 设置已保存');
+  const ls=document.getElementById('lv-stars');if(ls)ls.textContent=S.stars;
+  const ss=document.getElementById('shop-stars');if(ss)ss.textContent=S.stars;
+}
+function renderRewards(){
+  const list=document.getElementById('rw-list');
+  list.innerHTML=S.rewards.map((r,i)=>`<div class="rw-item">
+    <input type="text" value="${r.icon}" style="width:36px;text-align:center" onchange="updReward(${i},'icon',this.value)">
+    <input type="text" value="${r.name}" onchange="updReward(${i},'name',this.value)">
+    <input type="number" value="${r.price}" onchange="updReward(${i},'price',parseInt(this.value))">
+    <button class="rw-del" onclick="delReward(${i})">×</button>
+  </div>`).join('');
+}
+function updReward(i,f,v){S.rewards[i][f]=v}
+function addReward(){S.rewards.push({id:'r'+Date.now(),icon:'🎁',name:'新奖励',desc:'奖励描述',price:50,auto:false});renderRewards()}
+function delReward(i){S.rewards.splice(i,1);renderRewards()}
+function saveRewards(){save();showToast('✅ 奖励设置已保存')}
+function renderAudit(){
+  const list=document.getElementById('audit-list');
+  if(S.pending.length===0){list.innerHTML='<div style="text-align:center;color:#64748b;padding:30px">暂无待审核的兑换申请</div>';return}
+  list.innerHTML=S.pending.map((r,i)=>`<div class="pend-item">
+    <div style="font-size:28px">${r.icon}</div>
+    <div class="pend-info"><div class="pend-name">${r.name}</div><div class="pend-meta">消耗 ${r.price} ⭐ · ${r.date}</div></div>
+    <button class="appr-btn" onclick="audit(${i},true)">通过</button>
+    <button class="rej-btn" onclick="audit(${i},false)">拒绝</button>
+  </div>`).join('');
+}
+function audit(i,ok){
+  const r=S.pending[i];
+  if(ok){S.approved.push(r);showToast('✅ 已批准')}else{S.stars+=r.price;showToast('❌ 已拒绝，智慧星已退还')}
+  S.pending.splice(i,1);save();renderAudit()
+}
+function renderReport(){
+  document.getElementById('rp-tq').textContent=S.stats.todayQ;
+  document.getElementById('rp-tc').textContent=S.stats.todayC;
+  document.getElementById('rp-ta').textContent=S.stats.todayQ>0?Math.round(S.stats.todayC/S.stats.todayQ*100)+'%':'0%';
+  document.getElementById('rp-tt').textContent=Math.floor(S.todayTime/60)+'分钟';
+  document.getElementById('rp-ts').textContent=S.stats.todayS;
+  document.getElementById('rp-q').textContent=S.stats.tq;
+  document.getElementById('rp-a').textContent=S.stats.tq>0?Math.round(S.stats.tc/S.stats.tq*100)+'%':'0%';
+  document.getElementById('rp-l').textContent=Object.keys(S.completed).length;
+  document.getElementById('rp-s').textContent=S.totalStars;
+  const units=[...new Set(LEVELS.map(l=>l.unit))];
+  const un={1:'Helping at home',2:'My friends',3:'Places we live in',4:'Helping in the community',5:'The weather and us',6:'Changing for the seasons',7:'国庆特别节目'};
+  let h='';
+  units.forEach(u=>{
+    const ul=LEVELS.filter(l=>l.unit===u);
+    const done=ul.filter(l=>S.completed[l.id]);
+    const ts=done.reduce((s,l)=>s+(S.completed[l.id]?.stars||0),0);
+    const ms=ul.length*3;
+    const p=ms>0?Math.round(ts/ms*100):0;
+    h+=`<div style="margin-bottom:10px"><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px"><span style="color:#c7d2fe">第${u}单元：${un[u]}</span><span style="color:#e0e7ff">${done.length}/${ul.length}关 · ${p}%</span></div><div class="prog-bg"><div class="prog-fg" style="width:${p}%"></div></div></div>`;
+  });
+  document.getElementById('unit-prog').innerHTML=h;
+}
+
+// ==================== 锁定 ====================
+let lockT=null;
+function showLock(){
+  if(bTimer)clearInterval(bTimer);
+  show('lock');
+  updLock();
+  if(lockT)clearInterval(lockT);
+  lockT=setInterval(updLock,1000);
+}
+function updLock(){
+  const n=new Date(),t=new Date(n);
+  t.setDate(t.getDate()+1);t.setHours(0,0,0,0);
+  const d=t-n,h=Math.floor(d/3600000),m=Math.floor((d%3600000)/60000),s=Math.floor((d%60000)/1000);
+  document.getElementById('lock-cd').textContent=String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+}
+
+// ==================== 初始化 ====================
+window.onload=function(){
+  load();
+  const f=LEVELS.find(l=>l.unit===S.curUnit);
+  if(f&&!S.unlocked.includes(f.id)){S.unlocked.push(f.id);save()}
+  // 首次交互启动音乐（听写战斗中不启动）
+  document.addEventListener('click',function once(){initAudio();const inL=S.battle&&S.battle.lv&&S.battle.lv.questions.some(q=>q.type==='listen');if(musicOn&&!inL)startMusic();document.removeEventListener('click',once)},{once:true});
+}
+</script>
+</body>
+</html>

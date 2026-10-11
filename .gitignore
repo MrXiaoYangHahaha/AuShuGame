@@ -1,0 +1,11 @@
+# 临时测试文件与备份
+_*.js
+_*.html
+_*.txt
+_*.tmp.js
+*.bak
+
+# 系统文件
+Thumbs.db
+desktop.ini
+.DS_Store

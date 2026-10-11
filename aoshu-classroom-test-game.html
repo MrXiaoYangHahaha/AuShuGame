@@ -1,0 +1,1808 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>奥数勇士大冒险 · 课堂测试特训</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:'Microsoft YaHei','PingFang SC',sans-serif;background:linear-gradient(135deg,#1a1a2e,#16213e);min-height:100vh;display:flex;justify-content:center;align-items:center;overflow:hidden;user-select:none}
+#game{width:100%;max-width:500px;height:100vh;max-height:900px;background:#0f0f23;position:relative;overflow:hidden;box-shadow:0 0 40px rgba(99,102,241,.3)}
+@media(min-width:501px){#game{border-radius:20px;height:90vh}}
+.screen{position:absolute;top:0;left:0;width:100%;height:100%;display:none;flex-direction:column;overflow-y:auto}
+.screen.active{display:flex}
+.top-bar{background:linear-gradient(90deg,#4338ca,#6d28d9);color:#fff;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;font-size:13px;flex-shrink:0}
+.top-bar .stat{display:flex;align-items:center;gap:4px}
+.back-btn{background:none;border:none;color:#fff;font-size:18px;cursor:pointer;padding:2px 6px}
+.music-btn{background:none;border:none;color:#fff;font-size:16px;cursor:pointer;padding:2px 6px}
+
+/* 主菜单 */
+#menu{background:linear-gradient(180deg,#312e81 0%,#1e1b4b 50%,#0f0f23 50%);justify-content:center;align-items:center;padding:20px}
+.game-title{font-size:34px;font-weight:bold;color:#fff;text-shadow:0 0 20px rgba(139,92,246,.6);margin-bottom:6px;text-align:center}
+.game-sub{color:#a5b4fc;font-size:15px;margin-bottom:30px;text-align:center}
+.menu-hero{font-size:72px;margin-bottom:24px;animation:bounce 2s infinite}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+.menu-btn{width:250px;padding:14px 20px;margin:7px 0;border:none;border-radius:50px;font-size:17px;font-weight:bold;cursor:pointer;color:#fff;display:flex;align-items:center;justify-content:center;gap:8px;transition:transform .15s}
+.menu-btn:active{transform:scale(.95)}
+.menu-btn.p1{background:linear-gradient(135deg,#f472b6,#ec4899);box-shadow:0 4px 15px rgba(236,72,153,.4)}
+.menu-btn.p2{background:linear-gradient(135deg,#60a5fa,#3b82f6);box-shadow:0 4px 15px rgba(59,130,246,.4)}
+.menu-btn.p3{background:linear-gradient(135deg,#34d399,#10b981);box-shadow:0 4px 15px rgba(16,185,129,.4)}
+.menu-foot{position:absolute;bottom:16px;color:#64748b;font-size:11px}
+
+/* 选关 */
+.unit-tabs{display:flex;overflow-x:auto;padding:8px;gap:6px;background:#1e1b4b;flex-shrink:0;border-bottom:2px solid #312e81}
+.unit-tab{padding:7px 14px;border-radius:18px;background:#312e81;color:#a5b4fc;font-size:12px;font-weight:bold;cursor:pointer;white-space:nowrap;border:2px solid transparent}
+.unit-tab.active{background:#6d28d9;color:#fff;border-color:#8b5cf6}
+.unit-tab.lock{background:#1e293b;color:#475569}
+.level-list{padding:12px;flex:1}
+.level-card{background:#1e1b4b;border-radius:14px;padding:14px;margin-bottom:10px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:transform .15s;border:2px solid transparent}
+.level-card:active{transform:scale(.98)}
+.level-card.lock{opacity:.45;cursor:not-allowed}
+.level-card.done{border-color:#10b981}
+.level-num{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:bold;flex-shrink:0}
+.level-card.lock .level-num{background:#334155}
+.level-info{flex:1}
+.level-name{font-size:15px;font-weight:bold;color:#e0e7ff;margin-bottom:3px}
+.level-desc{font-size:11px;color:#818cf8}
+.level-stars{font-size:14px;letter-spacing:1px}
+
+/* 战斗 */
+#battle{background:linear-gradient(180deg,#0f0f23,#1a1a2e)}
+.battle-top{padding:10px 14px;display:flex;justify-content:space-between;align-items:center;flex-shrink:0}
+.hearts{font-size:20px;letter-spacing:3px}
+.combo{color:#fbbf24;font-size:14px;font-weight:bold;text-shadow:0 0 8px rgba(251,191,36,.5)}
+.arena{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px;position:relative}
+.monster-area{text-align:center;margin-bottom:16px}
+.monster{font-size:60px;display:inline-block;transition:transform .2s}
+.monster.hit{animation:shake .3s}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px) rotate(-4deg)}75%{transform:translateX(8px) rotate(4deg)}}
+.monster-name{color:#f87171;font-size:14px;font-weight:bold;margin-top:6px}
+.hp-bg{width:180px;height:14px;background:#334155;border-radius:7px;margin:6px auto 0;overflow:hidden;border:2px solid #475569}
+.hp-fg{height:100%;background:linear-gradient(90deg,#ef4444,#f87171);transition:width .5s;border-radius:5px}
+.q-box{background:#f8fafc;border-radius:14px;padding:16px;width:100%;max-width:400px;box-shadow:0 4px 20px rgba(0,0,0,.4)}
+.q-tag{display:inline-block;padding:2px 8px;border-radius:8px;font-size:10px;font-weight:bold;margin-bottom:8px}
+.tag-n{background:#dbeafe;color:#1e40af}.tag-e{background:#fef3c7;color:#92400e}.tag-b{background:#fee2e2;color:#991b1b}
+.q-text{font-size:16px;font-weight:bold;color:#1e293b;line-height:1.6;margin-bottom:12px;min-height:44px;white-space:pre-line}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.opt-btn{padding:12px 10px;border:2px solid #c7d2fe;border-radius:10px;background:#fff;font-size:15px;font-weight:bold;color:#1e293b;cursor:pointer;transition:all .15s;text-align:center}
+.opt-btn:active{transform:scale(.95)}
+.opt-btn.ok{background:#10b981;border-color:#059669;color:#fff}
+.opt-btn.no{background:#ef4444;border-color:#dc2626;color:#fff}
+.opt-btn:disabled{cursor:default}
+.fill-in{width:100%;padding:12px;font-size:18px;border:2px solid #c7d2fe;border-radius:10px;text-align:center;font-weight:bold;outline:none}
+.fill-in:focus{border-color:#6366f1}
+.fill-btn{width:100%;margin-top:8px;padding:12px;border:none;border-radius:10px;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;font-size:16px;font-weight:bold;cursor:pointer}
+.items-bar{display:flex;justify-content:center;gap:10px;padding:8px;flex-shrink:0}
+.item-btn{width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.1);border:2px solid rgba(255,255,255,.2);font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;position:relative}
+.item-btn .cnt{position:absolute;top:-3px;right:-3px;background:#ef4444;color:#fff;font-size:9px;font-weight:bold;width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center}
+.item-btn:disabled{opacity:.4;cursor:not-allowed}
+
+/* 反馈弹窗 */
+.fb-overlay{position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;z-index:100;padding:16px}
+.fb-overlay.show{display:flex}
+.fb-box{background:#fff;border-radius:18px;padding:20px;width:100%;max-width:420px;max-height:85vh;overflow-y:auto;animation:pop .3s}
+@keyframes pop{0%{transform:scale(.6);opacity:0}100%{transform:scale(1);opacity:1}}
+.fb-icon{font-size:42px;text-align:center;margin-bottom:6px}
+.fb-title{font-size:20px;font-weight:bold;text-align:center;margin-bottom:4px}
+.fb-title.c{color:#059669}.fb-title.w{color:#dc2626}
+.fb-stars{font-size:16px;color:#f59e0b;text-align:center;font-weight:bold;margin-bottom:10px}
+.fb-exp{font-size:13px;color:#475569;line-height:1.6;background:#f1f5f9;padding:10px;border-radius:8px;margin-bottom:12px}
+/* 解题演示 */
+.demo-title{font-size:14px;font-weight:bold;color:#4338ca;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.demo-steps{margin-bottom:12px}
+.demo-step{background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:10px;margin-bottom:8px;opacity:0;transform:translateX(-10px);transition:all .4s}
+.demo-step.show{opacity:1;transform:translateX(0)}
+.demo-step-hd{font-size:12px;font-weight:bold;color:#6d28d9;margin-bottom:4px}
+.demo-step-bd{font-size:13px;color:#334155;line-height:1.6}
+/* 线段图 */
+.line-diagram{display:flex;align-items:center;gap:0;margin:8px 0;flex-wrap:wrap}
+.seg{height:28px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:bold;color:#fff;position:relative;border:1px solid rgba(0,0,0,.1)}
+.seg-label{font-size:10px;color:#64748b;text-align:center;margin-top:2px}
+/* 表格演示 */
+.demo-table{width:100%;border-collapse:collapse;font-size:12px;margin:6px 0}
+.demo-table th,.demo-table td{border:1px solid #cbd5e1;padding:5px 6px;text-align:center}
+.demo-table th{background:#e0e7ff;color:#3730a3;font-weight:bold}
+.demo-table tr.hl{background:#fef3c7}
+/* 计算步骤 */
+.calc-step{font-family:'Courier New',monospace;font-size:14px;color:#1e293b;padding:4px 0;border-bottom:1px dashed #e2e8f0}
+.calc-step:last-child{border-bottom:none}
+.calc-step .hl{color:#dc2626;font-weight:bold}
+.calc-step .res{color:#059669;font-weight:bold}
+/* 网格演示 */
+.grid-demo{display:inline-grid;gap:2px;margin:6px 0}
+.grid-cell{width:24px;height:24px;background:#e0e7ff;border:1px solid #c7d2fe;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:bold;color:#4338ca;border-radius:3px}
+.grid-cell.tree{background:#10b981;color:#fff}
+.grid-cell.hl{background:#fbbf24;color:#78350f}
+.fb-btn{width:100%;padding:12px;border:none;border-radius:10px;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;font-size:16px;font-weight:bold;cursor:pointer}
+
+/* 结算 */
+#result{background:linear-gradient(180deg,#312e81,#1e1b4b);justify-content:center;align-items:center;padding:24px}
+.r-card{background:#fff;border-radius:20px;padding:24px 20px;width:100%;max-width:380px;text-align:center;box-shadow:0 10px 40px rgba(0,0,0,.4)}
+.r-title{font-size:24px;font-weight:bold;color:#1e293b;margin-bottom:4px}
+.r-sub{font-size:14px;color:#64748b;margin-bottom:16px}
+.r-stars{font-size:40px;margin-bottom:16px;letter-spacing:6px}
+.r-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.r-stat{background:#f1f5f9;border-radius:10px;padding:12px}
+.r-stat-v{font-size:20px;font-weight:bold;color:#4338ca}
+.r-stat-l{font-size:11px;color:#64748b;margin-top:2px}
+.r-bonus{background:linear-gradient(135deg,#fef3c7,#fde68a);border-radius:10px;padding:12px;margin-bottom:16px;font-size:15px;font-weight:bold;color:#92400e}
+.r-actions{display:flex;gap:8px}
+.r-btn{flex:1;padding:12px;border:none;border-radius:10px;font-size:14px;font-weight:bold;cursor:pointer;color:#fff}
+.r-btn.a{background:linear-gradient(135deg,#6366f1,#8b5cf6)}
+.r-btn.b{background:linear-gradient(135deg,#34d399,#10b981);color:#064e3b}
+
+/* 商店 */
+#shop{background:#0f0f23}
+.shop-hd{background:linear-gradient(135deg,#f59e0b,#ea580c);color:#fff;padding:18px;text-align:center;flex-shrink:0}
+.shop-hd h2{font-size:20px;margin-bottom:2px}
+.shop-list{padding:12px;flex:1}
+.shop-item{background:#1e1b4b;border-radius:14px;padding:14px;margin-bottom:10px;display:flex;align-items:center;gap:12px}
+.shop-icon{font-size:36px;flex-shrink:0}
+.shop-info{flex:1}
+.shop-name{font-size:15px;font-weight:bold;color:#e0e7ff;margin-bottom:2px}
+.shop-desc{font-size:11px;color:#818cf8}
+.shop-price{font-size:15px;font-weight:bold;color:#fbbf24;margin-bottom:4px}
+.shop-btn{padding:7px 14px;border:none;border-radius:18px;font-size:12px;font-weight:bold;cursor:pointer;color:#fff;background:linear-gradient(135deg,#f59e0b,#ea580c);white-space:nowrap}
+.shop-btn:disabled{background:#475569;cursor:not-allowed}
+.shop-item.pend{border:2px solid #f59e0b}
+.shop-item.appr{border:2px solid #10b981}
+.stag{display:inline-block;padding:1px 6px;border-radius:6px;font-size:9px;font-weight:bold;margin-top:2px}
+.stag.p{background:#fef3c7;color:#92400e}.stag.a{background:#d1fae5;color:#065f46}
+
+/* 家长后台 */
+#parent{background:#0f0f23}
+.parent-hd{background:linear-gradient(135deg,#374151,#1f2937);color:#fff;padding:14px 18px;flex-shrink:0}
+.parent-hd h2{font-size:17px;margin-bottom:2px}
+.parent-hd p{font-size:11px;opacity:.7}
+.p-tabs{display:flex;background:#1e1b4b;border-bottom:2px solid #312e81;flex-shrink:0}
+.p-tab{flex:1;padding:10px;text-align:center;font-size:12px;font-weight:bold;color:#818cf8;cursor:pointer;border-bottom:3px solid transparent}
+.p-tab.active{color:#a5b4fc;border-bottom-color:#8b5cf6}
+.p-content{padding:12px;flex:1}
+.p-sec{display:none}.p-sec.active{display:block}
+.p-card{background:#1e1b4b;border-radius:12px;padding:14px;margin-bottom:10px}
+.p-label{font-size:13px;font-weight:bold;color:#e0e7ff;margin-bottom:6px}
+.p-desc{font-size:11px;color:#818cf8;margin-bottom:8px}
+.p-sel,.p-inp{width:100%;padding:9px;border:2px solid #312e81;border-radius:8px;font-size:13px;background:#0f0f23;color:#e0e7ff;outline:none}
+.p-sel option{background:#1e1b4b}
+.rw-item{display:flex;align-items:center;gap:6px;margin-bottom:6px}
+.rw-item input{flex:1;padding:7px;border:1px solid #312e81;border-radius:6px;font-size:12px;background:#0f0f23;color:#e0e7ff}
+.rw-item input[type=number]{width:60px;flex:none}
+.rw-del{width:28px;height:28px;border:none;border-radius:50%;background:#7f1d1d;color:#fca5a5;font-size:14px;cursor:pointer;flex-shrink:0}
+.add-rw{width:100%;padding:9px;border:2px dashed #475569;border-radius:8px;background:transparent;color:#94a3b8;font-size:13px;cursor:pointer;margin-top:6px}
+.save-btn{width:100%;padding:12px;border:none;border-radius:10px;background:linear-gradient(135deg,#34d399,#10b981);color:#064e3b;font-size:15px;font-weight:bold;cursor:pointer;margin-top:12px}
+.pend-item{background:#1e1b4b;border-radius:10px;padding:12px;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.pend-info{flex:1}
+.pend-name{font-size:13px;font-weight:bold;color:#e0e7ff}
+.pend-meta{font-size:11px;color:#818cf8;margin-top:2px}
+.appr-btn,.rej-btn{padding:6px 12px;border:none;border-radius:7px;font-size:12px;font-weight:bold;cursor:pointer;color:#fff}
+.appr-btn{background:#059669}.rej-btn{background:#dc2626}
+.stat-row{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid #312e81;font-size:13px}
+.stat-row:last-child{border-bottom:none}
+.stat-row .l{color:#94a3b8}.stat-row .v{font-weight:bold;color:#e0e7ff}
+.prog-bg{width:100%;height:8px;background:#334155;border-radius:4px;margin-top:4px;overflow:hidden}
+.prog-fg{height:100%;background:linear-gradient(90deg,#6366f1,#8b5cf6);border-radius:4px;transition:width .5s}
+
+/* 锁定 */
+#lock{background:linear-gradient(180deg,#0f0f23,#1a1a2e);justify-content:center;align-items:center;padding:24px;text-align:center}
+.lock-icon{font-size:72px;margin-bottom:16px;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
+.lock-title{font-size:26px;font-weight:bold;color:#fff;margin-bottom:10px}
+.lock-desc{font-size:15px;color:#94a3b8;line-height:1.8;margin-bottom:24px}
+.lock-cd{font-size:42px;font-weight:bold;color:#fbbf24;margin-bottom:24px;text-shadow:0 0 16px rgba(251,191,36,.5)}
+.lock-btn{padding:12px 32px;border:none;border-radius:22px;background:rgba(255,255,255,.1);color:#fff;font-size:15px;cursor:pointer;border:1px solid rgba(255,255,255,.2)}
+
+.fstar{position:absolute;font-size:22px;pointer-events:none;animation:fup 1s ease-out forwards;z-index:50}
+@keyframes fup{0%{transform:translateY(0) scale(1);opacity:1}100%{transform:translateY(-70px) scale(1.4);opacity:0}}
+.toast{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,.85);color:#fff;padding:10px 20px;border-radius:8px;font-size:13px;z-index:999;display:none;animation:tin .3s}
+@keyframes tin{0%{opacity:0;transform:translate(-50%,-50%) scale(.8)}100%{opacity:1;transform:translate(-50%,-50%) scale(1)}}
+.toast.show{display:block}
+.screen::-webkit-scrollbar{width:4px}
+.screen::-webkit-scrollbar-thumb{background:#4338ca;border-radius:2px}
+</style>
+</head>
+<body>
+<div id="game">
+
+<!-- 主菜单 -->
+<div id="menu" class="screen active">
+  <div class="game-title">奥数勇士大冒险</div>
+  <div class="game-sub">四年级上册 · 第2~6讲 课堂测试特训</div>
+  <div class="menu-hero">🧙‍♂️</div>
+  <button class="menu-btn p1" onclick="goLevels()">⚔️ 开始挑战</button>
+  <button class="menu-btn p2" onclick="goShop()">🎁 奖励商店</button>
+  <button class="menu-btn p3" onclick="parentLogin()">👨‍👩‍👧 家长中心</button>
+  <div class="menu-foot">每天20分钟，思维更敏捷</div>
+</div>
+
+<!-- 选关 -->
+<div id="levels" class="screen">
+  <div class="top-bar">
+    <button class="back-btn" onclick="show('menu')">←</button>
+    <div class="stat"><span>⭐</span><span id="lv-stars">0</span></div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <button class="music-btn" id="music-toggle" onclick="toggleMusic()">🎵</button>
+      <div class="stat"><span>⏱️</span><span id="lv-time">20:00</span></div>
+    </div>
+  </div>
+  <div class="unit-tabs" id="u-tabs"></div>
+  <div class="level-list" id="lv-list"></div>
+</div>
+
+<!-- 战斗 -->
+<div id="battle" class="screen">
+  <div class="battle-top">
+    <button class="back-btn" onclick="exitBattle()">←</button>
+    <div class="hearts" id="b-hearts">❤️❤️❤️</div>
+    <div class="combo" id="b-combo"></div>
+  </div>
+  <div class="arena" id="arena">
+    <div class="monster-area">
+      <div class="monster" id="monster">👾</div>
+      <div class="monster-name" id="m-name">小怪</div>
+      <div class="hp-bg"><div class="hp-fg" id="m-hp" style="width:100%"></div></div>
+    </div>
+    <div class="q-box" id="q-box"></div>
+  </div>
+  <div class="items-bar" id="items-bar"></div>
+  <div class="fb-overlay" id="fb">
+    <div class="fb-box">
+      <div class="fb-icon" id="fb-icon">🎉</div>
+      <div class="fb-title" id="fb-title">回答正确！</div>
+      <div class="fb-stars" id="fb-stars"></div>
+      <div class="fb-exp" id="fb-exp"></div>
+      <div class="demo-title" id="demo-title" style="display:none">📐 图形化解题演示</div>
+      <div class="demo-steps" id="demo-steps"></div>
+      <button class="fb-btn" onclick="nextQ()">继续</button>
+    </div>
+  </div>
+</div>
+
+<!-- 结算 -->
+<div id="result" class="screen">
+  <div class="r-card">
+    <div class="r-title" id="r-title">关卡通过！</div>
+    <div class="r-sub" id="r-sub"></div>
+    <div class="r-stars" id="r-stars">⭐⭐⭐</div>
+    <div class="r-grid">
+      <div class="r-stat"><div class="r-stat-v" id="r-correct">0</div><div class="r-stat-l">答对题数</div></div>
+      <div class="r-stat"><div class="r-stat-v" id="r-acc">0%</div><div class="r-stat-l">正确率</div></div>
+      <div class="r-stat"><div class="r-stat-v" id="r-combo">0</div><div class="r-stat-l">最高连击</div></div>
+      <div class="r-stat"><div class="r-stat-v" id="r-time">0s</div><div class="r-stat-l">用时</div></div>
+    </div>
+    <div class="r-bonus" id="r-bonus">获得智慧星：+0 ⭐</div>
+    <div class="r-actions">
+      <button class="r-btn b" onclick="goLevels()">返回选关</button>
+      <button class="r-btn a" onclick="nextLevel()">下一关</button>
+    </div>
+  </div>
+</div>
+
+<!-- 商店 -->
+<div id="shop" class="screen">
+  <div class="shop-hd">
+    <h2>🎁 奖励商店</h2>
+    <div>我的智慧星：<span id="shop-stars">0</span> ⭐</div>
+  </div>
+  <div class="top-bar" style="background:transparent;padding:6px 12px">
+    <button class="back-btn" onclick="show('menu')" style="color:#a5b4fc">← 返回</button>
+    <span style="color:#64748b;font-size:11px">兑换后需家长审核</span>
+  </div>
+  <div class="shop-list" id="shop-list"></div>
+</div>
+
+<!-- 家长后台 -->
+<div id="parent" class="screen">
+  <div class="parent-hd"><h2>👨‍👩‍👧 家长中心</h2><p>管理学习进度、奖励兑换和查看报告</p></div>
+  <div class="p-tabs">
+    <div class="p-tab active" onclick="pTab('progress',this)">进度设置</div>
+    <div class="p-tab" onclick="pTab('rewards',this)">奖励管理</div>
+    <div class="p-tab" onclick="pTab('audit',this)">兑换审核</div>
+    <div class="p-tab" onclick="pTab('report',this)">学习报告</div>
+  </div>
+  <div class="p-content">
+    <div class="p-sec active" id="p-progress">
+      <div class="p-card">
+        <div class="p-label">📚 当前教学进度</div>
+        <div class="p-desc">设置孩子当前学到的奥数单元，自动解锁对应关卡</div>
+        <select class="p-sel" id="set-unit">
+          <option value="1">第1单元：找规律与速算</option>
+          <option value="2">第2单元：和差倍问题</option>
+          <option value="3">第3单元：典型应用题（一）</option>
+          <option value="4">第4单元：典型应用题（二）</option>
+          <option value="5">第5单元：几何与计数</option>
+          <option value="6">第6单元：逻辑与推理</option>
+          <option value="7">第7单元：课堂测试特训（第2~6讲）</option>
+        </select>
+      </div>
+      <div class="p-card">
+        <div class="p-label">⏱️ 每日游玩时长</div>
+        <div class="p-desc">建议保持20分钟</div>
+        <select class="p-sel" id="set-time">
+          <option value="900">15分钟</option>
+          <option value="1200" selected>20分钟（推荐）</option>
+          <option value="1500">25分钟</option>
+          <option value="1800">30分钟</option>
+        </select>
+      </div>
+      <div class="p-card">
+        <div class="p-label">🔄 重置数据</div>
+        <div class="p-desc">清除所有进度（不可恢复）</div>
+        <button class="save-btn" style="background:linear-gradient(135deg,#7f1d1d,#991b1b);color:#fca5a5" onclick="resetAll()">重置所有数据</button>
+      </div>
+      <button class="save-btn" onclick="saveSettings()">💾 保存设置</button>
+    </div>
+    <div class="p-sec" id="p-rewards">
+      <div class="p-card">
+        <div class="p-label">🎁 可兑换奖励</div>
+        <div id="rw-list"></div>
+        <button class="add-rw" onclick="addReward()">+ 添加新奖励</button>
+      </div>
+      <button class="save-btn" onclick="saveRewards()">💾 保存奖励设置</button>
+    </div>
+    <div class="p-sec" id="p-audit"><div id="audit-list"></div></div>
+    <div class="p-sec" id="p-report">
+      <div class="p-card">
+        <div class="p-label">📊 今日数据</div>
+        <div class="stat-row"><span class="l">答题数量</span><span class="v" id="rp-tq">0</span></div>
+        <div class="stat-row"><span class="l">答对数量</span><span class="v" id="rp-tc">0</span></div>
+        <div class="stat-row"><span class="l">正确率</span><span class="v" id="rp-ta">0%</span></div>
+        <div class="stat-row"><span class="l">游玩时长</span><span class="v" id="rp-tt">0分钟</span></div>
+        <div class="stat-row"><span class="l">获得智慧星</span><span class="v" id="rp-ts">0</span></div>
+      </div>
+      <div class="p-card">
+        <div class="p-label">📈 累计数据</div>
+        <div class="stat-row"><span class="l">总答题数</span><span class="v" id="rp-q">0</span></div>
+        <div class="stat-row"><span class="l">总正确率</span><span class="v" id="rp-a">0%</span></div>
+        <div class="stat-row"><span class="l">已通关卡</span><span class="v" id="rp-l">0</span></div>
+        <div class="stat-row"><span class="l">累计智慧星</span><span class="v" id="rp-s">0</span></div>
+      </div>
+      <div class="p-card">
+        <div class="p-label">🎯 各单元掌握度</div>
+        <div id="unit-prog"></div>
+      </div>
+    </div>
+  </div>
+  <div style="padding:0 12px 12px"><button class="save-btn" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff" onclick="show('menu')">返回主菜单</button></div>
+</div>
+
+<!-- 锁定 -->
+<div id="lock" class="screen">
+  <div class="lock-icon">🌙</div>
+  <div class="lock-title">今天的挑战结束啦</div>
+  <div class="lock-desc">你已经玩了20分钟啦<br/>保护眼睛，休息一下<br/>明天继续挑战奥数怪兽！</div>
+  <div class="lock-cd" id="lock-cd">--:--:--</div>
+  <button class="lock-btn" onclick="show('menu')">返回主菜单</button>
+</div>
+
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+// ==================== BGM 音乐系统 ====================
+let audioCtx = null, musicOn = true, musicTimer = null, musicStep = 0;
+function initAudio(){if(!audioCtx){try{audioCtx=new(window.AudioContext||window.webkitAudioContext)()}catch(e){}}}
+function playTone(freq,dur,type='square',vol=0.08){
+  if(!audioCtx||!musicOn)return;
+  const o=audioCtx.createOscillator(),g=audioCtx.createGain();
+  o.type=type;o.frequency.value=freq;
+  g.gain.setValueAtTime(vol,audioCtx.currentTime);
+  g.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+dur);
+  o.connect(g);g.connect(audioCtx.destination);
+  o.start();o.stop(audioCtx.currentTime+dur);
+}
+// 主旋律（C大调欢快旋律）
+const melody=[523,659,784,659,523,587,659,523,784,880,784,659,523,659,587,523];
+const bass=[262,262,330,330,262,262,196,196,262,262,330,330,262,262,196,196];
+function playMusicStep(){
+  if(!musicOn||!audioCtx)return;
+  const i=musicStep%melody.length;
+  playTone(melody[i],0.28,'square',0.06);
+  playTone(bass[i],0.5,'triangle',0.05);
+  musicStep++;
+}
+function startMusic(){
+  initAudio();
+  if(audioCtx&&audioCtx.state==='suspended')audioCtx.resume();
+  if(musicTimer)clearInterval(musicTimer);
+  musicTimer=setInterval(playMusicStep,320);
+}
+function stopMusic(){if(musicTimer){clearInterval(musicTimer);musicTimer=null}}
+function toggleMusic(){
+  musicOn=!musicOn;
+  document.getElementById('music-toggle').textContent=musicOn?'🎵':'🔇';
+  if(musicOn)startMusic();else stopMusic();
+  showToast(musicOn?'🎵 音乐已开启':'🔇 音乐已关闭');
+}
+// 音效
+function sfxCorrect(){initAudio();playTone(523,0.1,'square',0.1);setTimeout(()=>playTone(659,0.1,'square',0.1),80);setTimeout(()=>playTone(784,0.15,'square',0.1),160)}
+function sfxWrong(){initAudio();playTone(200,0.2,'sawtooth',0.08);setTimeout(()=>playTone(150,0.25,'sawtooth',0.08),100)}
+function sfxClick(){initAudio();playTone(800,0.05,'square',0.05)}
+function sfxWin(){initAudio();[523,659,784,1047].forEach((f,i)=>setTimeout(()=>playTone(f,0.2,'square',0.1),i*120))}
+
+// ==================== 题目数据（奥数） ====================
+// ===== 随机出题：帮助函数 =====
+const RI=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+const PK=a=>a[RI(0,a.length-1)];
+function SH(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=RI(0,i);const t=a[i];a[i]=a[j];a[j]=t}return a}
+// 数字选择题：给正确答案生成4个选项（干扰项用 ds 偏移）
+function mkOpts(ans,ds){
+  ds=ds||[-3,-2,-1,1,2,3];
+  const set=[ans];
+  ds.forEach(d=>{const v=ans+d;if(v>=0&&!set.includes(v)&&set.length<4)set.push(v)});
+  let g=2;
+  while(set.length<4){const v=ans+g*(g%2?1:-1);if(v>=0&&!set.includes(v))set.push(v);g++}
+  const os=SH(set);
+  return{options:os.map(String),answer:os.indexOf(ans)};
+}
+// 文字选择题：correct 为正确文字，others 为干扰文字；自动去重并补齐4个选项
+function mkTOpts(c,others){
+  const pool=['不变','扩大到原来的2倍','缩小到原来的1/2','扩大到原来的3倍','无法确定'];
+  const arr=[c];
+  others.concat(pool).forEach(x=>{if(x!==c&&!arr.includes(x)&&arr.length<4)arr.push(x)});
+  let k=2;while(arr.length<4){const x='其他情况'+k++;if(!arr.includes(x))arr.push(x)}
+  const os=SH(arr);
+  return{options:os,answer:os.indexOf(c)};
+}
+function st(t,d,data){return{t,d,type:'calc',data}}
+function tt(t,d,data){return{t,d,type:'text',data}}
+function fillQ(q,ans,exp,demo){return{type:'fill',diff:'n',q,answer:String(ans),exp,demo}}
+function choiceQ(q,opts,exp,demo){return Object.assign({type:'choice',diff:'n',q,exp,demo},opts)}
+// 判断题（正确/错误）
+function tfQ(q,ok,exp,demo){return{type:'choice',diff:'n',q,options:['正确','错误'],answer:ok?0:1,exp,demo}}
+const NAMES=['小明','小红','小刚','小丽','小强','小兰','小华','小军','小雨','小晨'];
+function pickN(k){return SH(NAMES).slice(0,k)}
+
+const LEVELS=[
+// 第1单元：找规律与速算
+{id:'1-1',unit:1,name:'数列找规律',monster:'🔢',mName:'数列精灵',
+gens:[
+// ① 等差数列
+()=>{const a=RI(1,9),d=RI(3,9),ans=a+5*d;const s=[0,1,2,3,4].map(i=>a+i*d);
+return choiceQ('找规律填数：'+s.join('，')+'，__',mkOpts(ans),
+'相邻两数相差'+d+'，'+s[4]+'+'+d+'='+ans+'。',
+[st('第1步：找差','相邻两数的差都是 '+d,s.slice(1).map((v,i)=>v+'-'+s[i]+'='+d)),
+ st('第2步：算下一项',s[4]+' + '+d+' = '+ans,[s[4]+' <span class="hl">+'+d+'</span> = <span class="res">'+ans+'</span>'])])},
+// ② 完全平方
+()=>{const k=RI(2,6),ans=(k+5)*(k+5);const s=[0,1,2,3,4].map(i=>(k+i)*(k+i));
+return choiceQ('找规律：'+s.join('，')+'，__',mkOpts(ans),
+'依次是 '+k+'²、'+(k+1)+'²、'+(k+2)+'²……下一个是 '+(k+5)+'²='+ans+'。',
+[st('第1步：看特征','每个数都是两个相同数相乘',s.map((v,i)=>(k+i)+'² = '+v)),
+ st('第2步：算下一项',(k+5)+'² = '+(k+5)+'×'+(k+5)+' = '+ans,[(k+5)+'² = <span class="res">'+ans+'</span>'])])},
+// ③ 三角形数（差递增1）
+()=>{const k0=RI(2,5);const T=n=>n*(n+1)/2;const s=[0,1,2,3,4].map(i=>T(k0+i));const ans=T(k0+5);
+return choiceQ('找规律：'+s.join('，')+'，__',mkOpts(ans),
+'相邻差依次多1，下一个差是 '+(k0+5)+'，'+s[4]+'+'+(k0+5)+'='+ans+'。这是三角形数。',
+[st('第1步：算相邻差','差每次增加1',s.slice(1).map((v,i)=>v+'-'+s[i]+'='+(v-s[i]))),
+ st('第2步：算下一项',s[4]+' + '+(k0+5)+' = '+ans,[s[4]+' <span class="hl">+'+(k0+5)+'</span> = <span class="res">'+ans+'</span>'])])},
+// ④ n(n+1) 数列
+()=>{const k0=RI(2,5);const s=[0,1,2,3,4].map(i=>(k0+i)*(k0+i+1));const ans=(k0+5)*(k0+6);
+return fillQ('找规律：'+s.join('，')+'，____',ans,
+'差依次多2，下一个差是 '+(2*(k0+5))+'，'+s[4]+'+'+(2*(k0+5))+'='+ans+'。也可看成 n×(n+1)：'+(k0+5)+'×'+(k0+6)+'='+ans+'。',
+[st('第1步：找差','相邻差每次增加2',s.slice(1).map((v,i)=>v+'-'+s[i]+'='+(v-s[i]))),
+ st('第2步：算下一项',s[4]+' + '+(ans-s[4])+' = '+ans,[s[4]+' <span class="hl">+'+(ans-s[4])+'</span> = <span class="res">'+ans+'</span>'])])},
+// ⑤ 斐波那契
+()=>{const a=RI(1,5),b=a+RI(1,5);const s=[a,b,a+b,a+2*b,2*a+3*b];const ans=3*a+5*b;
+return choiceQ('找规律：'+s.join('，')+'，__',mkOpts(ans),
+'从第三项起，每一项等于前两项之和：'+s[3]+'+'+s[4]+'='+ans+'。',
+[st('第1步：看关系','每项 = 前两项之和',[''+s[0]+'+'+s[1]+'='+s[2],''+s[1]+'+'+s[2]+'='+s[3],''+s[2]+'+'+s[3]+'='+s[4]]),
+ st('第2步：算下一项',s[3]+' + '+s[4]+' = '+ans,[s[3]+' + '+s[4]+' = <span class="res">'+ans+'</span>'])])},
+// ⑥ 差为等差数列（二次型），求第10项
+()=>{const a=RI(1,4),d=RI(1,3);const t=n=>a+(n-1)*d+(n-1)*(n-2)/2;const s=[1,2,3,4,5,6].map(t);const ans=t(10);
+return choiceQ('有一串数：'+s.join('，')+'，……第10个数是多少？',mkOpts(ans),
+'相邻差为 '+d+'、'+(d+1)+'、'+(d+2)+'……依次多1。第10个数 = '+a+'+'+d+'×9+9×8÷2 = '+ans+'。',
+[tt('第1步：差的规律','相邻差依次是 '+d+'、'+(d+1)+'、'+(d+2)+'……，每次多1'),
+ st('第2步：求第10个数','首项'+a+'，差的总和 = 9×'+d+' + (1+2+…+8) = '+(9*d+36),[a+' + '+9*d+' + 36 = <span class="res">'+ans+'</span>'])])}
+]},
+{id:'1-2',unit:1,name:'速算与巧算',monster:'⚡',mName:'速算闪电',
+gens:[
+// ① 25×(4k)
+()=>{const k=RI(3,19),n=4*k,ans=100*k;
+return choiceQ('巧算：25×'+n+' = ?',mkOpts(ans,[-30,-20,-10,10,20,30]),
+n+'=4×'+k+'，25×4=100，100×'+k+'='+ans+'。',
+[st('第1步：拆分','25 的好朋友是 4：'+n+' = 4 × '+k,['25 × 4 = 100']),
+ st('第2步：计算','100 × '+k+' = '+ans,['100 × '+k+' = <span class="res">'+ans+'</span>'])])},
+// ② 99×N
+()=>{const N=RI(21,89),ans=99*N;
+return choiceQ('巧算：99×'+N+' = ?',mkOpts(ans,[-100,-10,10,100,-200,200]),
+'99=100-1，99×'+N+'='+(100*N)+'-'+N+'='+ans+'。',
+[st('第1步：凑整','99 = 100 - 1',['(100-1)×'+N+' = '+100*N+' - '+N]),
+ st('第2步：相减',100*N+' - '+N+' = '+ans,[100*N+' - '+N+' = <span class="res">'+ans+'</span>'])])},
+// ③ 25×a×125×b
+()=>{const a=PK([4,8,12,16]),b=PK([4,8]);const p1=25*a,p2=125*b,ans=p1*p2;
+return choiceQ('巧算：25×'+a+'×125×'+b+' = ?',mkOpts(ans,[-10000,-5000,5000,10000,-20000,20000]),
+'25×'+a+'='+p1+'，125×'+b+'='+p2+'，再相乘得 '+ans+'。',
+[st('第1步：分组配对','25 配 4 的倍数，125 配 8 或直接乘',['25×'+a+' = '+p1,'125×'+b+' = '+p2]),
+ st('第2步：相乘',p1+' × '+p2+' = '+ans,[p1+' × '+p2+' = <span class="res">'+ans+'</span>'])])},
+// ④ 7个连续数求和
+()=>{const a=RI(21,68),ans=7*(a+3);const s=[0,1,2,3,4,5,6].map(i=>a+i);
+return fillQ('巧算：'+s[0]+'+'+s[1]+'+'+s[2]+'+'+s[3]+'+'+s[4]+'+'+s[5]+'+'+s[6]+' = ____',ans,
+'7个连续自然数，平均数就是中间数 '+(a+3)+'，'+(a+3)+'×7='+ans+'。',
+[tt('第1步：找中间数','7个数的中间数是第4个 = '+(a+3),s.slice(0,3).join('、')+'、<span class="hl">'+(a+3)+'</span>、'+s.slice(4).join('、')),
+ st('第2步：配对求和','首尾配对都等于 '+2*(a+3)+'，剩中间数',[2*(a+3)+'×3 + '+(a+3)+' = <span class="res">'+ans+'</span>'])])},
+// ⑤ 高斯求和
+()=>{const N=PK([60,80,90,100,110,120]),ans=N*(N+1)/2;
+return choiceQ('巧算：1+2+3+…+'+(N-1)+'+'+N+' = ?',mkOpts(ans,[-50,-10,10,50,-100,100]),
+'(首项+末项)×项数÷2 = (1+'+N+')×'+N+'÷2 = '+ans+'。',
+[tt('第1步：首尾配对','1+'+N+'='+(N+1)+'，共 '+N/2+' 对（'+N+'为偶数）','每对的和都是 '+(N+1)),
+ st('第2步：公式',(N+1)+' × '+N+' ÷ 2 = '+ans,['(1+'+N+')×'+N+'÷2 = <span class="res">'+ans+'</span>'])])},
+// ⑥ 9999+999+99+9 型
+()=>{const m=PK([3,4,5]);const parts=[];for(let i=m;i>=1;i--)parts.push('9'.repeat(i));const round=10*(Math.pow(10,m)-1)/9;const ans=round-m;
+return choiceQ('巧算：'+parts.join('+')+' = ?',mkOpts(ans,[-9,-1,1,9,-18,18]),
+'每个数各加1凑成整十整百，和为 '+round+'，再减去多加的 '+m+'，得 '+ans+'。',
+[st('第1步：各加1凑整','每个数都差1就是整十/整百/整千',['凑整后的和 = '+round]),
+ st('第2步：减回多加的','共 '+m+' 个数，多加了 '+m,[round+' - '+m+' = <span class="res">'+ans+'</span>'])])}
+]},
+{id:'1-3',unit:1,name:'定义新运算',monster:'✨',mName:'运算魔法师',
+gens:[
+// ① a※b=a×b+a+b
+()=>{const a=RI(2,8),b=RI(2,8),ans=a*b+a+b;
+return choiceQ('规定 a※b = a×b+a+b，那么 '+a+'※'+b+' = ?',mkOpts(ans),
+'按规则代入：'+a+'×'+b+'+'+a+'+'+b+' = '+a*b+'+'+(a+b)+' = '+ans+'。',
+[st('第1步：代入规则',a+'※'+b+' = '+a+'×'+b+'+'+a+'+'+b,[a+'×'+b+' = '+a*b]),
+ st('第2步：求和',a*b+' + '+(a+b)+' = '+ans,[a*b+' + '+(a+b)+' = <span class="res">'+ans+'</span>'])])},
+// ② a△b=(a+b)×2，求 x
+()=>{const x=RI(2,9),b=RI(3,9),c=2*(x+b);
+return choiceQ('规定 a△b=(a+b)×2。若 x△'+b+'='+c+'，那么 x = ?',mkOpts(x),
+'(x+'+b+')×2='+c+'，x+'+b+'='+c/2+'，x='+c/2+'-'+b+'='+x+'。',
+[st('第1步：两边同除以2','(x+'+b+')×2 = '+c,['x+'+b+' = '+c/2]),
+ st('第2步：求 x','x = '+c/2+' - '+b,[c/2+' - '+b+' = <span class="res">'+x+'</span>'])])},
+// ③ a◎b=a×m-b×2
+()=>{const m=PK([2,3,4]);const a=RI(5,9);const b=RI(2,Math.min(8,Math.floor((a*m-3)/2)));const ans=a*m-2*b;
+return fillQ('规定 a◎b = a×'+m+'-b×2，那么 '+a+'◎'+b+' = ____',ans,
+'代入：'+a+'×'+m+'-'+b+'×2 = '+a*m+'-'+2*b+' = '+ans+'。',
+[st('第1步：分别相乘',a+'×'+m+' = '+a*m+'，'+b+'×2 = '+2*b,[a*m+' - '+2*b]),
+ st('第2步：相减',a*m+' - '+2*b+' = '+ans,['= <span class="res">'+ans+'</span>'])])},
+// ④ a★b=a+b-1；a☆b=a×b-1，求 a★(b☆c)
+()=>{const a=RI(2,6),b=RI(2,6),c=RI(2,6);const inner=b*c-1,ans=a+inner-1;
+return choiceQ('规定 a★b=a+b-1，a☆b=a×b-1。那么 '+a+'★('+b+'☆'+c+') = ?',mkOpts(ans),
+'先算括号里的：'+b+'☆'+c+'='+b+'×'+c+'-1='+inner+'；再算 '+a+'★'+inner+'='+a+'+'+inner+'-1='+ans+'。',
+[st('第1步：先算括号',b+'☆'+c+' = '+b+'×'+c+'-1 = '+inner,[b+'×'+c+'-1 = '+inner]),
+ st('第2步：再算★',a+'★'+inner+' = '+a+'+'+inner+'-1',[a+'+'+inner+'-1 = <span class="res">'+ans+'</span>'])])}
+]},
+// 第2单元：和差倍
+{id:'2-1',unit:2,name:'和差问题',monster:'⚖️',mName:'天平守护者',
+gens:[
+// ① 已知和与差求大数
+()=>{const big=RI(20,60),small=RI(5,big-5),S=big+small,D=big-small;
+return choiceQ('甲乙两数之和是'+S+'，甲数比乙数大'+D+'。甲数是多少？',mkOpts(big),
+'大数=(和+差)÷2=('+S+'+'+D+')÷2='+big+'。',
+[st('第1步：套公式','甲（大数）= (和+差)÷2',['('+S+' + '+D+') ÷ 2']),
+ st('第2步：计算',S+D+' ÷ 2 = '+big,['= <span class="res">'+big+'</span>'])])},
+// ② 邮票求小数
+()=>{const n=pickN(2);const big=RI(20,60),small=RI(8,big-5),S=big+small,D=big-small;
+return choiceQ(n[0]+'和'+n[1]+'共有邮票'+S+'张，'+n[1]+'比'+n[0]+'多'+D+'张。'+n[0]+'有多少张邮票？',mkOpts(small),
+n[0]+'（小数）=(和-差)÷2=('+S+'-'+D+')÷2='+small+'。',
+[st('第1步：套公式','小数 = (和-差)÷2',['('+S+' - '+D+') ÷ 2']),
+ st('第2步：计算',S-D+' ÷ 2 = '+small,['= <span class="res">'+small+' 张</span>'])])},
+// ③ 给若干后相等，求原来多的
+()=>{const n=pickN(2);const x=RI(3,12),B=RI(10,50),ans=B+2*x;
+return choiceQ(n[0]+'给'+n[1]+' '+x+'颗糖后，两人糖数一样多。'+n[1]+'原来有'+B+'颗，'+n[0]+'原来有多少颗？',mkOpts(ans,[-10,-5,5,10,-15,15]),
+'给'+x+'颗后相等，说明原来相差 '+x+'×2='+2*x+' 颗：'+B+'+'+2*x+'='+ans+'。',
+[st('第1步：找原来的差','给'+x+'颗后相等，差 = '+x+'×2 = '+2*x+'（颗）',['相差数 = 给出数×2']),
+ st('第2步：求'+n[0],B+' + '+2*x+' = '+ans,['= <span class="res">'+ans+' 颗</span>'])])},
+// ④ 长方形周长求长
+()=>{const w=RI(5,20),d=RI(2,10),L=w+d,P=2*(L+w);
+return fillQ('一个长方形的周长是'+P+'厘米，长比宽多'+d+'厘米。长是多少厘米？',L,
+'长+宽='+P+'÷2='+P/2+'，长=('+P/2+'+'+d+')÷2='+L+'厘米。',
+[st('第1步：求长+宽',P+' ÷ 2 = '+P/2+'（厘米）',['长+宽 = '+P/2]),
+ st('第2步：和差求长','('+P/2+' + '+d+') ÷ 2 = '+L,['长 = <span class="res">'+L+' 厘米</span>'])])}
+]},
+{id:'2-2',unit:2,name:'和倍问题',monster:'🔵',mName:'倍数精灵',
+gens:[
+// ① 和倍求1份
+()=>{const n=pickN(2);const k=PK([2,3,4,5]),b=RI(10,60),S=(k+1)*b;
+return choiceQ(n[0]+'和'+n[1]+'共有卡片'+S+'张，'+n[0]+'的卡片张数正好是'+n[1]+'的'+k+'倍。'+n[1]+'有多少张卡片？',mkOpts(b),
+'把'+n[1]+'看作1份，两人共'+(k+1)+'份，1份='+S+'÷'+(k+1)+'='+b+'。',
+[tt('第1步：画份数',n[1]+'1份，'+n[0]+k+'份，共 '+(k+1)+' 份',''),
+ st('第2步：求1份',S+' ÷ '+(k+1)+' = '+b,['= <span class="res">'+b+' 张</span>'])])},
+// ② 比几倍多几
+()=>{const k=PK([2,3,4]);const b=RI(10,40),m=RI(2,9),S=(k+1)*b+m;
+return choiceQ('水果店苹果和梨共'+S+'千克，苹果比梨的'+k+'倍还多'+m+'千克。梨有多少千克？',mkOpts(b),
+'先去掉多的'+m+'千克：'+S+'-'+m+'='+(S-m)+'，正好是梨的'+(k+1)+'倍，梨='+(S-m)+'÷'+(k+1)+'='+b+'。',
+[st('第1步：去掉多的部分',S+' - '+m+' = '+(S-m),['正好对应梨的 '+(k+1)+' 倍']),
+ st('第2步：求梨',(S-m)+' ÷ '+(k+1)+' = '+b,['= <span class="res">'+b+' 千克</span>'])])},
+// ③ 三个数和倍
+()=>{const b=RI(8,30),k1=RI(2,4),k2=RI(2,4),S=b*(1+k1+k2);
+return fillQ('甲、乙、丙三个数之和是'+S+'。甲数是乙数的'+k1+'倍，丙数是乙数的'+k2+'倍。乙数是多少？',b,
+'乙1份、甲'+k1+'份、丙'+k2+'份，共'+(1+k1+k2)+'份，乙='+S+'÷'+(1+k1+k2)+'='+b+'。',
+[tt('第1步：画份数','乙1份、甲'+k1+'份、丙'+k2+'份，共 '+(1+k1+k2)+' 份',''),
+ st('第2步：求1份',S+' ÷ '+(1+k1+k2)+' = '+b,['乙数 = <span class="res">'+b+'</span>'])])}
+]},
+{id:'2-3',unit:2,name:'差倍问题',monster:'📏',mName:'差倍怪兽',
+gens:[
+// ① 差倍求小数
+()=>{const n=pickN(2);const k=PK([2,3,4,5]),b=RI(10,50),D=(k-1)*b;
+return choiceQ(n[0]+'的邮票张数是'+n[1]+'的'+k+'倍，且比'+n[1]+'多'+D+'张。'+n[1]+'有多少张邮票？',mkOpts(b),
+'多出的'+D+'张正好是'+n[1]+'的'+(k-1)+'倍，'+n[1]+'='+D+'÷'+(k-1)+'='+b+'。',
+[tt('第1步：找差对应的份数','多出来的 '+(k-1)+' 份 = '+D+' 张',''),
+ st('第2步：求1份',D+' ÷ '+(k-1)+' = '+b,['= <span class="res">'+b+' 张</span>'])])},
+// ② 给若干后相等+倍数
+()=>{const n=pickN(2);const k=PK([2,3,5]);const b=2*RI(4,15),x=(k-1)*b/2;
+return choiceQ(n[0]+'的糖果数是'+n[1]+'的'+k+'倍。如果'+n[0]+'给'+n[1]+' '+x+'颗糖，两人就一样多。'+n[1]+'原来有多少颗糖？',mkOpts(b),
+'给'+x+'颗后相等，原来相差 '+2*x+' 颗；差也是'+n[1]+'的'+(k-1)+'倍，所以'+n[1]+'='+2*x+'÷'+(k-1)+'='+b+'。',
+[st('第1步：求原来的差','给'+x+'颗后相等 → 差 = '+x+'×2 = '+2*x+'（颗）',['差 = '+2*x]),
+ st('第2步：差倍求小数',2*x+' ÷ ('+k+'-1) = '+b,['= <span class="res">'+b+' 颗</span>'])])},
+// ③ 差倍求大数（绳长）
+()=>{const k=PK([2,3,4]),b=RI(5,30),D=(k-1)*b,ans=k*b;
+return fillQ('甲绳的长度是乙绳的'+k+'倍，甲绳比乙绳长'+D+'米。甲绳长多少米？',ans,
+'乙绳='+D+'÷'+(k-1)+'='+b+'米，甲绳='+b+'×'+k+'='+ans+'米。',
+[st('第1步：求乙绳',D+' ÷ '+(k-1)+' = '+b+' 米',['乙绳 = '+b]),
+ st('第2步：求甲绳',b+' × '+k+' = '+ans+' 米',['甲绳 = <span class="res">'+ans+' 米</span>'])])}
+]},
+{id:'2-4',unit:2,name:'算式之谜',monster:'🔮',mName:'数字谜巫师',count:6,
+gens:[
+// ① 加法竖式：问第一个加数十位
+()=>{const u1=RI(1,9);const uu2=RI(Math.max(1,10-u1),9);const c0=(u1+uu2)%10;
+const t1=RI(1,5),t2=RI(1,8-t1); // 十位加进位1后仍不进位
+const c1=t1+t2+1;
+const h1=RI(1,4),h2=RI(1,8-h1);
+const C=(h1+h2+1)*100+c1*10+c0;
+return choiceQ('在□里填上合适的数字：'+h1+'□'+u1+' ＋ '+h2+''+t2+''+uu2+' ＝ '+C+'。□代表数字几？',mkOpts(t1),
+'个位：'+u1+'+'+uu2+'='+(u1+uu2)+'，写'+c0+'向十位进1；十位：□+'+t2+'+1='+c1+'，□='+t1+'。',
+[st('第1步：看个位',u1+' + '+uu2+' = '+(u1+uu2)+'，写 '+c0+' 进 1',['个位向十位进 1']),
+ st('第2步：看十位','□ + '+t2+' + 1 = '+c1+'（不向百位进位）',['□ = '+c1+' - '+t2+' - 1 = <span class="res">'+t1+'</span>'])])},
+// ② 减法竖式：问减数百位（无借位，加法逆推）
+()=>{const c0=RI(1,8),b0=RI(0,9-c0),a0=b0+c0;
+const c1=RI(1,8),b1=RI(0,9-c1),a1=b1+c1;
+const b2=RI(1,7),c2=RI(1,9-b2),a2=b2+c2;
+const A=a2*100+a1*10+a0,B=b2*100+b1*10+b0,Cc=c2*100+c1*10+c0;
+return choiceQ('在□里填数（没有借位）：'+A+' － □'+(b1)+''+b0+' ＝ '+Cc+'。减数百位上的□代表几？',mkOpts(b2),
+'没有借位，可用加法逆推：百位 '+a2+'=□+'+c2+'，所以 □='+a2+'-'+c2+'='+b2+'。',
+[st('第1步：判断无借位','个位 '+a0+'='+b0+'+'+c0+'，十位 '+a1+'='+b1+'+'+c1+'，各位都够减',['这是一道不借位减法']),
+ st('第2步：加法逆推看百位',a2+' = □ + '+c2,['□ = '+a2+' - '+c2+' = <span class="res">'+b2+'</span>'])])},
+// ③ 乘法竖式谜：p□×v=C，问个位
+()=>{const combos=[[3,7,9],[3,9,3],[7,3,9],[7,9,7],[9,3,7],[9,7,3]]; // v,s,u
+let v,s,u,p,C=0,tries=0;
+while(C<100&&tries++<50){const c=PK(combos);v=c[0];s=c[1];u=c[2];p=PK([2,3,4]);C=(10*p+u)*v}
+return choiceQ('竖式乘法：'+p+'□ × '+v+' ＝ '+C+'。□代表数字几？',mkOpts(u),
+'积的个位是'+s+'，即 □×'+v+'的个位是'+s+'。试算 '+u+'×'+v+'='+(u*v)+'，个位正好是'+s+'，所以□='+u+'。',
+[st('第1步：看个位','□×'+v+' 的个位数字 = '+s+'（积'+C+'的个位）',['试：'+u+'×'+v+' = '+(u*v)+'，个位是 '+s+' ✓']),
+ st('第2步：验证',(10*p+u)+' × '+v+' = '+C,['□ = <span class="res">'+u+'</span>'])])},
+// ④ 汉字谜：好+好学=N，问好
+()=>{const h=RI(6,9);let x=RI(0,9);if(x===h)x=(x+1)%10;const N=11*h+x;
+return choiceQ('汉字数字谜：好 ＋ 好学 ＝ '+N+'（不同汉字代表不同数字）。"好"代表数字几？',mkOpts(h),
+'"好学"=10×好+学，所以 好+好学=11×好+学='+N+'。试 好='+h+'：11×'+h+'='+11*h+'，学='+x+'，成立。',
+[tt('第1步：按位值展开','"好"是一位数，"好学"是两位数 = 10×好+学','好 + 好学 = 11×好 + 学'),
+ st('第2步：试算','11×'+h+' = '+11*h+'，'+N+' - '+11*h+' = '+x+'（学）',['好 = <span class="res">'+h+'</span>，学 = '+x])])},
+// ⑤ ABC+ABC=N，求 A
+()=>{const ABC=RI(123,456),N=2*ABC,A=Math.floor(ABC/100);
+return choiceQ('字母谜：ABC ＋ ABC ＝ '+N+'（ABC表示一个三位数）。百位上的 A 代表数字几？',mkOpts(A),
+'ABC+ABC=ABC×2='+N+'，所以 ABC='+N+'÷2='+ABC+'，它的百位 A='+A+'。',
+[st('第1步：求 ABC',N+' ÷ 2 = '+ABC,['ABC = '+ABC]),
+ st('第2步：看百位',ABC+' 的百位数字是 '+A,['A = <span class="res">'+A+'</span>'])])},
+// ⑥ AB+BA=M，求 A+B
+()=>{const k=PK([9,10,11,12,13,14]);const lo=Math.max(1,k-9),hi=Math.min(9,k-1);const A=RI(lo,hi),B=k-A,M=11*k;
+return choiceQ('AB ＋ BA ＝ '+M+'（A、B是不同的非零数字）。那么 A＋B ＝ ?',mkOpts(k),
+'AB=10A+B，BA=10B+A，和=11×(A+B)='+M+'，所以 A+B='+M+'÷11='+k+'。',
+[st('第1步：展开','AB = 10A+B，BA = 10B+A',['和 = 11A + 11B = 11×(A+B)']),
+ st('第2步：求 A+B',M+' ÷ 11 = '+k,['A+B = <span class="res">'+k+'</span>'])])}
+]},
+// 第3单元：典型应用一
+{id:'3-1',unit:3,name:'年龄问题',monster:'🎂',mName:'时光老人',
+gens:[
+// ① 几年后是 m 倍
+()=>{const b=RI(5,10),y=RI(3,8),c=b+y,m=PK([3,4,5]),dad=b+(m-1)*c;
+return choiceQ('儿子今年'+b+'岁，爸爸今年'+dad+'岁。几年后爸爸的年龄正好是儿子的'+m+'倍？',mkOpts(y),
+'年龄差不变，是'+(dad-b)+'岁；'+m+'倍时差是儿子年龄的'+(m-1)+'倍，那时儿子'+(dad-b)+'÷'+(m-1)+'='+c+'岁，即'+y+'年后。',
+[st('第1步：算年龄差',dad+' - '+b+' = '+(dad-b)+'（岁），年龄差永不变',['差 = '+(m-1)+'×'+c+' = '+(dad-b)]),
+ st('第2步：求那时儿子年龄',(dad-b)+' ÷ '+(m-1)+' = '+c+' 岁',['现在'+b+'岁 → '+c+'-'+b+' = <span class="res">'+y+' 年后</span>'])])},
+// ② 几年前是 m 倍
+()=>{let c,m,y,dad,son,tries=0;
+do{c=RI(6,9);m=PK([4,5]);y=RI(2,6);dad=m*c+y;son=c+y}while(dad>50);
+return choiceQ('爸爸今年'+dad+'岁，儿子今年'+son+'岁。几年前爸爸的年龄是儿子的'+m+'倍？',mkOpts(y),
+'年龄差'+(dad-son)+'岁不变；'+m+'倍时差是儿子的'+(m-1)+'倍，那时儿子'+(dad-son)+'÷'+(m-1)+'='+c+'岁，即'+y+'年前。',
+[st('第1步：年龄差',dad+' - '+son+' = '+(dad-son)+'（岁）',['差不变']),
+ st('第2步：求那时儿子年龄',(dad-son)+' ÷ '+(m-1)+' = '+c,[''+son+' - '+c+' = <span class="res">'+y+' 年前</span>'])])},
+// ③ 和为 T 时哥哥几岁
+()=>{const D=RI(3,9),g=RI(15,25),T=2*g-D;
+return fillQ('哥哥比弟弟大'+D+'岁。当兄弟俩年龄之和是'+T+'岁时，哥哥多少岁？',g,
+'年龄差永不变。哥=(和+差)÷2=('+T+'+'+D+')÷2='+g+'岁。',
+[st('第1步：和差公式','哥 = (年龄和 + 年龄差) ÷ 2',['('+T+' + '+D+') ÷ 2']),
+ st('第2步：计算',T+D+' ÷ 2 = '+g,['哥哥 <span class="res">'+g+' 岁</span>'])])}
+]},
+{id:'3-2',unit:3,name:'植树问题',monster:'🌳',mName:'森林精灵',
+gens:[
+// ① 两端都栽
+()=>{const g=PK([4,5,6,8]),n=RI(6,15),L=n*g;
+return choiceQ('一条小路长'+L+'米，在路的一边从头到尾每隔'+g+'米栽一棵树（两端都栽），一共要栽多少棵树？',mkOpts(n+1),
+'间隔数='+L+'÷'+g+'='+n+'；两端都栽时，棵数=间隔数+1='+(n+1)+'。',
+[st('第1步：算间隔数',L+' ÷ '+g+' = '+n+'（个）',['间隔数 = '+n]),
+ st('第2步：两端都栽','棵数 = 间隔数 + 1',[n+' + 1 = <span class="res">'+(n+1)+' 棵</span>'])])},
+// ② 封闭图形
+()=>{const g=PK([4,5,6,10]),n=RI(6,16),C=n*g;
+return choiceQ('一个圆形花坛的周长是'+C+'米，沿花坛边每隔'+g+'米栽一棵树，一共要栽多少棵树？',mkOpts(n),
+'封闭图形中，棵数=间隔数。间隔数='+C+'÷'+g+'='+n+'，所以栽'+n+'棵。',
+[tt('第1步：封闭图形特点','首尾重合，棵数 = 间隔数','直线上"两端都栽"会多1棵，圆形没有这个问题'),
+ st('第2步：算间隔数',C+' ÷ '+g+' = '+n,['共栽 <span class="res">'+n+' 棵</span>'])])},
+// ③ 爬楼梯
+()=>{const f2=RI(4,12),per=RI(12,22),ans=per*(f2-1);
+return fillQ('小明从1楼走到'+f2+'楼，每上一层楼要走'+per+'级台阶。他一共要走多少级台阶？',ans,
+'1楼到'+f2+'楼只要上'+(f2-1)+'层：'+per+'×'+(f2-1)+'='+ans+'级。',
+[st('第1步：算层数','1楼不用爬，实际爬 '+(f2-1)+' 层',['层数 = '+f2+' - 1 = '+(f2-1)]),
+ st('第2步：算台阶级数',per+' × '+(f2-1)+' = '+ans,['共 <span class="res">'+ans+' 级</span>'])])}
+]},
+{id:'3-3',unit:3,name:'鸡兔同笼',monster:'🐔',mName:'鸡兔怪兽',
+gens:[
+// ① 基本型求鸡
+()=>{const X=RI(6,20),Y=RI(4,15),n=X+Y,m=2*X+4*Y;
+return choiceQ('鸡兔同笼，共有'+n+'个头、'+m+'只脚。鸡有多少只？',mkOpts(X),
+'假设全是兔：'+n+'×4='+4*n+'只脚，比实际多'+(4*n-m)+'只；每只鸡比兔少2只脚，鸡='+(4*n-m)+'÷2='+X+'只。',
+[st('第1步：假设全是兔',n+' × 4 = '+4*n+'（只脚），多出 '+(4*n-m)+' 只',['多的脚是把鸡当兔算出来的']),
+ st('第2步：求鸡的只数','每只鸡多算了2只脚',[4*n-m+' ÷ 2 = <span class="res">'+X+' 只</span>'])])},
+// ② 汽车与三轮车
+()=>{const X=RI(5,15),Y=RI(4,12),n=X+Y,m=4*X+3*Y;
+return choiceQ('停车场上有汽车（4个轮子）和三轮车（3个轮子）共'+n+'辆，数一数共有'+m+'个轮子。汽车有多少辆？',mkOpts(X),
+'假设全是三轮车：'+3*n+'个轮子，还少'+(m-3*n)+'个；每辆汽车多1个轮子，所以汽车有'+(m-3*n)+'辆。',
+[st('第1步：假设全是三轮车',n+' × 3 = '+3*n+'（个轮子）',['还差 '+(m-3*n)+' 个轮子']),
+ st('第2步：求汽车','每辆汽车比三轮车多 1 个轮子',['汽车 = '+m+' - '+3*n+' = <span class="res">'+X+' 辆</span>'])])},
+// ③ 鸡比兔多 k 只
+()=>{const Y=RI(4,12),k=RI(2,8),m=6*Y+2*k;
+return fillQ('鸡比兔多'+k+'只，鸡和兔一共有'+m+'只脚。兔有多少只？',Y,
+'先去掉多的'+k+'只鸡的'+2*k+'只脚：'+m+'-'+2*k+'='+(m-2*k)+'；这时鸡兔只数相同，每组1鸡1兔共6只脚，兔='+(m-2*k)+'÷6='+Y+'只。',
+[st('第1步：去掉多的鸡',m+' - 2×'+k+' = '+(m-2*k)+'（只脚）',['剩下的鸡与兔只数相同']),
+ st('第2步：分组','1只鸡+1只兔 = 6只脚',[(m-2*k)+' ÷ 6 = <span class="res">'+Y+' 只兔</span>'])])}
+]},
+{id:'3-4',unit:3,name:'积商变化规律',monster:'🔀',mName:'变化魔法师',count:6,
+gens:[
+// ① 因数乘a，积扩P，另一因数乘r
+()=>{const a=PK([2,3,4]),r=PK([2,3,5]),P=a*r;
+return choiceQ('两个数相乘，一个因数乘'+a+'，积扩大到原来的'+P+'倍。另一个因数应怎样变化？',
+mkTOpts('乘'+r,['除以'+r,'乘'+a,'不变']),
+'积的变化是两个因数变化的乘积：'+a+'×'+r+'='+P+'，所以另一个因数应乘'+r+'。',
+[tt('规律','积扩大的倍数 = 两个因数变化倍数相乘',''),
+ st('推理',a+' × ？ = '+P,['？ = '+P+' ÷ '+a+' = <span class="res">'+r+'（乘'+r+'）</span>'])])},
+// ② 一因数缩小1/n，积扩P，另一因数
+()=>{const n=PK([2,4,5]),P=PK([2,3,4]);const ans=P*n;
+return choiceQ('两个数相乘，一个因数缩小到原来的1/'+n+'，积反而扩大到原来的'+P+'倍。另一个因数怎样变化？',
+mkTOpts('扩大到原来的'+ans+'倍',['扩大到原来的'+P+'倍','缩小到原来的1/'+ans,'不变']),
+'一个因数除以'+n+'，要让积乘'+P+'，另一个因数就要乘 '+n+'×'+P+'='+ans+'。',
+[tt('规律','一个因数除以 '+n+'，另一个因数就要补上 '+n+' 倍','还要再多扩大 '+P+' 倍'),
+ st('推理','另一个因数 ×'+n+' 再 ×'+P,['= 扩大到原来的 <span class="res">'+ans+' 倍</span>'])])},
+// ③ 积V，一乘一除
+()=>{const a=PK([2,4,5]),b=PK([2,3,4]);const V=b*RI(10,60);const nv=V*a/b;
+return choiceQ('两个数相乘的积是'+V+'。如果一个因数乘'+a+'，另一个因数除以'+b+'，新的积是多少？',
+mkOpts(nv,[-20,-10,10,20,-30,30]),
+'积先乘'+a+'再除以'+b+'：'+V+'×'+a+'÷'+b+'='+nv+'。',
+[st('第1步：列算式','新积 = 原积 × '+a+' ÷ '+b,[V+' × '+a+' ÷ '+b]),
+ st('第2步：计算','= '+nv,['新积 = <span class="res">'+nv+'</span>'])])},
+// ④ 被除数除数同乘（成倍数），商扩k
+()=>{const k=PK([2,3,4]),b=PK([2,3]),a=k*b;
+return choiceQ('在除法算式中，被除数乘'+a+'，除数乘'+b+'，商会怎样变化？',
+mkTOpts('扩大到原来的'+k+'倍',['扩大到原来的'+a+'倍','缩小到原来的1/'+k,'不变']),
+'被除数和除数乘的倍数相除，就是商的变化：'+a+'÷'+b+'='+k+'，商扩大到原来的'+k+'倍。',
+[tt('规律','商的变化 = 被除数的变化 ÷ 除数的变化',''),
+ st('推理',a+' ÷ '+b+' = '+k,['商 <span class="res">扩大到原来的 '+k+' 倍</span>'])])},
+// ⑤ 商V，被乘a，除乘b
+()=>{const k=PK([2,3,4]),b=PK([2,3]),a=k*b,V=RI(10,80),nv=V*k;
+return choiceQ('两个数相除的商是'+V+'。被除数乘'+a+'，除数乘'+b+'，新的商是多少？',
+mkOpts(nv,[-10,-5,5,10,-20,20]),
+'商跟着被除数乘'+a+'、跟着除数除以'+b+'：'+V+'×'+a+'÷'+b+'='+V+'×'+k+'='+nv+'。',
+[st('第1步：分析','被除数乘'+a+' 商也乘'+a+'；除数乘'+b+' 商反而除以'+b,[V+' × '+a+' ÷ '+b]),
+ st('第2步：化简',a+' ÷ '+b+' = '+k,[V+' × '+k+' = <span class="res">'+nv+'</span>'])])},
+// ⑥ 一乘一除同一个数，积不变
+()=>{const a=PK([3,4,5,8]);
+return choiceQ('两个数相乘，一个因数乘'+a+'，另一个因数除以'+a+'，积怎样变化？',
+mkTOpts('不变',['乘'+a,'除以'+a,'乘'+a*a]),
+'一个乘'+a+'、另一个除以'+a+'，变化正好抵消，积不变。',
+[tt('规律','×'+a+' 和 ÷'+a+' 相互抵消','积不变'),
+ st('验证','积 × '+a+' ÷ '+a,'= 积 × 1 = <span class="res">积不变</span>',['结论：积不变'])])},
+// ⑦ 被除除n，除除m（n=mr），商缩1/r
+()=>{const m=PK([2,3]),r=PK([2,3]),n=m*r;
+return choiceQ('在除法算式中，被除数除以'+n+'，除数除以'+m+'，商怎样变化？',
+mkTOpts('缩小到原来的1/'+r,['扩大到原来的'+r+'倍','缩小到原来的1/'+n,'不变']),
+'被除数除以'+n+' 商除以'+n+'；除数除以'+m+' 商反而乘'+m+'。'+n+'÷'+m+'='+r+'，所以商缩小到原来的1/'+r+'。',
+[st('第1步：分析','商 ÷'+n+' 再 ×'+m,[1+'/'+n+' × '+m]),
+ st('第2步：化简',n+' ÷ '+m+' = '+r,['商 <span class="res">缩小到原来的 1/'+r+'</span>'])])},
+// ⑧ 商V，被除除n，除乘m
+()=>{const n=PK([2,4]),m=PK([2,3,5]),t=RI(3,12),V=n*m*t;
+return choiceQ('两个数相除的商是'+V+'。被除数除以'+n+'，除数乘'+m+'，新的商是多少？',mkOpts(t),
+'商先除以'+n+'再除以'+m+'：'+V+'÷'+n+'÷'+m+'='+V+'÷'+(n*m)+'='+t+'。',
+[st('第1步：列算式','新商 = '+V+' ÷ '+n+' ÷ '+m,[V+' ÷ '+(n*m)]),
+ st('第2步：计算',V+' ÷ '+(n*m)+' = '+t,['新商 = <span class="res">'+t+'</span>'])])}
+]}
+,
+// 第4单元：典型应用二
+{id:'4-1',unit:4,name:'盈亏问题',monster:'📦',mName:'分配精灵',
+gens:[
+// ① 一盈一亏
+()=>{const n=RI(6,15),d=RI(2,4),a=RI(3,8),b=a+d,p=RI(1,n*d-2),q=n*d-p;
+return choiceQ('老师给小朋友分糖果：每人分'+a+'颗，多出'+p+'颗；每人分'+b+'颗，还少'+q+'颗。一共有多少个小朋友？',mkOpts(n),
+'两种分法相差 '+p+'+'+q+'='+(p+q)+'颗糖；每人多分'+d+'颗，人数='+(p+q)+'÷'+d+'='+n+'。',
+[st('第1步：算总差额','一多一少，差额相加：'+p+' + '+q+' = '+(p+q)+'（颗）',['两种分法共差 '+(p+q)+' 颗']),
+ st('第2步：求人数','每人多分 '+d+' 颗',[p+q+' ÷ '+d+' = <span class="res">'+n+' 个</span>'])])},
+// ② 盈盈
+()=>{const n=RI(6,15),d=RI(2,4),a=RI(3,8),q=RI(2,20),p=q+n*d;
+return choiceQ('老师分练习本：每人分'+a+'本，还剩'+p+'本；每人分'+(a+d)+'本，还剩'+q+'本。一共有多少人？',mkOpts(n),
+'两次都有剩，差额是 '+p+'-'+q+'='+(p-q)+'本；每人多分'+d+'本，人数='+(p-q)+'÷'+d+'='+n+'。',
+[st('第1步：算差额','两次都盈（剩），差额相减：'+p+' - '+q+' = '+(p-q)+'（本）',['多发完了 '+(p-q)+' 本']),
+ st('第2步：求人数',(p-q)+' ÷ '+d+' = '+n,['人数 = <span class="res">'+n+'</span>'])])},
+// ③ 亏亏
+()=>{const n=RI(6,15),d=RI(2,4),a=RI(3,8),p=RI(3,20),q=p+n*d;
+return fillQ('同学们分组活动：每组'+a+'人，还少'+p+'人；每组'+(a+d)+'人，还少'+q+'人。一共有多少组？',n,
+'两次都不够，第二次多缺 '+q+'-'+p+'='+(q-p)+'人；每组多'+d+'人，组数='+(q-p)+'÷'+d+'='+n+'。',
+[st('第1步：算差额','两次都亏（少），差额相减：'+q+' - '+p+' = '+(q-p)+'（人）',['第二次多缺 '+(q-p)+' 人']),
+ st('第2步：求组数',(q-p)+' ÷ '+d+' = '+n,['组数 = <span class="res">'+n+'</span>'])])}
+]},
+{id:'4-2',unit:4,name:'平均数问题',monster:'📊',mName:'平均法师',
+gens:[
+// ① 三科平均求英语
+()=>{let avg,c,m,e,tries=0;
+do{avg=RI(82,94);c=RI(75,95);m=RI(75,95);e=3*avg-c-m}while(e<60||e>100);
+return fillQ('小明期末考试三科的平均分是'+avg+'分，其中语文'+c+'分、数学'+m+'分。他的英语是多少分？',e,
+'三科总分='+avg+'×3='+3*avg+'，英语='+3*avg+'-'+c+'-'+m+'='+e+'分。',
+[st('第1步：求总分','平均分 × 科目数 = 总分',[avg+' × 3 = '+3*avg]),
+ st('第2步：求英语',3*avg+' - '+c+' - '+m+' = '+e,['英语 = <span class="res">'+e+' 分</span>'])])},
+// ② 两两平均求甲
+()=>{const jia=RI(20,60),yi=jia+2*RI(-8,8),bing=jia+2*RI(-8,8);
+const yv=(jia+yi),jv=(yi+bing),a=(jia+yi)/2,b=(yi+bing)/2,c2=(jia+bing)/2;
+return choiceQ('甲、乙两个数的平均数是'+a+'，乙、丙两个数的平均数是'+b+'，甲、丙两个数的平均数是'+c2+'。甲数是多少？',
+mkOpts(jia,[-10,-5,5,10,-20,20]),
+'甲+乙='+yv+'，甲+丙='+2*c2+'，乙+丙='+jv+'；甲=('+yv+'+'+2*c2+'-'+jv+')÷2='+jia+'。',
+[st('第1步：两两求和','甲+乙='+yv+'，甲+丙='+2*c2+'，乙+丙='+jv,['前两个相加减去第三个，正好剩 2个甲']),
+ st('第2步：求甲','('+yv+' + '+2*c2+' - '+jv+') ÷ 2',['甲 = <span class="res">'+jia+'</span>'])])},
+// ③ 加第五个数
+()=>{const a=RI(30,60);let fifth,tries=0;
+do{fifth=RI(15,90)}while((4*a+fifth)%5!==0);
+const b=(4*a+fifth)/5;
+return fillQ('有4个数，它们的平均数是'+a+'。加入第5个数后，5个数的平均数变成了'+b+'。第5个数是多少？',fifth,
+'原来4个数之和='+a+'×4='+4*a+'；后来5个数之和='+b+'×5='+5*b+'；第5个数='+5*b+'-'+4*a+'='+fifth+'。',
+[st('第1步：分别求总和','4个数和 = '+a+'×4 = '+4*a+'；5个数和 = '+b+'×5 = '+5*b,[4*a+' 与 '+5*b]),
+ st('第2步：求第5个数',5*b+' - '+4*a+' = '+fifth,['第5个数 = <span class="res">'+fifth+'</span>'])])}
+]},
+{id:'4-3',unit:4,name:'归一归总问题',monster:'🔄',mName:'归一怪兽',
+gens:[
+// ① 正归一
+()=>{const r=RI(2,6),n1=RI(2,5),t1=RI(2,6),m=r*n1*t1,n2=RI(2,6),t2=RI(2,8),ans=r*n2*t2;
+return choiceQ(n1+'台拖拉机'+t1+'小时耕地'+m+'亩。照这样计算，'+n2+'台拖拉机'+t2+'小时可以耕地多少亩？',
+mkOpts(ans,[-20,-10,10,20,-30,30]),
+'1台1小时耕地 '+m+'÷'+n1+'÷'+t1+'='+r+'亩；'+n2+'台'+t2+'小时耕地 '+r+'×'+n2+'×'+t2+'='+ans+'亩。',
+[st('第1步：求单一量',m+' ÷ '+n1+' ÷ '+t1+' = '+r+'（亩/台·小时）',['1台1小时耕 '+r+' 亩']),
+ st('第2步：求总量',r+' × '+n2+' × '+t2+' = '+ans,['共耕地 <span class="res">'+ans+' 亩</span>'])])},
+// ② 归总
+()=>{let p,d,q,total,now,ans,tries=0;
+do{p=RI(15,25);d=RI(12,25);q=RI(3,8);now=p+q;total=p*d;ans=total/now}while(total%now!==0||ans<8||ans>18);
+return fillQ('小明看一本书，每天看'+p+'页，'+d+'天正好看完。如果每天多看'+q+'页，多少天可以看完？',ans,
+'书的总页数='+p+'×'+d+'='+total+'；现在每天看'+now+'页，天数='+total+'÷'+now+'='+ans+'天。',
+[st('第1步：求总页数（总量不变）',p+' × '+d+' = '+total+'（页）',['书的页数是固定的']),
+ st('第2步：求新天数','现在每天 '+p+' + '+q+' = '+now+' 页',[total+' ÷ '+now+' = <span class="res">'+ans+' 天</span>'])])},
+// ③ 逆归一（求时间）
+()=>{const r=RI(5,15),n1=RI(2,4),t1=RI(2,5),m1=r*n1*t1,n2=RI(3,6),hours=RI(3,10),m2=r*n2*hours;
+return choiceQ(n1+'台抽水机'+t1+'小时抽水'+m1+'吨。照这样计算，'+n2+'台抽水机抽水'+m2+'吨需要多少小时？',
+mkOpts(hours),
+'1台1小时抽水 '+m1+'÷'+n1+'÷'+t1+'='+r+'吨；'+n2+'台1小时抽'+r*n2+'吨；需要 '+m2+'÷'+r*n2+'='+hours+'小时。',
+[st('第1步：求单一量',m1+' ÷ '+n1+' ÷ '+t1+' = '+r+'（吨）',[r*n2+' 台1小时抽 '+r*n2+' 吨']),
+ st('第2步：求时间',m2+' ÷ '+r*n2+' = '+hours,['需要 <span class="res">'+hours+' 小时</span>'])])}
+]},
+{id:'4-4',unit:4,name:'和差倍进阶',monster:'🎯',mName:'倍数猎手',count:6,
+gens:[
+// ① 和倍求小
+()=>{const b=RI(10,50),k=PK([3,4,5,6]),S=(k+1)*b;
+return choiceQ('甲、乙两筐苹果共'+S+'千克，甲筐苹果的质量正好是乙筐的'+k+'倍。乙筐有多少千克？',mkOpts(b),
+'乙筐1份、甲筐'+k+'份，共'+(k+1)+'份，乙筐='+S+'÷'+(k+1)+'='+b+'千克。',
+[tt('画份数','乙1份，甲'+k+'份，共 '+(k+1)+' 份',''),
+ st('计算',S+' ÷ '+(k+1)+' = '+b,['乙筐 <span class="res">'+b+' 千克</span>'])])},
+// ② 减法三数和
+()=>{const cha=RI(5,20),k=PK([2,3,4]),T=2*(k+1)*cha;
+return fillQ('在一道减法算式里，被减数、减数与差的和是'+T+'，减数正好是差的'+k+'倍。差是多少？',cha,
+'被减数=减数+差，所以三数之和=2×(减数+差)='+T+'，减数+差='+T/2+'；共'+(k+1)+'份，差='+T/2+'÷'+(k+1)+'='+cha+'。',
+[st('第1步：利用减法关系','被减数 = 减数 + 差 → 三数和 = 2×(减数+差)','减数 + 差 = '+T+' ÷ 2 = '+T/2),
+ st('第2步：按倍数分份','减数'+k+'份、差1份，共'+(k+1)+'份',[T/2+' ÷ '+(k+1)+' = <span class="res">'+cha+'</span>'])])},
+// ③ 商k求和中的甲
+()=>{const b=RI(10,40),k=PK([2,3,4,5]),S=(k+1)*b,jia=k*b;
+return choiceQ('甲数除以乙数，商正好是'+k+'。甲、乙两数之和是'+S+'。甲数是多少？',mkOpts(jia,[-20,-10,10,20]),
+'商是'+k+'说明甲是乙的'+k+'倍；乙='+S+'÷'+(k+1)+'='+b+'，甲='+b+'×'+k+'='+jia+'。',
+[st('第1步：商就是倍数','甲 ÷ 乙 = '+k+' → 甲是乙的 '+k+' 倍',['乙 = '+S+' ÷ '+(k+1)+' = '+b]),
+ st('第2步：求甲',b+' × '+k+' = '+jia,['甲 = <span class="res">'+jia+'</span>'])])},
+// ④ 比k倍少m求小
+()=>{const b=RI(10,40),k=PK([2,3,4]),m=RI(3,12),S=(k+1)*b-m;
+return choiceQ('两个班共有学生'+S+'人，一班人数比二班的'+k+'倍少'+m+'人。二班有多少人？',mkOpts(b),
+'给一班补上'+m+'人，一班就正好是二班的'+k+'倍，总人数变成 '+S+'+'+m+'='+(S+m)+'；二班='+(S+m)+'÷'+(k+1)+'='+b+'。',
+[st('第1步：补够整倍数','一班少'+m+'人，先补上：'+S+' + '+m+' = '+(S+m),['正好对应二班的 '+(k+1)+' 倍']),
+ st('第2步：求二班',(S+m)+' ÷ '+(k+1)+' = '+b,['二班 <span class="res">'+b+' 人</span>'])])},
+// ⑤ 差倍求大
+()=>{const b=RI(10,40),k=PK([3,4,5]),D=(k-1)*b,jia=k*b;
+return choiceQ('甲仓存粮吨数是乙仓的'+k+'倍，甲仓比乙仓多存'+D+'吨。甲仓存粮多少吨？',mkOpts(jia,[-20,-10,10,20]),
+'多的'+D+'吨是乙仓的'+(k-1)+'倍，乙仓='+D+'÷'+(k-1)+'='+b+'吨；甲仓='+b+'×'+k+'='+jia+'吨。',
+[st('第1步：求乙仓',D+' ÷ '+(k-1)+' = '+b+'（吨）',['乙仓 = '+b]),
+ st('第2步：求甲仓',b+' × '+k+' = '+jia,['甲仓 <span class="res">'+jia+' 吨</span>'])])},
+// ⑥ 比k倍多m求大
+()=>{const b=RI(10,40),k=PK([2,3]),m=RI(4,15),S=(k+1)*b+m,jia=k*b+m;
+return fillQ('书架上、下两层共有'+S+'本书，上层书的本数比下层的'+k+'倍还多'+m+'本。上层有多少本书？',jia,
+'下层=('+S+'-'+m+')÷'+(k+1)+'='+b+'本；上层='+b+'×'+k+'+'+m+'='+jia+'本。',
+[st('第1步：求下层','去掉多的'+m+'本：('+S+' - '+m+') ÷ '+(k+1)+' = '+b,['下层 = '+b+' 本']),
+ st('第2步：求上层',b+' × '+k+' + '+m+' = '+jia,['上层 = <span class="res">'+jia+' 本</span>'])])},
+// ⑦ 甲比乙2倍少m，求甲
+()=>{const b=RI(15,50),m=RI(4,15),S=3*b-m,jia=2*b-m;
+return choiceQ('甲、乙两人共有'+S+'元钱，甲的钱数比乙的2倍少'+m+'元。甲有多少元？',mkOpts(jia,[-20,-10,10,20]),
+'乙=('+S+'+'+m+')÷3='+b+'元；甲='+b+'×2-'+m+'='+jia+'元。',
+[st('第1步：求乙','给甲补上'+m+'元正好2倍：('+S+' + '+m+') ÷ 3 = '+b,['乙 = '+b+' 元']),
+ st('第2步：求甲',b+' × 2 - '+m+' = '+jia,['甲 = <span class="res">'+jia+' 元</span>'])])},
+// ⑧ 被减数比差大a、减数比差小b
+()=>{const a=RI(10,40),b=RI(5,30),cha=a+b,bei=2*a+b,jian=a;
+return fillQ('在一道减法算式中，被减数比差大'+a+'，减数比差小'+b+'。被减数是多少？',bei,
+'被减数-差=减数，所以减数='+a+'；差='+a+'+'+b+'='+cha+'；被减数=减数+差='+a+'+'+cha+'='+bei+'。',
+[st('第1步：求减数和差','被减数 - 差 = 减数 = '+a+'；差比减数大'+b+'，差 = '+a+' + '+b+' = '+cha,['减数='+a+'，差='+cha]),
+ st('第2步：求被减数','被减数 = 减数 + 差',[a+' + '+cha+' = <span class="res">'+bei+'</span>'])])}
+]},
+// 第5单元：几何与计数
+{id:'5-1',unit:5,name:'图形计数',monster:'🔷',mName:'图形精灵',
+gens:[
+// ① 线段上的点数
+()=>{const n=RI(5,9),ans=n*(n-1)/2;
+return choiceQ('一条线段上一共有'+n+'个点（包括两个端点）。这些点一共可以数出多少条不同的线段？',mkOpts(ans),
+'任选2个点就能确定一条线段：'+n+'×'+(n-1)+'÷2='+ans+'条。',
+[tt('第1步：计数原理','两个点确定一条线段，与顺序无关','用"数线段公式"'),
+ st('第2步：公式',n+' × '+(n-1)+' ÷ 2 = '+ans,['共 <span class="res">'+ans+' 条</span>'])])},
+// ② 长方形网格
+()=>{const r=RI(2,4),c=RI(2,5);const hc=c*(c+1)/2,vc=r*(r+1)/2,ans=hc*vc;
+return choiceQ('一个由'+r+'行、'+c+'列小方格组成的大长方形中，一共可以数出多少个长方形（包括正方形）？',
+mkOpts(ans,[-20,-10,10,20,-40,40]),
+'横边有'+(c+1)+'条选2条：'+hc+'种；竖边有'+(r+1)+'条选2条：'+vc+'种；长方形='+hc+'×'+vc+'='+ans+'个。',
+[st('第1步：分别选边','横向：'+(c+1)+'选2 = '+hc+'；纵向：'+(r+1)+'选2 = '+vc,['横竖各选2条就组成一个长方形']),
+ st('第2步：相乘',hc+' × '+vc+' = '+ans,['共 <span class="res">'+ans+' 个</span>'])])},
+// ③ 射线数角
+()=>{const k=RI(2,6),n=k+2,ans=n*(n-1)/2;
+return fillQ('从同一个顶点引出'+n+'条射线，一共可以数出多少个大小不同的角？',ans,
+'任选2条射线组成一个角：'+n+'×'+(n-1)+'÷2='+ans+'个。',
+[tt('第1步：计数原理','每两条射线夹一个角','与数线段方法相同'),
+ st('第2步：公式',n+' × '+(n-1)+' ÷ 2 = '+ans,['共 <span class="res">'+ans+' 个</span>'])])}
+]},
+{id:'5-2',unit:5,name:'周长与面积',monster:'📐',mName:'几何大师',
+gens:[
+// ① 剪最大正方形
+()=>{const L=RI(10,25),W=RI(4,L-3),ans=2*L;
+return choiceQ('一张长'+L+'厘米、宽'+W+'厘米的长方形彩纸，剪下一个最大的正方形后，剩下小长方形的周长是多少厘米？',mkOpts(ans),
+'最大正方形边长='+W+'，剩下的是 '+W+'×'+(L-W)+' 的长方形，周长=('+W+'+'+(L-W)+')×2=2×'+L+'='+ans+'厘米。',
+[st('第1步：确定剩余尺寸','正方形边长 = 宽 = '+W+'，剩下 '+W+' × '+(L-W),['长+宽 = '+W+' + '+(L-W)+' = '+L]),
+ st('第2步：求周长','周长 = (长+宽)×2 = '+L+'×2',['= <span class="res">'+ans+' 厘米</span>'])])},
+// ② 边长增加面积增
+()=>{const e=RI(5,15),d=RI(1,5),I=2*e*d+d*d;
+return fillQ('一个正方形，如果边长增加'+d+'厘米，面积就增加'+I+'平方厘米。原来正方形的面积是多少平方厘米？',e*e,
+'增加的部分可分成两个长条和一个小正方形：2×边长×'+d+'+'+d+'×'+d+'='+I+'；边长=('+I+'-'+d*d+')÷2÷'+d+'='+e+'，原面积='+e+'×'+e+'='+e*e+'。',
+[st('第1步：拆增加部分','增加面积 = 2×原边长×'+d+' + '+d+'² = '+I,['角上小正方形面积 = '+(d*d)]),
+ st('第2步：求原边长','('+I+' - '+d*d+') ÷ 2 ÷ '+d+' = '+e,['原面积 = '+e+'×'+e+' = <span class="res">'+e*e+' 平方厘米</span>'])])},
+// ③ 长方形改正方形
+()=>{let a=RI(6,20),b=RI(6,20);if((a+b)%2===1)b++;const side=(a+b)/2,ans=side*side;
+return choiceQ('一根绳子正好围成一个长'+a+'厘米、宽'+b+'厘米的长方形。如果把它改围成正方形，正方形的面积是多少平方厘米？',
+mkOpts(ans,[-20,-10,10,20,-40,40]),
+'绳长=('+a+'+'+b+')×2='+2*(a+b)+'厘米；正方形边长='+2*(a+b)+'÷4='+side+'厘米；面积='+side+'×'+side+'='+ans+'平方厘米。',
+[st('第1步：绳长不变','('+a+' + '+b+') × 2 = '+2*(a+b)+'（厘米）',['正方形边长 = '+2*(a+b)+' ÷ 4 = '+side]),
+ st('第2步：求面积',side+' × '+side+' = '+ans,['面积 <span class="res">'+ans+' 平方厘米</span>'])])}
+]},
+{id:'5-3',unit:5,name:'方阵问题',monster:'🛡️',mName:'方阵将军',
+gens:[
+// ① 空心方阵
+()=>{const n=RI(9,14),k=PK([2,3]),ans=4*k*(n-k);
+return choiceQ('同学们排成一个'+k+'层的空心方阵，最外层每边有'+n+'人。这个方阵一共有多少人？',
+mkOpts(ans,[-20,-10,10,20,-30,30]),
+'空心方阵总人数=4×层数×(最外层每边人数-层数)=4×'+k+'×('+n+'-'+k+')='+ans+'人。',
+[tt('规律','相邻两层每边相差2人，每层相差8人','空心方阵公式：4×层数×(每边-层数)'),
+ st('计算','4 × '+k+' × ('+n+' - '+k+') = '+ans,['共 <span class="res">'+ans+' 人</span>'])])},
+// ② 实心方阵最外层求总数
+()=>{const side=RI(7,15),P=4*(side-1);
+return fillQ('一个实心方阵，最外层一共有'+P+'人。这个方阵一共有多少人？',side*side,
+'最外层人数=(每边人数-1)×4，每边='+P+'÷4+1='+side+'人；总人数='+side+'×'+side+'='+side*side+'人。',
+[st('第1步：求每边人数',P+' ÷ 4 + 1 = '+side+'（人）',['4个角的人重复，所以先减4再除4：'+P+'÷4+1']),
+ st('第2步：求总人数',side+' × '+side+' = '+side*side,['共 <span class="res">'+side*side+' 人</span>'])])},
+// ③ 每边n求最外层
+()=>{const n=RI(8,16),ans=4*(n-1);
+return choiceQ('一个实心方阵，最外层每边有'+n+'人。最外层一共有多少人？',mkOpts(ans),
+'4条边看似'+4*n+'人，但4个角的人各被算了2次，要减去4：'+4*n+'-4='+ans+'人。',
+[st('第1步：先按4条边算',n+' × 4 = '+4*n+'（人）',['4个角上的人各被重复算了1次']),
+ st('第2步：减去重复的4人',4*n+' - 4 = '+ans,['最外层 <span class="res">'+ans+' 人</span>'])])}
+]},
+{id:'5-4',unit:5,name:'隐藏条件与不变量',monster:'🔑',mName:'不变量守护者',count:6,
+gens:[
+// ① 给糖后相等
+()=>{const n=pickN(2);const x=RI(3,15),B=RI(15,60),A=B+2*x;
+return choiceQ(n[0]+'有'+A+'颗糖，'+n[1]+'有'+B+'颗糖。'+n[0]+'给'+n[1]+'多少颗糖后，两人糖数一样多？',mkOpts(x),
+'两人相差 '+A+'-'+B+'='+2*x+'颗，把差的一半给对方就相等：'+2*x+'÷2='+x+'颗。',
+[st('第1步：找不变量与差','给来给去总数不变；原来相差 '+(2*x)+' 颗',['差 = '+A+' - '+B+' = '+2*x]),
+ st('第2步：差的一半',2*x+' ÷ 2 = '+x,['给 <span class="res">'+x+' 颗</span>'])])},
+// ② 两绳剪同长剩k倍
+()=>{const m=RI(8,20),k=PK([2,3,4]),x=RI(3,15),b=m+x,a=k*m+x;
+return choiceQ('甲绳长'+a+'米、乙绳长'+b+'米，两根绳子剪去同样长的一段后，甲绳剩下的长度正好是乙绳剩下的'+k+'倍。两根绳各剪去多少米？',mkOpts(x),
+'剪去同样长，两绳长度差不变，差是'+(a-b)+'米；剩后差是乙剩的'+(k-1)+'倍，乙剩='+(a-b)+'÷'+(k-1)+'='+m+'米；剪去'+b+'-'+m+'='+x+'米。',
+[st('第1步：抓不变量','同时剪去同样长 → 长度差不变 = '+(a-b)+' 米',['剩后：甲是乙的'+k+'倍，差是乙剩的'+(k-1)+'倍']),
+ st('第2步：求乙剩与剪去长度',(a-b)+' ÷ '+(k-1)+' = '+m+'，'+b+' - '+m+' = '+x,['剪去 <span class="res">'+x+' 米</span>'])])},
+// ③ 倒水后k倍
+()=>{const A2=RI(20,50),k=PK([2,3,4]),B2=k*A2,b=RI(10,B2-10),a=(k+1)*A2-b,dao=B2-b;
+return fillQ('甲杯有水'+a+'毫升，乙杯有水'+b+'毫升。从甲杯往乙杯倒入多少毫升水后，乙杯的水正好是甲杯的'+k+'倍？',dao,
+'倒水过程总量不变，共'+(a+b)+'毫升；倒后甲1份、乙'+k+'份，甲剩='+(a+b)+'÷'+(k+1)+'='+A2+'毫升，乙变为'+B2+'毫升；倒入'+B2+'-'+b+'='+dao+'毫升。',
+[st('第1步：总量不变','共 '+a+' + '+b+' = '+(a+b)+'（毫升）',['倒后甲1份、乙'+k+'份，甲剩 = '+(a+b)+' ÷ '+(k+1)+' = '+A2]),
+ st('第2步：求倒水量','乙变 '+k+'×'+A2+' = '+B2+' 毫升',[B2+' - '+b+' = <span class="res">'+dao+' 毫升</span>'])])},
+// ④ 年龄倍数（差不变）
+()=>{const b0=RI(6,11),y=RI(3,9),c=b0+y,m=PK([2,3,4]),dad=b0+(m-1)*c;
+return choiceQ('今年哥哥'+dad+'岁、弟弟'+b0+'岁。再过几年，哥哥的年龄正好是弟弟的'+m+'倍？',mkOpts(y),
+'年龄差'+(dad-b0)+'岁不变；'+m+'倍时差是弟龄的'+(m-1)+'倍，那时弟弟'+(dad-b0)+'÷'+(m-1)+'='+c+'岁，即'+y+'年后。',
+[st('第1步：抓不变量','年龄差 = '+(dad-b0)+' 岁，永远不变',['差是那时弟龄的 '+(m-1)+' 倍']),
+ st('第2步：求年份',(dad-b0)+' ÷ '+(m-1)+' = '+c+' 岁',[c+' - '+b0+' = <span class="res">'+y+' 年后</span>'])])},
+// ⑤ 两筐搬运后相等
+()=>{const half=RI(50,150),x=RI(4,20),A=half+x,B=half-x,T=2*half;
+return choiceQ('甲筐有水果'+A+'千克，乙筐有水果'+B+'千克。从甲筐拿多少千克到乙筐，两筐水果一样多？',mkOpts(x),
+'总量'+T+'千克不变，相等时每筐'+half+'千克；甲筐拿出'+A+'-'+half+'='+x+'千克。',
+[st('第1步：总量不变','共 '+A+' + '+B+' = '+T+'（千克），相等时每筐 '+half,['搬运不改变总量']),
+ st('第2步：求拿出量',A+' - '+half+' = '+x,['拿 <span class="res">'+x+' 千克</span>'])])},
+// ⑥ 同长绳剪不同长度后k倍
+()=>{const m=RI(6,20),k=PK([2,3,4]),a=RI(2,10),b=a+(k-1)*m,L=m+b;
+return fillQ('两根同样长的绳子，第一根剪去'+a+'米，第二根剪去'+b+'米，第一根剩下的长度正好是第二根剩下的'+k+'倍。原来每根绳子长多少米？',L,
+'两根绳剩下部分相差 '+(b-a)+'米，等于第二根剩下的'+(k-1)+'倍，第二根剩='+(b-a)+'÷'+(k-1)+'='+m+'米；原长='+m+'+'+b+'='+L+'米。',
+[st('第1步：找剩下部分的差','原来同长，剪得差=剩下差 = '+b+' - '+a+' = '+(b-a)+'（米）',['差是第二根剩下的 '+(k-1)+' 倍']),
+ st('第2步：求原长','第二根剩 = '+(b-a)+' ÷ '+(k-1)+' = '+m,[m+' + '+b+' = <span class="res">'+L+' 米</span>'])])},
+// ⑦ 卡片给后相等
+()=>{const n=pickN(2);const half=RI(30,100),x=RI(3,15),A=half+x,B=half-x;
+return choiceQ(n[0]+'有'+A+'张卡片，'+n[1]+'有'+B+'张卡片。'+n[0]+'给'+n[1]+'多少张后，两人卡片一样多？',mkOpts(x),
+'总数'+(A+B)+'张不变，相等时各'+half+'张，'+n[0]+'给出'+A+'-'+half+'='+x+'张。',
+[st('第1步：总数不变','共 '+(A+B)+' 张，一样多时各 '+half+' 张',['给来给去总数不变']),
+ st('第2步',A+' - '+half+' = '+x,['给 <span class="res">'+x+' 张</span>'])])},
+// ⑧ 花同样多的钱后k倍
+()=>{const left=RI(10,30),k=PK([2,3,4]),x=RI(5,25),b=left+x,a=b+(k-1)*left;
+return fillQ('甲有'+a+'元、乙有'+b+'元，两人各买了一个同样价钱的文具后，甲剩下的钱正好是乙的'+k+'倍。乙还剩多少元？',left,
+'花掉同样多，钱数差不变，差='+(a-b)+'元；剩后差是乙剩的'+(k-1)+'倍，乙剩='+(a-b)+'÷'+(k-1)+'='+left+'元。',
+[st('第1步：抓不变量','花掉同样多 → 钱数差不变 = '+a+' - '+b+' = '+(a-b)+'（元）',['差 = 乙剩下钱数的 '+(k-1)+' 倍']),
+ st('第2步',(a-b)+' ÷ '+(k-1)+' = '+left,['乙还剩 <span class="res">'+left+' 元</span>'])])}
+]},
+// 第6单元：逻辑与推理
+{id:'6-1',unit:6,name:'逻辑推理',monster:'🔍',mName:'侦探精灵',
+gens:[
+// ① 真假话
+()=>{const n=pickN(3);
+return choiceQ(n[0]+'说："'+n[1]+'在说谎。" '+n[1]+'说："'+n[2]+'在说谎。" '+n[2]+'说："'+n[0]+'和'+n[1]+'都在说谎。"如果三人中只有一人说真话，这个人是谁？',
+{options:[n[0],n[1],n[2],'三个人都在说谎'],answer:1},
+'假设'+n[1]+'说真话，则'+n[2]+'说谎，即"两人都说谎"是假的；'+n[0]+'说"'+n[1]+'说谎"也是假的，正好符合只有'+n[1]+'一人说真话。',
+[tt('第1步：假设中间的人说真话',n[1]+'真 → '+n[2]+'假 → "'+n[0]+'、'+n[1]+'都说谎"不成立',''),
+ tt('第2步：验证其余人',n[0]+'说"'+n[1]+'说谎"确为假话；只有 '+n[1]+' 一人真话，无矛盾','说真话的是 '+n[1])])},
+// ② 比赛名次
+()=>{const n=pickN(4);
+const stmts=['我不是最后一名','我不是第一名，也不是最后一名','我是第一名','我是最后一名'];
+const perm=SH([0,1,2,3]);
+const said=perm.map(s=>stmts[s]);
+return choiceQ('赛跑结束后，'+n[0]+'说："'+said[0]+'。" '+n[1]+'说："'+said[1]+'。" '+n[2]+'说："'+said[2]+'。" '+n[3]+'说："'+said[3]+'。"已知只有说"我是第一名"的人说错了，其余三人都对。第一名是谁？',
+{options:n,answer:perm.indexOf(0)},
+'说"我是第一名"的人在说谎，所以他不是第一名；说"我是最后一名"的人对，他垫底；说"我不是第一也不是最后"的人在中间；剩下说"我不是最后一名"的人就是第一名，即'+n[perm.indexOf(0)]+'。',
+[tt('第1步：找假话','说"我是第一名"的人错了 → 他不是第一','最后一名由"我是最后一名"确定'),
+ tt('第2步：排除法','排除最后一名和中间的人，第一名是说"我不是最后一名"的人','第一名：'+n[perm.indexOf(0)])])}
+]},
+{id:'6-2',unit:6,name:'综合挑战（BOSS）',monster:'👹',mName:'奥数大魔王',
+gens:[
+// ① 1+2-3+4+5-6…
+()=>{const k=RI(20,40),N=3*k,ans=3*k*(k-1)/2;
+return choiceQ('计算：1+2-3+4+5-6+7+8-9+……+'+(N-2)+'+'+(N-1)+'-'+N+' = ?',
+mkOpts(ans,[-60,-30,30,60,-90,90]),
+'每三个数一组：(1+2-3)、(4+5-6)……每组结果依次是0、3、6…，共'+k+'组；和=3×(0+1+…+'+(k-1)+')=3×'+k+'×'+(k-1)+'÷2='+ans+'。',
+[st('第1步：三个一组','每组 = (3j+1)+(3j+2)-(3j+3) = 3j',['各组：0、3、6、…、'+3*(k-1)]),
+ st('第2步：求和','3 × (0+1+…+'+(k-1)+') = 3×'+k+'×'+(k-1)+'÷2',['= <span class="res">'+ans+'</span>'])])},
+// ② 相遇问题
+()=>{const v1=RI(50,90),diff=2*RI(3,8),t=RI(2,6);const v2=v1-diff,ans=(v1+v2)*t,d=diff*t/2;
+return fillQ('甲、乙两车同时从两地相向开出，甲车每小时行'+v1+'千米，乙车每小时比甲车少行'+diff+'千米，'+t+'小时后两车相遇，相遇点距两地中点'+d+'千米。两地相距多少千米？',ans,
+'乙车速度='+v1+'-'+diff+'='+v2+'千米/时；速度和='+v1+'+'+v2+'='+(v1+v2)+'；两地距离='+(v1+v2)+'×'+t+'='+ans+'千米。',
+[st('第1步：求乙车速度和速度和',v1+' - '+diff+' = '+v2+'，速度和 = '+v1+' + '+v2+' = '+(v1+v2),['（中点距可验证：甲多走 '+diff+'×'+t+'='+diff*t+'，一半正好是'+d+'千米）']),
+ st('第2步：求全程','速度和 × 相遇时间',[(v1+v2)+' × '+t+' = <span class="res">'+ans+' 千米</span>'])])},
+// ③ 九宫格中间数
+()=>{const a=PK([1,2,3,5]),ans=a+4;
+return fillQ('把连续的9个数 '+a+'、'+(a+1)+'、'+(a+2)+'、…、'+(a+8)+' 分别填入3×3的九宫格中，使每行、每列、每条对角线上三个数的和都相等。正中间的格子里应该填几？',ans,
+'9个数的平均数=('+a+'+'+(a+8)+')÷2='+ans+'；九宫格正中间的数就是这组数的平均数，每条线上三个数的和='+3*ans+'。',
+[st('第1步：求平均数','连续9个数的平均数 = 中间的数 = ('+a+'+'+(a+8)+')÷2 = '+ans,['幻和（每条线的和）= '+ans+'×3 = '+3*ans]),
+ st('第2步：确定中心','九宫格中心 = 平均数',['中间填 <span class="res">'+ans+'</span>'])])}
+]},
+{id:'6-3',unit:6,name:'复杂和差倍',monster:'🐉',mName:'和差倍龙王',count:6,
+gens:[
+// ① 三连倍数
+()=>{const b=RI(5,20),k1=RI(2,4),k2=RI(2,4),T=b*(1+k2+k1*k2);
+return choiceQ('甲、乙、丙三个数之和是'+T+'。甲数是乙数的'+k1+'倍，乙数是丙数的'+k2+'倍。丙数是多少？',mkOpts(b),
+'丙1份、乙'+k2+'份、甲'+k1+'×'+k2+'='+(k1*k2)+'份，共'+(1+k2+k1*k2)+'份，丙='+T+'÷'+(1+k2+k1*k2)+'='+b+'。',
+[tt('第1步：画份数','丙1份、乙'+k2+'份、甲'+(k1*k2)+'份','共 '+(1+k2+k1*k2)+' 份'),
+ st('第2步',T+' ÷ '+(1+k2+k1*k2)+' = '+b,['丙 = <span class="res">'+b+'</span>'])])},
+// ② 足球篮球排球
+()=>{const x=RI(10,30),m=RI(3,12),T=4*x+3*m;
+return choiceQ('体育室里足球、篮球、排球共'+T+'个，其中足球的个数是篮球的2倍，篮球比排球多'+m+'个。排球有多少个？',mkOpts(x),
+'设排球x个：篮球x+'+m+'，足球2(x+'+m+')；x+(x+'+m+')+2(x+'+m+')=4x+'+3*m+'='+T+'，x=('+T+'-'+3*m+')÷4='+x+'。',
+[st('第1步：用x表示三种球','排球x，篮球x+'+m+'，足球2(x+'+m+')',['总和 = 4x + '+3*m]),
+ st('第2步：解方程','4x = '+T+' - '+3*m+' = '+(T-3*m),['x = '+(T-3*m)+' ÷ 4 = <span class="res">'+x+'</span>'])])},
+// ③ 三人年龄
+()=>{const b=RI(10,30),a=RI(2,8),bb=RI(2,8),T=3*b+a-bb;
+return fillQ('甲、乙、丙三人年龄之和是'+T+'岁，甲比乙大'+a+'岁，丙比乙小'+bb+'岁。乙今年多少岁？',b,
+'都按乙算：甲=乙+'+a+'，丙=乙-'+bb+'；3×乙+'+a+'-'+bb+'='+T+'，乙=('+T+'-'+a+'+'+bb+')÷3='+b+'岁。',
+[st('第1步：统一成乙','甲=乙+'+a+'，丙=乙-'+bb+'，三人和=3×乙+'+(a-bb),['3×乙 = '+T+' - '+(a-bb)+' = '+(T-a+bb)]),
+ st('第2步','乙 = ('+T+' - '+a+' + '+bb+') ÷ 3',['乙 = <span class="res">'+b+' 岁</span>'])])},
+// ④ 书架三层
+()=>{const x=RI(20,60),k=PK([2,3]),m=RI(10,40),T=(k+2)*x+m;
+return choiceQ('书架上、中、下三层共放书'+T+'本，上层书的本数是中层的'+k+'倍，下层比中层多'+m+'本。中层有多少本书？',
+mkOpts(x,[-20,-10,10,20]),
+'中层1份、上层'+k+'份、下层1份多'+m+'本，共'+(k+2)+'份多'+m+'；中层=('+T+'-'+m+')÷'+(k+2)+'='+x+'本。',
+[tt('第1步：画份数','中层1份、上层'+k+'份、下层1份另加'+m+'本','共 '+(k+2)+' 份 + '+m),
+ st('第2步','('+T+' - '+m+') ÷ '+(k+2)+' = '+x,['中层 = <span class="res">'+x+' 本</span>'])])},
+// ⑤ 四数倍数链
+()=>{const c=RI(2,3),b=RI(2,3),a=RI(2,3),d=RI(3,12);const parts=1+c+b*c+a*b*c,T=d*parts;
+return choiceQ('甲、乙、丙、丁四个数之和是'+T+'，甲数是乙数的'+a+'倍，乙数是丙数的'+b+'倍，丙数是丁数的'+c+'倍。丁数是多少？',mkOpts(d),
+'丁1份、丙'+c+'份、乙'+(b*c)+'份、甲'+(a*b*c)+'份，共'+parts+'份，丁='+T+'÷'+parts+'='+d+'。',
+[tt('第1步：从丁开始画份','丁1→丙'+c+'→乙'+(b*c)+'→甲'+(a*b*c),['共 '+parts+' 份']),
+ st('第2步',T+' ÷ '+parts+' = '+d,['丁 = <span class="res">'+d+'</span>'])])},
+// ⑥ 加减乘除相等
+()=>{const x=PK([8,16,20]);const T=25*x/4;
+return choiceQ('甲、乙、丙、丁四个数满足：甲+4 = 乙-4 = 丙×4 = 丁÷4，且四个数之和是'+T+'。丁数是多少？',
+mkOpts(4*x,[-20,-10,10,20,-40,40]),
+'设相等的结果为'+x+'：甲='+x+'-4='+(x-4)+'，乙='+x+'+4='+(x+4)+'，丙='+x+'÷4='+x/4+'，丁=4×'+x+'='+4*x+'；和为'+T+'，丁='+4*x+'。',
+[st('第1步：用相等结果表示四个数','甲='+(x-4)+'，乙='+(x+4)+'，丙='+x/4+'，丁='+4*x,['甲+4=乙-4=丙×4=丁÷4='+x]),
+ st('第2步：验证和',(x-4)+' + '+(x+4)+' + '+x/4+' + '+4*x+' = '+T,['丁 = <span class="res">'+4*x+'</span>'])])},
+// ⑦ 三个班植树
+()=>{const x=RI(20,50),k=PK([2,3,4]),m=RI(5,20),T=(k+2)*x+m;
+return fillQ('三个班共植树'+T+'棵，一班植树棵数是二班的'+k+'倍，三班比二班多植'+m+'棵。二班植树多少棵？',x,
+'二班1份、一班'+k+'份、三班1份多'+m+'，共'+(k+2)+'份多'+m+'；二班=('+T+'-'+m+')÷'+(k+2)+'='+x+'棵。',
+[tt('第1步：画份数','二班1、一班'+k+'、三班1+'+m,'共 '+(k+2)+' 份 + '+m+' = '+T),
+ st('第2步','('+T+' - '+m+') ÷ '+(k+2)+' = '+x,['二班 = <span class="res">'+x+' 棵</span>'])])},
+// ⑧ 集邮
+()=>{const x=RI(10,30),n=RI(3,10),m=RI(2,8),T=4*x+3*n+m;
+return fillQ('甲、乙、丙三人集邮：乙比丙多'+n+'张，甲收集的邮票比乙的2倍还多'+m+'张，三人一共收集了'+T+'张。丙收集了多少张？',x,
+'设丙x张：乙x+'+n+'，甲2(x+'+n+')+'+m+'；总和=x+(x+'+n+')+(2x+'+(2*n+m)+')=4x+'+(3*n+m)+'='+T+'，x=('+T+'-'+(3*n+m)+')÷4='+x+'。',
+[st('第1步：用x表示','丙x，乙x+'+n+'，甲2x+'+(2*n+m),['总和 = 4x + '+(3*n+m)]),
+ st('第2步','4x = '+T+' - '+(3*n+m)+' = '+(T-3*n-m),['x = <span class="res">'+x+' 张</span>'])])}
+]},
+// 第7单元：课堂测试特训
+{id:'7-1',unit:7,name:'算式之谜·测试',monster:'🔮',mName:'数字谜考官',count:6,
+gens:[
+// ① 四位数+三位数，十位进位
+()=>{const a0=RI(0,8),b0=RI(0,9-a0),c0=a0+b0;
+const a1=RI(2,9),b1=RI(10-a1,9),c1=a1+b1-10;
+const a2=RI(1,6),b2=RI(1,8-a2),c2=a2+b2+1;
+const a3=RI(1,9);
+const A=''+a3+a2+a1+a0,B=''+b2+b1+b0,C=''+a3+c2+c1+c0;
+return choiceQ('在□里填合适的数字：'+a3+''+a2+'□'+a0+' ＋ '+B+' ＝ '+C+'。□代表数字几？',mkOpts(a1),
+'个位'+a0+'+'+b0+'='+c0+'不进位；十位□+'+b1+'要向百位进1、写'+c1+'：□='+(c1+10)+'-'+b1+'='+a1+'。',
+[st('第1步：看个位',a0+' + '+b0+' = '+c0+'，不进位',['十位相加没有个位来的进位']),
+ st('第2步：看十位','□ + '+b1+' = 1' + c1+'（向百位进1）',['□ = '+(c1+10)+' - '+b1+' = <span class="res">'+a1+'</span>'])])},
+// ② 三位+四位=2091，问B百位
+()=>{const a0=RI(2,9),b0=11-a0;
+const a1=RI(0,8),b1=8-a1;
+const a2=RI(1,8),b2=10-a2;
+const A=a2*100+a1*10+a0;
+return choiceQ('竖式：'+a2+'□□ ＋ 1□'+(b1===0?'0':b1)+''+b0+' ＝ 2091。第二个加数百位上的□代表数字几？',mkOpts(b2),
+'个位两个□相加得11（写1进1）；十位两个□加进位1得9；百位 '+a2+'+□要向千位进1、写0：□=10-'+a2+'='+b2+'。',
+[st('第1步：看低位','个位两□和=11（写1进1）；十位两□+1=9（写9不进位）',['百位将收到十位的进位0']),
+ st('第2步：看百位',a2+' + □ = 10（写0进1）',['□ = 10 - '+a2+' = <span class="res">'+b2+'</span>'])])},
+// ③ 四位减法无借位，问B十位
+()=>{const b3=RI(1,4),c3=RI(1,8-b3),a3=b3+c3;
+const c0=RI(0,8),b0=RI(0,9-c0),a0=b0+c0;
+const c1=RI(1,8),b1=RI(0,9-c1),a1=b1+c1;
+const c2=RI(0,8),b2=RI(0,9-c2),a2=b2+c2;
+const A=''+a3+a2+a1+a0,B=''+b3+b2+'□'+b0,Cc=''+c3+c2+c1+c0;
+return choiceQ('在□里填数（不借位）：'+A+' － '+B+' ＝ '+Cc+'。减数十位上的□代表几？',mkOpts(b1),
+'不借位可用加法验算：□+'+c1+'='+a1+'，所以□='+a1+'-'+c1+'='+b1+'。',
+[tt('第1步：判断不借位','每一位上的数都够减，可直接用加法逆推',''),
+ st('第2步：看十位','□ + '+c1+' = '+a1,['□ = '+a1+' - '+c1+' = <span class="res">'+b1+'</span>'])])},
+// ④ 新年快楽
+()=>{const L=PK([3,4,5,6,7,9]),S=1999+L;
+return choiceQ('竖式汉字谜：新 ＋ 新年 ＋ 新年快 ＋ 新年快乐 ＝ '+S+'（相同汉字代表相同数字）。"乐"代表数字几？',mkOpts(L),
+'从高位突破：新=1，年=8，快=0；1+18+180+(1800+乐)='+S+'，所以乐='+L+'。',
+[st('第1步：从高位推','千位只能是1 → 新=1；逐层推出 年=8、快=0',['1 + 18 + 180 = 199']),
+ st('第2步：求乐','199 + (1800+乐) = '+S,['乐 = '+S+' - 1999 = <span class="res">'+L+'</span>'])])},
+// ⑤ 科学连环加（给三个字求五位数）
+()=>{const wo=RI(1,7),men=RI(0,9),ai=RI(0,9),ke=RI(1,9),xue=RI(0,9);
+const S=11000*wo+1000*men+300*ai+40*ke+4*xue;
+const ans=10000*wo+1000*men+100*ai+10*ke+xue;
+const rest=40*ke+4*xue;
+return fillQ('竖式对齐相加：科学 ＋ 爱科学 ＋ 我爱科学 ＋ 我们爱科学 ＝ '+S+'。已知"我"='+wo+'、"们"='+men+'、"爱"='+ai+'，五位数"我们爱科学"是多少？',ans,
+'先减去已知的高位部分：'+S+'−('+(11000*wo+1000*men+300*ai)+')='+rest+'，这正好是4个"科学"：科学='+rest+'÷4='+(10*ke+xue)+'，即科='+ke+'、学='+xue+'；五位数='+ans+'。',
+[st('第1步：减去已知部分','11000×'+wo+' + 1000×'+men+' + 300×'+ai+' = '+(11000*wo+1000*men+300*ai),['剩余 '+rest+' = 40×科 + 4×学 = 4×"科学"']),
+ st('第2步：求"科学"',rest+' ÷ 4 = '+(10*ke+xue)+' → 科='+ke+'，学='+xue,['我们爱科学 = <span class="res">'+ans+'</span>'])])},
+// ⑥ 三位减法问被减数百位
+()=>{const b2=RI(1,5),c2=RI(1,9-b2),a2=b2+c2;
+const b0=RI(0,8),c0=RI(0,9-b0),a0=b0+c0;
+const b1=RI(0,8),c1=RI(0,9-b1),a1=b1+c1;
+const A=''+a2+a1+a0,B=''+b2+b1+b0,Cc=''+c2+c1+c0;
+return choiceQ('在□里填数（不借位）：□'+a1+''+a0+' － '+B+' ＝ '+Cc+'。被减数百位上的□代表数字几？',mkOpts(a2),
+'不借位减法用加法验算：'+b2+'+'+c2+'=□，所以□='+a2+'。',
+[tt('第1步：加法逆推','不借位时：减数 + 差 = 被减数',''),
+ st('第2步：看百位',b2+' + '+c2+' = '+a2,['□ = <span class="res">'+a2+'</span>'])])}
+]},
+{id:'7-2',unit:7,name:'积商变化·测试',monster:'🔀',mName:'变化考官',count:8,
+gens:[
+// ① 乘a积扩P
+()=>{const a=PK([2,3,5]),r=PK([2,4,6]),P=a*r;
+return choiceQ('两个数相乘，一个因数乘'+a+'后，积扩大到原来的'+P+'倍。另一个因数应怎样变化？',
+mkTOpts('乘'+r,['除以'+r,'乘'+a,'乘'+P]),
+'积的变化倍数等于两个因数变化倍数相乘：'+P+'÷'+a+'='+r+'，另一个因数乘'+r+'。',
+[tt('规律','积的倍数 = 因数1倍数 × 因数2倍数',''),
+ st('推理',P+' ÷ '+a+' = '+r,['另一个因数 <span class="res">乘'+r+'</span>'])])},
+// ② 缩1/n积扩P
+()=>{const n=PK([3,5,6]),P=PK([2,3]),ans=P*n;
+return choiceQ('两个数相乘，一个因数缩小到原来的1/'+n+'，积扩大到原来的'+P+'倍。另一个因数怎样变化？',
+mkTOpts('扩大到原来的'+ans+'倍',['扩大到原来的'+P+'倍','缩小到原来的1/'+ans,'扩大到原来的'+n+'倍']),
+'一个因数除以'+n+'，另一个因数要先补上'+n+'倍、再扩大'+P+'倍：'+n+'×'+P+'='+ans+'。',
+[tt('规律','÷'+n+' 的反方向是 ×'+n+'，还要再 ×'+P,''),
+ st('推理',n+' × '+P+' = '+ans,['另一个因数 <span class="res">扩大到原来的 '+ans+' 倍</span>'])])},
+// ③ 因数扩a积反缩1/m
+()=>{const a=PK([2,3,4]),m=PK([2,3,4,5]),am=a*m;
+return choiceQ('两个数相乘，一个因数扩大到原来的'+a+'倍，积反而缩小到原来的1/'+m+'。另一个因数怎样变化？',
+mkTOpts('缩小到原来的1/'+am,['扩大到原来的'+am+'倍','缩小到原来的1/'+a,'不变']),
+'a×( )=1/'+m+'，括号中应填 1/'+am+'，即另一个因数缩小到原来的1/'+am+'。',
+[tt('规律','积的倍数 = 两个因数倍数相乘',''),
+ st('推理',a+' × (1/'+am+') = 1/'+m,['另一个因数 <span class="res">缩小到原来的 1/'+am+'</span>'])])},
+// ④ 被除除n、除除m，商缩1/r
+()=>{const m=PK([2,3]),r=PK([2,4]),n=m*r;
+return choiceQ('除法算式中，被除数除以'+n+'，除数除以'+m+'，商怎样变化？',
+mkTOpts('缩小到原来的1/'+r,['扩大到原来的'+r+'倍','缩小到原来的1/'+n,'不变']),
+'商跟着被除数除以'+n+'，又因除数除以'+m+'反而乘'+m+'：'+n+'÷'+m+'='+r+'，商缩小到原来的1/'+r+'。',
+[st('推理','商 ÷'+n+' ×'+m+' = 商 ÷ ('+n+'÷'+m+')',[n+' ÷ '+m+' = '+r]),
+ tt('结论','商随被除数同变、随除数反变','商 <span class="res">缩小到原来的 1/'+r+'</span>')])},
+// ⑤ 积V，一缩一扩
+()=>{const b=PK([2,4,5]),a=PK([2,3,6]),V=b*RI(20,80),nv=V*a/b;
+return choiceQ('两个数相乘的积是'+V+'。一个因数除以'+b+'，另一个因数乘'+a+'，新的积是多少？',
+mkOpts(nv,[-40,-20,20,40,-60,60]),
+'新积='+V+'÷'+b+'×'+a+'='+nv+'。',
+[st('计算',V+' ÷ '+b+' × '+a,[V+' ÷ '+b+' = '+V/b+'，再 × '+a+' = '+nv]),
+ tt('结论','新积 = '+nv,'<span class="res">'+nv+'</span>')])},
+// ⑥ fill：一扩一缩
+()=>{const b=PK([2,3,6]),a=PK([2,4,8]),V=b*RI(20,70),nv=V*a/b;
+return fillQ('两个数相乘的积是'+V+'。一个因数乘'+a+'，另一个因数除以'+b+'，得到的新积是多少？',nv,
+'积先乘'+a+'再除以'+b+'：'+V+'×'+a+'÷'+b+'='+nv+'。',
+[st('第1步','新积 = '+V+' × '+a+' ÷ '+b,[V+' × '+a+' = '+V*a]),
+ st('第2步',V*a+' ÷ '+b+' = '+nv,['新积 = <span class="res">'+nv+'</span>'])])},
+// ⑦ 被除除n、除乘m
+()=>{const n=PK([2,4]),m=PK([3,5]),nm=n*m;
+return choiceQ('除法算式中，被除数除以'+n+'，除数乘'+m+'，商怎样变化？',
+mkTOpts('缩小到原来的1/'+nm,['扩大到原来的'+nm+'倍','缩小到原来的1/'+n,'不变']),
+'被除数除以'+n+' 商除以'+n+'；除数乘'+m+' 商反而除以'+m+'；商一共缩小到原来的1/'+nm+'。',
+[tt('规律','两种变化都让商变小，影响相乘',''),
+ st('推理','商 ÷ '+n+' ÷ '+m,'= <span class="res">商缩小到原来的 1/'+nm+'</span>',['1/'+n+' × 1/'+m+' = 1/'+nm])])},
+// ⑧ 商V，同除以不同数
+()=>{const n=PK([2,4]),m=PK([2,3,5]),k=RI(6,15),V=n*k,ans=k*m;
+return choiceQ('两个数相除的商是'+V+'。被除数除以'+n+'，除数也除以'+m+'，新的商是多少？',mkOpts(ans,[-10,-5,5,10,-20,20]),
+'商='+V+'÷'+n+'×'+m+'='+V/n+'×'+m+'='+ans+'。',
+[st('第1步','商随被除数除以'+n+'：'+V+' ÷ '+n+' = '+V/n,['除数除以'+m+'，商反而乘'+m]),
+ st('第2步',V/n+' × '+m+' = '+ans,['新商 = <span class="res">'+ans+'</span>'])])}
+]},
+{id:'7-3',unit:7,name:'和倍差倍·测试',monster:'⚖️',mName:'和差倍考官',count:8,
+gens:[
+// ① 和倍求乙
+()=>{const b=RI(10,60),k=PK([2,3,4,5]),S=(k+1)*b;
+return choiceQ('甲、乙两个数之和是'+S+'，甲数是乙数的'+k+'倍。乙数是多少？',mkOpts(b),
+'乙1份、甲'+k+'份，共'+(k+1)+'份，乙='+S+'÷'+(k+1)+'='+b+'。',
+[tt('份数','乙1份，甲'+k+'份，共 '+(k+1)+' 份',''),
+ st('计算',S+' ÷ '+(k+1)+' = '+b,['乙 = <span class="res">'+b+'</span>'])])},
+// ② 和倍求甲
+()=>{const b=RI(10,50),k=PK([2,3,4]),S=(k+1)*b,jia=k*b;
+return choiceQ('甲、乙两数之和是'+S+'，甲数是乙数的'+k+'倍。甲数是多少？',mkOpts(jia,[-20,-10,10,20]),
+'乙='+S+'÷'+(k+1)+'='+b+'，甲='+b+'×'+k+'='+jia+'。',
+[st('第1步','乙 = '+S+' ÷ '+(k+1)+' = '+b,['甲是乙的 '+k+' 倍']),
+ st('第2步',b+' × '+k+' = '+jia,['甲 = <span class="res">'+jia+'</span>'])])},
+// ③ 商k求乙
+()=>{const b=RI(10,40),k=PK([2,3,5]),S=(k+1)*b;
+return choiceQ('甲数除以乙数的商是'+k+'，甲、乙两数之和是'+S+'。乙数是多少？',mkOpts(b),
+'商是'+k+'说明甲是乙的'+k+'倍，乙='+S+'÷'+(k+1)+'='+b+'。',
+[tt('关键','甲 ÷ 乙 = '+k+' → 甲 = 乙 × '+k,''),
+ st('计算',S+' ÷ '+(k+1)+' = '+b,['乙 = <span class="res">'+b+'</span>'])])},
+// ④ fill 商k求甲
+()=>{const b=RI(10,40),k=PK([2,3,4]),S=(k+1)*b,jia=k*b;
+return fillQ('甲数除以乙数的商是'+k+'，甲、乙两数之和是'+S+'。甲数是多少？',jia,
+'乙='+S+'÷'+(k+1)+'='+b+'；甲=乙×'+k+'='+jia+'。',
+[st('第1步','乙 = '+S+' ÷ '+(k+1)+' = '+b,['甲 = 乙 × '+k]),
+ st('第2步',b+' × '+k+' = '+jia,['甲 = <span class="res">'+jia+'</span>'])])},
+// ⑤ 减法三数和求减数
+()=>{const cha=RI(5,25),k=PK([2,3,4]),T=2*(k+1)*cha,jian=k*cha;
+return choiceQ('一道减法算式中，被减数、减数与差的和是'+T+'，减数是差的'+k+'倍。减数是多少？',
+mkOpts(jian,[-20,-10,10,20]),
+'被减数=减数+差，三数和=2×(减数+差)='+T+'，减数+差='+T/2+'，共'+(k+1)+'份；差='+T/2+'÷'+(k+1)+'='+cha+'，减数='+cha+'×'+k+'='+jian+'。',
+[st('第1步','减数+差 = '+T+' ÷ 2 = '+T/2,['减数'+k+'份、差1份']),
+ st('第2步','差 = '+T/2+' ÷ '+(k+1)+' = '+cha+'; 减数 = '+cha+' × '+k,['减数 = <span class="res">'+jian+'</span>'])])},
+// ⑥ 差倍绳
+()=>{const b=RI(8,40),k=PK([3,4,5]),D=(k-1)*b;
+return choiceQ('甲绳长度是乙绳的'+k+'倍，甲绳比乙绳长'+D+'米。乙绳长多少米？',mkOpts(b),
+'长的'+D+'米是乙绳的'+(k-1)+'倍，乙绳='+D+'÷'+(k-1)+'='+b+'米。',
+[tt('差倍','多的 '+(k-1)+' 份 = '+D+' 米',''),
+ st('计算',D+' ÷ '+(k-1)+' = '+b,['乙绳 <span class="res">'+b+' 米</span>'])])},
+// ⑦ k倍少m求小
+()=>{const b=RI(10,40),k=PK([2,3,4]),m=RI(2,12),S=(k+1)*b-m;
+return choiceQ('甲、乙两数之和是'+S+'，甲数比乙数的'+k+'倍少'+m+'。乙数是多少？',mkOpts(b),
+'给甲补上'+m+'正好是乙的'+k+'倍：'+S+'+'+m+'='+(S+m)+'，乙='+(S+m)+'÷'+(k+1)+'='+b+'。',
+[st('第1步','补够整倍数：'+S+' + '+m+' = '+(S+m),['对应乙的 '+(k+1)+' 倍']),
+ st('第2步',(S+m)+' ÷ '+(k+1)+' = '+b,['乙 = <span class="res">'+b+'</span>'])])},
+// ⑧ fill 求大=k小-m
+()=>{const b=RI(10,40),k=PK([2,3]),m=RI(3,10),S=(k+1)*b-m,jia=k*b-m;
+return fillQ('甲、乙两数之和是'+S+'，甲数比乙数的'+k+'倍少'+m+'。甲数是多少？',jia,
+'乙=('+S+'+'+m+')÷'+(k+1)+'='+b+'；甲='+b+'×'+k+'-'+m+'='+jia+'。',
+[st('第1步','乙 = ('+S+' + '+m+') ÷ '+(k+1)+' = '+b,['甲 = 乙 × '+k+' - '+m]),
+ st('第2步',b+' × '+k+' - '+m+' = '+jia,['甲 = <span class="res">'+jia+'</span>'])])}
+]},
+{id:'7-4',unit:7,name:'隐藏条件·测试',monster:'🔑',mName:'不变量考官',count:7,
+gens:[
+// ① 下棋胜负
+()=>{const n=pickN(2);const jia=RI(10,30),d=2*RI(1,Math.max(1,Math.floor((jia-1)/2))),T=2*jia-d;
+return choiceQ(n[0]+'和'+n[1]+'进行下棋比赛，一共下了'+T+'盘（没有平局），结果'+n[0]+'比'+n[1]+'多赢'+d+'盘。'+n[0]+'赢了多少盘？',
+mkOpts(jia,[-1,1,-10,10]),
+'赢棋总盘数就是'+T+'，套用和差公式：'+n[0]+'=('+T+'+'+d+')÷2='+jia+'盘。',
+[st('和差','赢的盘数和='+T+'，差='+d,['('+T+' + '+d+') ÷ 2 = '+jia]),
+ tt('结论',n[0]+'赢的盘数','<span class="res">'+jia+' 盘</span>')] )},
+// ② 倒水
+()=>{const A2=RI(30,60),k=PK([2,3]),B2=k*A2,b=RI(10,B2-15),a=(k+1)*A2-b,dao=B2-b;
+return fillQ('甲杯有水'+a+'毫升，乙杯有水'+b+'毫升。从甲杯倒多少毫升水给乙杯后，乙杯的水正好是甲杯的'+k+'倍？',dao,
+'总水量'+(a+b)+'毫升不变；倒后甲1份、乙'+k+'份，甲剩='+(a+b)+'÷'+(k+1)+'='+A2+'毫升，乙是'+B2+'毫升；倒出'+B2+'-'+b+'='+dao+'毫升。',
+[st('第1步','总量 = '+a+' + '+b+' = '+(a+b)+'；甲剩 = '+(a+b)+' ÷ '+(k+1)+' = '+A2,['乙变 '+k+' × '+A2+' = '+B2]),
+ st('第2步',B2+' - '+b+' = '+dao,['倒出 <span class="res">'+dao+' 毫升</span>'])])},
+// ③ 包子总量
+()=>{const n=pickN(1)[0];const p=RI(40,90),q=RI(30,80),r=RI(20,70),ans=p+q+r;
+return choiceQ('食堂运来一筐包子，分给第一组'+p+'个、第二组'+q+'个，筐里还剩'+r+'个。这筐包子原来有多少个？',
+mkOpts(ans,[-1,1,-10,10]),
+'原来的总数=分出的+剩下的：'+p+'+'+q+'+'+r+'='+ans+'个。',
+[tt('不变量','各部分与剩余合起来就是原来的总数',''),
+ st('计算',p+' + '+q+' + '+r+' = '+ans,['原来有 <span class="res">'+ans+' 个</span>'])])},
+// ④ 面条剩量
+()=>{const left=RI(10,30),k=PK([2,3,4]),x=RI(5,20),b=left+x,a=b+(k-1)*left;
+return choiceQ('两碗面条分别有'+a+'克和'+b+'克，两个人吃掉同样多的面条后，第一碗剩下的质量是第二碗的'+k+'倍。第二碗还剩多少克？',
+mkOpts(left),
+'吃掉同样多，质量差不变：'+(a-b)+'克；它是第二碗剩量的'+(k-1)+'倍，第二碗剩='+(a-b)+'÷'+(k-1)+'='+left+'克。',
+[st('第1步','差不变 = '+a+' - '+b+' = '+(a-b)+' 克',['差 = 第二碗剩量的 '+(k-1)+' 倍']),
+ st('第2步',(a-b)+' ÷ '+(k-1)+' = '+left,['第二碗剩 <span class="res">'+left+' 克</span>'])])},
+// ⑤ 绳剪同长 k倍多p
+()=>{const m=RI(8,25),k=PK([2,3]),p=RI(2,8),x=RI(3,15),b=m+x,a=b+(k-1)*m+p;
+return fillQ('甲绳长'+a+'米、乙绳长'+b+'米，两根绳剪去同样长后，甲绳剩下的长度比乙绳剩下长度的'+k+'倍还多'+p+'米。两根绳各剪去多少米？',x,
+'差不变为'+(a-b)+'米，它=乙剩×'+(k-1)+'+'+p+'；乙剩=('+(a-b)+'-'+p+')÷'+(k-1)+'='+m+'米；剪去'+b+'-'+m+'='+x+'米。',
+[st('第1步','差 = '+(a-b)+' = 乙剩×'+(k-1)+' + '+p,['乙剩 = ('+(a-b)+' - '+p+') ÷ '+(k-1)+' = '+m]),
+ st('第2步','剪去 = '+b+' - '+m+' = '+x,['各剪去 <span class="res">'+x+' 米</span>'])])},
+// ⑥ 判断：变化中总量
+()=>{const t=RI(0,2);
+if(t===0){const aa=RI(100,400),bb=RI(100,400);
+return tfQ('判断：甲杯有'+aa+'毫升水，乙杯有'+bb+'毫升水，把甲杯的一部分水倒入乙杯（水不洒出），两杯水的总质量不变。',true,
+'水只是在两个杯子间转移，没有增加也没有减少，总量不变，说法正确。',
+[tt('分析','倒水过程中两杯水的和始终是 '+(aa+bb)+' 毫升','总量是不变量'),tt('结论','说法正确','√')])}
+if(t===1){const aa=RI(15,40),bb=RI(15,40),kk=RI(1,aa-1);
+return tfQ('判断：棋盘上有黑棋'+aa+'颗、白棋'+bb+'颗，拿走'+kk+'颗黑棋后，棋盘上棋子的总数不变。',false,
+'拿走了'+kk+'颗黑棋，棋子总数减少了'+kk+'颗，说法错误。',
+[tt('分析','拿走棋子 → 棋子离开棋盘','总数减少 '+kk),tt('结论','说法错误','×')])}
+const aa=RI(15,40),bb=RI(15,40),kk=RI(1,aa-1);
+return tfQ('判断：哥哥有'+aa+'颗糖、弟弟有'+bb+'颗糖，哥哥吃掉'+kk+'颗后，两人糖果的总数不变。',false,
+'糖被吃掉了，两人糖果总数减少'+kk+'颗，说法错误。',
+[tt('分析','吃掉 = 糖从总数中消失','总数减少 '+kk),tt('结论','说法错误','×')])},
+// ⑦ 判断：不变量辨析
+()=>{const t=RI(0,2);
+if(t===0){const L=RI(20,80),aa=RI(5,L-5),bb=L-aa;
+return tfQ('判断：把一根绳子剪成两段，两段分别长'+aa+'米和'+bb+'米，那么绳子原来长'+L+'米。',true,
+'两段长度合起来就是原来的长度：'+aa+'+'+bb+'='+L+'米，说法正确。',
+[tt('分析','绳子只是被剪开，总长度不变',aa+' + '+bb+' = '+L),tt('结论','说法正确','√')])}
+if(t===1){const aa=RI(10,40),kk=RI(1,Math.floor(aa/2)-1);
+return tfQ('判断：甲比乙多'+aa+'颗糖，甲给乙'+kk+'颗糖后（两人数量没有反超），两人糖果数的差变小了。',true,
+'甲减少'+kk+'、乙增加'+kk+'，差减少'+2*kk+'，由'+aa+'变成'+(aa-2*kk)+'，差确实变小，说法正确。',
+[tt('分析','你少我多，差缩小 2×'+kk+' = '+2*kk,'差：'+aa+' → '+(aa-2*kk)),tt('结论','说法正确','√')])}
+let aa=RI(5,20),bb=aa+PK([-3,-2,-1,1,2,3]);if(bb<3||bb===aa)bb=aa+2;
+return tfQ('判断：加法算式中，一个加数增加'+aa+'，另一个加数减少'+bb+'（'+aa+'≠'+bb+'），和不变。',false,
+'一个加数增'+aa+'、另一个减'+bb+'，和会 '+(bb>aa?'减少':'增加')+Math.abs(aa-bb)+'；只有增减相同（都为同一个数）时和才不变，说法错误。',
+[tt('分析','和的变化 = '+aa+' - '+bb+' = '+(aa-bb)+'（不为0）','增减不同，和改变'),tt('结论','说法错误','×')])}
+]},
+{id:'7-5',unit:7,name:'复杂和差倍·测试',monster:'🐉',mName:'龙王考官',count:5,
+gens:[
+// ① 三科打包
+()=>{const x=RI(40,100),k=PK([2,3]),T=(k+1)*x,jia=k*x;
+return choiceQ('小明期末考试三科总分是'+T+'分，语文和数学的分数之和正好是英语分数的'+k+'倍。语文、数学共多少分？',
+mkOpts(jia,[-30,-20,-10,10,20,30]),
+'英语1份、语数'+k+'份，共'+(k+1)+'份；英语='+T+'÷'+(k+1)+'='+x+'分，语数='+x+'×'+k+'='+jia+'分。',
+[st('第1步','英语 = '+T+' ÷ '+(k+1)+' = '+x,['语数和是英语的 '+k+' 倍']),
+ st('第2步',x+' × '+k+' = '+jia,['语数共 <span class="res">'+jia+' 分</span>'])])},
+// ② 打包和差
+()=>{const big=RI(40,90),m=2*RI(3,Math.min(15,Math.floor((big-10)/2))),T=2*big-m,small=big-m;
+return choiceQ('体育室足球和篮球共'+T+'个，足球比篮球多'+m+'个。篮球有多少个？',mkOpts(small,[-20,-10,10,20]),
+'篮球（小数）=('+T+'-'+m+')÷2='+small+'个。',
+[st('和差公式','小数 = (和-差)÷2','('+T+' - '+m+') ÷ 2'),
+ st('计算',T-m+' ÷ 2 = '+small,['篮球 <span class="res">'+small+' 个</span>'])])},
+// ③ 四口之家
+()=>{const youngest=RI(6,12),oldest=youngest+RI(18,30),M=youngest+oldest,N=RI(20,M-8),T=M+N,d=M-N;
+return choiceQ('一家四口的年龄和是'+T+'岁，其中最年长者与最年幼者的年龄之和，比另外两人的年龄和多'+d+'岁。已知最年幼的是'+youngest+'岁，最年长者多少岁？',
+mkOpts(oldest),
+'年长组年龄和=('+T+'+'+d+')÷2='+M+'岁；最年长者='+M+'-'+youngest+'='+oldest+'岁。',
+[st('第1步：和差求年长组','('+T+' + '+d+') ÷ 2 = '+M+'（岁）',['最年长+最年幼 = '+M]),
+ st('第2步','减去最年幼的 '+youngest+' 岁',[M+' - '+youngest+' = <span class="res">'+oldest+' 岁</span>'])])},
+// ④ 两筐
+()=>{const jia=RI(80,200),d=2*RI(5,30),T=2*jia-d;
+return choiceQ('甲、乙两筐水果共'+T+'千克，甲筐比乙筐多'+d+'千克。甲筐有多少千克？',mkOpts(jia,[-20,-10,10,20]),
+'甲筐（大数）=('+T+'+'+d+')÷2='+jia+'千克。',
+[st('和差','甲 = (和+差)÷2','('+T+' + '+d+') ÷ 2'),
+ st('计算',T+d+' ÷ 2 = '+jia,['甲筐 <span class="res">'+jia+' 千克</span>'])])},
+// ⑤ 三赛区
+()=>{const bei=RI(80,140),m1=RI(40,90),m2=RI(10,40),T=6*bei-m1+m2;
+return fillQ('歌唱比赛有东、南、北三个赛区。东部报名人数比北部的2倍少'+m1+'人，南部报名人数比北部的3倍多'+m2+'人，三个赛区共'+T+'人报名。北部赛区有多少人报名？',bei,
+'设北部x人：东=2x-'+m1+'，南=3x+'+m2+'；x+2x-'+m1+'+3x+'+m2+'=6x-'+(m1-m2)+'='+T+'，6x='+T+'+'+m1+'-'+m2+'='+6*bei+'，x='+bei+'。',
+[st('第1步：用x表示','北x，东2x-'+m1+'，南3x+'+m2,['总和 = 6x - '+(m1-m2)]),
+ st('第2步','6x = '+T+' + '+m1+' - '+m2+' = '+6*bei,['北部 = <span class="res">'+bei+' 人</span>'])])}
+]}
+
+];
+
+// ==================== 游戏状态 ====================
+let S={stars:0,totalStars:0,curUnit:1,dailyLimit:1200,todayTime:0,lastDate:'',unlocked:['1-1'],completed:{},pending:[],approved:[],used:[],rewards:[
+{id:'r1',icon:'🎮',name:'周末多玩30分钟游戏',desc:'延长游戏时间30分钟',price:100,auto:false},
+{id:'r2',icon:'📺',name:'周末多看30分钟电视',desc:'延长看电视30分钟',price:80,auto:false},
+{id:'r3',icon:'🧹',name:'免做一次家务',desc:'免除一次家务任务',price:60,auto:false},
+{id:'r4',icon:'🍭',name:'一份小零食',desc:'当天提供小零食',price:50,auto:false},
+{id:'r5',icon:'🎬',name:'选择周末家庭电影',desc:'本周电影由你选',price:40,auto:true},
+{id:'r6',icon:'🍽️',name:'选择晚餐菜品',desc:'指定一天晚餐主菜',price:30,auto:true},
+],items:{revive:1,time:2,hint:3},stats:{tq:0,tc:0,todayQ:0,todayC:0,todayS:0},lastQs:{},earnedT:{},battle:null};
+
+const SK='aoshu_classroom_test_save_v1';
+function save(){S.lastDate=todayStr();localStorage.setItem(SK,JSON.stringify(S))}
+function load(){
+  let d=localStorage.getItem(SK);
+  if(!d){ // 首次运行：自动继承旧版游戏（奥数勇士大冒险）的存档——家长设置、游玩进度、星星、道具全部保留
+    const old=localStorage.getItem('aoshu_quest_save_v1');
+    if(old){try{const o=JSON.parse(old);o.battle=null;Object.assign(S,o);localStorage.setItem(SK,JSON.stringify(S));d=localStorage.getItem(SK)}catch(e){}}
+  }
+  if(d){try{S=Object.assign(S,JSON.parse(d));if(S.lastDate!==todayStr()){S.todayTime=0;S.stats.todayQ=0;S.stats.todayC=0;S.stats.todayS=0;S.items.revive=Math.min(3,S.items.revive+1)}}catch(e){}}
+}
+function todayStr(){const d=new Date();return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate()}
+function resetAll(){if(confirm('确定重置所有数据？不可恢复！')){localStorage.removeItem(SK);location.reload()}}
+function showToast(m,t=2000){const el=document.getElementById('toast');el.textContent=m;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),t)}
+function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');if(id==='menu'&&S.todayTime>=S.dailyLimit)showLock()}
+
+// ==================== 选关 ====================
+let curTab=1;
+function goLevels(){initAudio();startMusic();show('levels');renderLevels()}
+function renderLevels(){
+  document.getElementById('lv-stars').textContent=S.stars;
+  const m=Math.floor((S.dailyLimit-S.todayTime)/60),s=(S.dailyLimit-S.todayTime)%60;
+  document.getElementById('lv-time').textContent=String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+  const tabs=document.getElementById('u-tabs');
+  const units=[...new Set(LEVELS.map(l=>l.unit))];
+  const un={1:'找规律与速算',2:'和差倍问题',3:'典型应用一',4:'典型应用二',5:'几何与计数',6:'逻辑与推理',7:'课堂测试特训'};
+  tabs.innerHTML=units.map(u=>{const lock=u>S.curUnit;return `<div class="unit-tab ${u===curTab?'active':''} ${lock?'lock':''}" onclick="${lock?'':`switchU(${u})`}">${lock?'🔒 ':''}第${u}单元</div>`}).join('');
+  const list=document.getElementById('lv-list');
+  const lvs=LEVELS.filter(l=>l.unit===curTab);
+  list.innerHTML=lvs.map((lv,i)=>{
+    const unlk=S.unlocked.includes(lv.id);
+    const done=S.completed[lv.id];
+    const st=done?done.stars:0;
+    return `<div class="level-card ${unlk?'':'lock'} ${done?'done':''}" onclick="${unlk?`startBattle('${lv.id}')`:''}">
+      <div class="level-num">${unlk?(i+1):'🔒'}</div>
+      <div class="level-info"><div class="level-name">${lv.name}</div><div class="level-desc">${lv.count||5}道题 · ${done?'已通关':'未通关'}</div></div>
+      <div class="level-stars">${'⭐'.repeat(st)+'☆'.repeat(3-st)}</div>
+    </div>`;
+  }).join('');
+}
+function switchU(u){curTab=u;renderLevels()}
+
+// ==================== 战斗 ====================
+let bTimer=null,bStart=0;
+function startBattle(id){
+  if(S.todayTime>=S.dailyLimit){showLock();return}
+  const lv=LEVELS.find(l=>l.id===id);
+  // 随机生成出题：每个知识点（生成器）先各出1道，不足 count 道时循环补足；
+  // 同一关卡内题面绝不重复，并尽量避开上一场出过的题面（换数字也算新题）
+  const count=lv.count||5;
+  const used=new Set(),last=new Set((S.lastQs&&S.lastQs[id])||[]);
+  const seq=[];
+  while(seq.length<count)SH([...lv.gens.keys()]).forEach(i=>{if(seq.length<count)seq.push(i)});
+  const picked=[];
+  seq.forEach(gi=>{
+    let q=null;
+    for(let t=0;t<60;t++){
+      const c=lv.gens[gi]();
+      if(used.has(c.q))continue;            // 同场题面不重复
+      if(t<40&&last.has(c.q))continue;      // 尽量避开上一场题面
+      q=c;break;
+    }
+    if(!q)q=lv.gens[gi]();                  // 极端情况下兜底
+    q.tid=id+'-t'+gi;                       // 题型模板ID：用于计分（首答20/重复10）
+    used.add(q.q);picked.push(q);
+  });
+  S.lastQs[id]=picked.map(x=>x.q);
+  S.battle={id,lv,questions:picked,qi:0,hearts:3,correct:0,wrong:0,combo:0,maxCombo:0,earned:0,answered:0,itemsUsed:0,double:false};
+  bStart=Date.now();show('battle');renderBattle();startBTimer();sfxClick()
+}
+function startBTimer(){if(bTimer)clearInterval(bTimer);bTimer=setInterval(()=>{S.todayTime++;if(S.todayTime>=S.dailyLimit){clearInterval(bTimer);showToast('今日时间到，完成本题后结束')}},1000)}
+function renderBattle(){
+  const b=S.battle,lv=b.lv,q=b.questions[b.qi],total=b.questions.length;
+  document.getElementById('b-hearts').textContent='❤️'.repeat(b.hearts)+'🖤'.repeat(3-b.hearts);
+  document.getElementById('b-combo').textContent=b.combo>=2?`🔥 ${b.combo}连击！`:'';
+  document.getElementById('monster').textContent=lv.monster;
+  document.getElementById('m-name').textContent=`${lv.mName} (${b.qi+1}/${total})`;
+  document.getElementById('m-hp').style.width=(100-b.qi/total*100)+'%';
+  renderItems();
+  const box=document.getElementById('q-box');
+  const tag=q.diff==='b'?'tag-b':q.diff==='e'?'tag-e':'tag-n';
+  const tn=q.diff==='b'?'BOSS题':q.diff==='e'?'精英题':'普通题';
+  let h=`<span class="q-tag ${tag}">${tn}</span><div class="q-text">${q.q}</div>`;
+  if(q.type==='choice'){
+    h+=`<div class="opts">`;
+    q.options.forEach((o,i)=>{h+=`<button class="opt-btn" id="o${i}" onclick="ansChoice(${i})">${o}</button>`});
+    h+=`</div>`;
+  }else{
+    h+=`<input class="fill-in" id="f-ans" placeholder="输入答案" onkeypress="if(event.key==='Enter')ansFill()"><button class="fill-btn" onclick="ansFill()">提交答案</button>`;
+  }
+  box.innerHTML=h;
+  if(q.type==='fill')setTimeout(()=>document.getElementById('f-ans').focus(),100);
+}
+function renderItems(){
+  const bar=document.getElementById('items-bar');
+  const items=[{k:'revive',i:'💖',c:S.items.revive},{k:'time',i:'⏳',c:S.items.time},{k:'hint',i:'📜',c:S.items.hint}];
+  bar.innerHTML=items.map(it=>`<button class="item-btn" onclick="useItem('${it.k}')" ${it.c<=0?'disabled':''}>${it.i}<span class="cnt">${it.c}</span></button>`).join('');
+}
+function useItem(k){
+  const b=S.battle;
+  if(b.itemsUsed>=2){showToast('每局限用2个道具');return}
+  if(S.items[k]<=0)return;
+  if(k==='revive'){if(b.hearts>=3){showToast('心已满');return}b.hearts++;S.items.revive--;showToast('💖 恢复1颗心')}
+  else if(k==='hint'){const q=b.questions[b.qi];S.items.hint--;showToast('📜 '+q.exp.substring(0,25)+'...',3000)}
+  else if(k==='time'){S.items.time--;showToast('⏳ 时间延长')}
+  b.itemsUsed++;renderBattle();save()
+}
+function ansChoice(i){
+  const b=S.battle,q=b.questions[b.qi],ok=i===q.answer;
+  document.querySelectorAll('.opt-btn').forEach(b=>b.disabled=true);
+  document.getElementById('o'+i).classList.add(ok?'ok':'no');
+  if(!ok)document.getElementById('o'+q.answer).classList.add('ok');
+  if(ok){document.getElementById('monster').classList.add('hit');setTimeout(()=>document.getElementById('monster').classList.remove('hit'),300)}
+  setTimeout(()=>procAns(ok,q),500)
+}
+function ansFill(){
+  const b=S.battle,q=b.questions[b.qi];
+  const v=document.getElementById('f-ans').value.trim();
+  const ok=v===q.answer||v===q.answer.replace(/,/g,'');
+  document.getElementById('f-ans').disabled=true;
+  document.querySelector('.fill-btn').disabled=true;
+  if(ok){document.getElementById('monster').classList.add('hit');setTimeout(()=>document.getElementById('monster').classList.remove('hit'),300)}
+  setTimeout(()=>procAns(ok,q),500)
+}
+function procAns(ok,q){
+  const b=S.battle;
+  b.answered++;S.stats.tq++;S.stats.todayQ++;
+  let e=0;
+  b._rep=false;
+  if(ok){
+    b.correct++;b.combo++;b.maxCombo=Math.max(b.maxCombo,b.combo);
+    S.stats.tc++;S.stats.todayC++;
+    // 计分规则：同一题型模板第一次答对20分，之后（即使数字不同）再答对只给10分
+    S.earnedT=S.earnedT||{};
+    b._rep=!!S.earnedT[q.tid];
+    e=b._rep?10:20;
+    S.earnedT[q.tid]=true;
+    b.earned+=e;S.stars+=e;S.totalStars+=e;S.stats.todayS+=e;
+    sfxCorrect();showFStar(e);
+  }else{b.wrong++;b.hearts--;b.combo=0;sfxWrong()}
+  showFB(ok,e,q);save()
+}
+function showFStar(n){
+  const a=document.getElementById('arena');
+  const s=document.createElement('div');s.className='fstar';s.textContent=`+${n}⭐`;
+  s.style.left='50%';s.style.top='40%';a.appendChild(s);setTimeout(()=>s.remove(),1000)
+}
+
+// ==================== 图形化解题演示 ====================
+function showFB(ok,e,q){
+  const b=S.battle;
+  document.getElementById('fb-icon').textContent=ok?'🎉':'💡';
+  document.getElementById('fb-title').textContent=ok?'回答正确！':'答错了，看看解法';
+  document.getElementById('fb-title').className='fb-title '+(ok?'c':'w');
+  document.getElementById('fb-stars').textContent=ok?`+${e} ⭐${b._rep?'（重复题型）':''}`:'';
+  document.getElementById('fb-exp').textContent='💡 '+q.exp;
+  // 演示
+  const demoTitle=document.getElementById('demo-title');
+  const demoSteps=document.getElementById('demo-steps');
+  if(q.demo&&q.demo.length>0){
+    demoTitle.style.display='flex';
+    demoSteps.innerHTML='';
+    q.demo.forEach((step,idx)=>{
+      const div=document.createElement('div');
+      div.className='demo-step';
+      let inner=`<div class="demo-step-hd">${step.t}</div><div class="demo-step-bd">${step.d}</div>`;
+      // 根据类型渲染
+      if(step.type==='calc'){
+        inner+=`<div style="margin-top:6px">`+step.data.map(c=>`<div class="calc-step">${c}</div>`).join('')+`</div>`;
+      }else if(step.type==='line'){
+        inner+=`<div class="line-diagram">`;
+        step.data.forEach(line=>{
+          inner+=`<div style="width:100%;margin-bottom:8px"><div style="display:flex;width:100%;height:26px;border-radius:4px;overflow:hidden">`;
+          line.parts.forEach(p=>{
+            inner+=`<div style="width:${p.w}%;background:${p.c};display:flex;align-items:center;justify-content:center;font-size:10px;color:#fff;font-weight:bold">${p.t}</div>`;
+          });
+          inner+=`</div><div class="seg-label">${line.label}</div></div>`;
+        });
+        inner+=`</div>`;
+      }else if(step.type==='table'){
+        inner+=`<table class="demo-table"><thead><tr>`+step.data.head.map(h=>`<th>${h}</th>`).join('')+`</tr></thead><tbody>`;
+        step.data.rows.forEach(r=>{inner+=`<tr>`+r.map(c=>`<td>${c}</td>`).join('')+`</tr>`});
+        inner+=`</tbody></table>`;
+      }else if(step.type==='grid'){
+        const cols=step.data.cols||4;
+        inner+=`<div class="grid-demo" style="grid-template-columns:repeat(${cols},1fr)">`;
+        for(let i=0;i<cols*(step.data.rows||1);i++){
+          const isTree=step.data.trees&&step.data.trees.includes(i);
+          inner+=`<div class="grid-cell ${isTree?'tree':''}">${isTree?'🌳':''}</div>`;
+        }
+        inner+=`</div>`;
+        if(step.data.label)inner+=`<div style="font-size:11px;color:#64748b;margin-top:4px">${step.data.label}</div>`;
+      }else if(step.type==='text'){
+        inner+=`<div style="margin-top:6px;padding:8px;background:#ede9fe;border-radius:6px;font-size:13px;color:#4c1d95">${step.data}</div>`;
+      }
+      div.innerHTML=inner;
+      demoSteps.appendChild(div);
+      setTimeout(()=>div.classList.add('show'),300+idx*500);
+    });
+  }else{
+    demoTitle.style.display='none';
+    demoSteps.innerHTML='';
+  }
+  document.getElementById('fb').classList.add('show');
+}
+function nextQ(){
+  document.getElementById('fb').classList.remove('show');
+  const b=S.battle;
+  if(b.hearts<=0){endBattle(false);return}
+  b.qi++;
+  if(b.qi>=b.questions.length){endBattle(true);return}
+  if(S.todayTime>=S.dailyLimit){endBattle(true);return}
+  renderBattle()
+}
+function exitBattle(){if(confirm('退出当前关卡？进度不保存')){if(bTimer)clearInterval(bTimer);goLevels()}}
+
+// ==================== 结算 ====================
+function endBattle(pass){
+  if(bTimer)clearInterval(bTimer);
+  const b=S.battle,t=Math.floor((Date.now()-bStart)/1000);
+  let stars=0;
+  if(pass){
+    stars=1;
+    const acc=b.correct/b.answered;
+    if(acc>=0.8)stars=2;
+    if(acc>=0.9&&b.maxCombo>=5)stars=3;
+    if(stars>=2){b.earned+=20;S.stars+=20}
+    if(stars>=3){b.earned+=30;S.stars+=30}
+    const bonus=b.lv.unit<=2?20:b.lv.unit<=4?35:50;
+    b.earned+=bonus;S.stars+=bonus;
+    const prev=S.completed[b.id];
+    if(!prev||prev.stars<stars)S.completed[b.id]={stars,date:todayStr()};
+    const idx=LEVELS.findIndex(l=>l.id===b.id);
+    if(idx>=0&&idx+1<LEVELS.length){
+      const nx=LEVELS[idx+1];
+      if(!S.unlocked.includes(nx.id))S.unlocked.push(nx.id);
+      if(nx.unit>S.curUnit)S.curUnit=nx.unit;
+    }
+    sfxWin();
+  }else{b.earned=Math.floor(b.earned*0.5)}
+  document.getElementById('r-title').textContent=pass?'🎉 关卡通过！':'💔 挑战失败';
+  document.getElementById('r-sub').textContent=b.lv.name;
+  document.getElementById('r-stars').textContent=pass?('⭐'.repeat(stars)+'☆'.repeat(3-stars)):'☆☆☆';
+  document.getElementById('r-correct').textContent=`${b.correct}/${b.answered}`;
+  document.getElementById('r-acc').textContent=b.answered>0?Math.round(b.correct/b.answered*100)+'%':'0%';
+  document.getElementById('r-combo').textContent=b.maxCombo;
+  document.getElementById('r-time').textContent=t+'s';
+  document.getElementById('r-bonus').textContent=`获得智慧星：+${b.earned} ⭐`;
+  save();show('result')
+}
+function nextLevel(){
+  const b=S.battle;
+  const idx=LEVELS.findIndex(l=>l.id===b.id);
+  if(idx>=0&&idx+1<LEVELS.length){
+    const nx=LEVELS[idx+1];
+    if(S.unlocked.includes(nx.id)){startBattle(nx.id);return}
+  }
+  goLevels()
+}
+
+// ==================== 商店 ====================
+function goShop(){show('shop');renderShop()}
+function renderShop(){
+  document.getElementById('shop-stars').textContent=S.stars;
+  let h='';
+  if(S.pending.length>0){
+    h+='<div style="font-size:13px;font-weight:bold;color:#fbbf24;margin-bottom:6px">⏳ 待审核</div>';
+    S.pending.forEach(r=>{h+=`<div class="shop-item pend"><div class="shop-icon">${r.icon}</div><div class="shop-info"><div class="shop-name">${r.name}</div><span class="stag p">等待家长审核</span></div></div>`});
+  }
+  const active=S.approved.filter(r=>!S.used.includes(r.id));
+  if(active.length>0){
+    h+='<div style="font-size:13px;font-weight:bold;color:#34d399;margin-bottom:6px;margin-top:10px">✅ 已获得</div>';
+    active.forEach(r=>{h+=`<div class="shop-item appr"><div class="shop-icon">${r.icon}</div><div class="shop-info"><div class="shop-name">${r.name}</div><span class="stag a">已批准，点击使用</span></div><button class="shop-btn" style="background:#10b981" onclick="useReward('${r.id}')">使用</button></div>`});
+  }
+  h+='<div style="font-size:13px;font-weight:bold;color:#a5b4fc;margin-bottom:6px;margin-top:10px">🎁 可兑换</div>';
+  S.rewards.forEach(r=>{
+    const can=S.stars>=r.price;
+    h+=`<div class="shop-item"><div class="shop-icon">${r.icon}</div><div class="shop-info"><div class="shop-name">${r.name}</div><div class="shop-desc">${r.desc}</div><div class="shop-price">${r.price} ⭐</div></div><button class="shop-btn" ${can?'':'disabled'} onclick="redeem('${r.id}')">兑换</button></div>`;
+  });
+  document.getElementById('shop-list').innerHTML=h;
+}
+function redeem(id){
+  const r=S.rewards.find(x=>x.id===id);
+  if(!r||S.stars<r.price){showToast('智慧星不足');return}
+  S.stars-=r.price;
+  const p={id:'p'+Date.now(),rid:r.id,icon:r.icon,name:r.name,price:r.price,auto:r.auto,date:todayStr()};
+  if(r.auto){S.approved.push(p);showToast('✅ 兑换成功！已自动批准')}
+  else{S.pending.push(p);showToast('⏳ 已申请，等待家长审核')}
+  save();renderShop()
+}
+function useReward(id){if(confirm('确定使用这个奖励？')){S.used.push(id);save();renderShop();showToast('🎉 奖励已使用！')}}
+
+// ==================== 家长后台 ====================
+function parentLogin(){
+  const p=prompt('请输入家长密码（默认：1234）');
+  if(p==='1234'||p===null){show('parent');renderPSettings();renderRewards();renderAudit();renderReport()}
+  else showToast('密码错误')
+}
+function pTab(name,el){
+  document.querySelectorAll('.p-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.p-sec').forEach(s=>s.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('p-'+name).classList.add('active');
+  if(name==='report')renderReport();if(name==='audit')renderAudit()
+}
+function renderPSettings(){document.getElementById('set-unit').value=S.curUnit;document.getElementById('set-time').value=S.dailyLimit}
+function saveSettings(){
+  const u=parseInt(document.getElementById('set-unit').value);
+  const t=parseInt(document.getElementById('set-time').value);
+  if(u>S.curUnit){const f=LEVELS.find(l=>l.unit===u);if(f&&!S.unlocked.includes(f.id))S.unlocked.push(f.id)}
+  S.curUnit=u;S.dailyLimit=t;save();showToast('✅ 设置已保存')
+}
+function renderRewards(){
+  const list=document.getElementById('rw-list');
+  list.innerHTML=S.rewards.map((r,i)=>`<div class="rw-item">
+    <input type="text" value="${r.icon}" style="width:36px;text-align:center" onchange="updReward(${i},'icon',this.value)">
+    <input type="text" value="${r.name}" onchange="updReward(${i},'name',this.value)">
+    <input type="number" value="${r.price}" onchange="updReward(${i},'price',parseInt(this.value))">
+    <button class="rw-del" onclick="delReward(${i})">×</button>
+  </div>`).join('');
+}
+function updReward(i,f,v){S.rewards[i][f]=v}
+function addReward(){S.rewards.push({id:'r'+Date.now(),icon:'🎁',name:'新奖励',desc:'奖励描述',price:50,auto:false});renderRewards()}
+function delReward(i){S.rewards.splice(i,1);renderRewards()}
+function saveRewards(){save();showToast('✅ 奖励设置已保存')}
+function renderAudit(){
+  const list=document.getElementById('audit-list');
+  if(S.pending.length===0){list.innerHTML='<div style="text-align:center;color:#64748b;padding:30px">暂无待审核的兑换申请</div>';return}
+  list.innerHTML=S.pending.map((r,i)=>`<div class="pend-item">
+    <div style="font-size:28px">${r.icon}</div>
+    <div class="pend-info"><div class="pend-name">${r.name}</div><div class="pend-meta">消耗 ${r.price} ⭐ · ${r.date}</div></div>
+    <button class="appr-btn" onclick="audit(${i},true)">通过</button>
+    <button class="rej-btn" onclick="audit(${i},false)">拒绝</button>
+  </div>`).join('');
+}
+function audit(i,ok){
+  const r=S.pending[i];
+  if(ok){S.approved.push(r);showToast('✅ 已批准')}else{S.stars+=r.price;showToast('❌ 已拒绝，智慧星已退还')}
+  S.pending.splice(i,1);save();renderAudit()
+}
+function renderReport(){
+  document.getElementById('rp-tq').textContent=S.stats.todayQ;
+  document.getElementById('rp-tc').textContent=S.stats.todayC;
+  document.getElementById('rp-ta').textContent=S.stats.todayQ>0?Math.round(S.stats.todayC/S.stats.todayQ*100)+'%':'0%';
+  document.getElementById('rp-tt').textContent=Math.floor(S.todayTime/60)+'分钟';
+  document.getElementById('rp-ts').textContent=S.stats.todayS;
+  document.getElementById('rp-q').textContent=S.stats.tq;
+  document.getElementById('rp-a').textContent=S.stats.tq>0?Math.round(S.stats.tc/S.stats.tq*100)+'%':'0%';
+  document.getElementById('rp-l').textContent=Object.keys(S.completed).length;
+  document.getElementById('rp-s').textContent=S.totalStars;
+  const units=[...new Set(LEVELS.map(l=>l.unit))];
+  const un={1:'找规律与速算',2:'和差倍问题',3:'典型应用一',4:'典型应用二',5:'几何与计数',6:'逻辑与推理',7:'课堂测试特训'};
+  let h='';
+  units.forEach(u=>{
+    const ul=LEVELS.filter(l=>l.unit===u);
+    const done=ul.filter(l=>S.completed[l.id]);
+    const ts=done.reduce((s,l)=>s+(S.completed[l.id]?.stars||0),0);
+    const ms=ul.length*3;
+    const p=ms>0?Math.round(ts/ms*100):0;
+    h+=`<div style="margin-bottom:10px"><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px"><span style="color:#c7d2fe">第${u}单元：${un[u]}</span><span style="color:#e0e7ff">${done.length}/${ul.length}关 · ${p}%</span></div><div class="prog-bg"><div class="prog-fg" style="width:${p}%"></div></div></div>`;
+  });
+  document.getElementById('unit-prog').innerHTML=h;
+}
+
+// ==================== 锁定 ====================
+let lockT=null;
+function showLock(){
+  if(bTimer)clearInterval(bTimer);
+  show('lock');
+  updLock();
+  if(lockT)clearInterval(lockT);
+  lockT=setInterval(updLock,1000);
+}
+function updLock(){
+  const n=new Date(),t=new Date(n);
+  t.setDate(t.getDate()+1);t.setHours(0,0,0,0);
+  const d=t-n,h=Math.floor(d/3600000),m=Math.floor((d%3600000)/60000),s=Math.floor((d%60000)/1000);
+  document.getElementById('lock-cd').textContent=String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+}
+
+// ==================== 初始化 ====================
+window.onload=function(){
+  load();
+  const f=LEVELS.find(l=>l.unit===S.curUnit);
+  if(f&&!S.unlocked.includes(f.id)){S.unlocked.push(f.id);save()}
+  // 首次交互启动音乐
+  document.addEventListener('click',function once(){initAudio();if(musicOn)startMusic();document.removeEventListener('click',once)},{once:true});
+}
+</script>
+</body>
+</html>
