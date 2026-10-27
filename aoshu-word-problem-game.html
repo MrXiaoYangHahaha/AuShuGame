@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>奥数应用题闯关 · 第5~6讲</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:'Microsoft YaHei','PingFang SC',system-ui,-apple-system,sans-serif;background:linear-gradient(135deg,#1a1a2e,#16213e);min-height:100vh;display:flex;justify-content:center;color:#e0e7ff}
+#app{width:100%;max-width:520px;min-height:100vh;background:#0f0f23;position:relative;box-shadow:0 0 40px rgba(99,102,241,.25);display:flex;flex-direction:column}
+@media(min-width:561px){#app{border-radius:18px;margin:20px 0;min-height:calc(100vh - 40px);overflow:hidden}}
+.screen{display:none;flex:1;flex-direction:column}
+.screen.active{display:flex}
+
+/* ---------- 顶部条 ---------- */
+.top-bar{background:linear-gradient(90deg,#4338ca,#6d28d9);color:#fff;padding:11px 14px;display:flex;justify-content:space-between;align-items:center;font-size:13px;position:sticky;top:0;z-index:20;flex-shrink:0}
+.top-bar .ttl{font-weight:bold;font-size:15px}
+.back-btn{background:none;border:none;color:#fff;font-size:19px;cursor:pointer;padding:2px 8px;line-height:1}
+.cnt{font-size:12px;color:#ddd6fe}
+.prog{height:4px;background:#1e1b4b;flex-shrink:0;position:sticky;top:46px;z-index:19}
+.prog-fill{height:100%;width:0;background:linear-gradient(90deg,#f472b6,#8b5cf6);transition:width .35s}
+
+/* ---------- 主菜单 ---------- */
+#menu{padding:0 0 30px}
+.hero{text-align:center;padding:34px 20px 20px}
+.hero .ico{font-size:60px;display:block;margin-bottom:12px;animation:bounce 2.6s infinite}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-9px)}}
+.hero h1{font-size:26px;color:#fff;text-shadow:0 0 22px rgba(139,92,246,.65);letter-spacing:1px}
+.hero p{color:#a5b4fc;font-size:13px;margin-top:8px;line-height:1.7}
+.ch-list{padding:6px 16px}
+.ch-card{background:linear-gradient(135deg,rgba(67,56,202,.34),rgba(30,27,75,.95));border:1px solid rgba(139,92,246,.4);border-radius:16px;padding:16px;margin-bottom:13px;cursor:pointer;transition:transform .15s,box-shadow .15s;position:relative;overflow:hidden}
+.ch-card:active{transform:scale(.985)}
+.ch-card:hover{box-shadow:0 8px 22px rgba(99,102,241,.32)}
+.ch-card .row1{display:flex;align-items:center;gap:10px;margin-bottom:7px}
+.ch-card .num{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,#8b5cf6,#6366f1);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:bold;color:#fff;flex-shrink:0}
+.ch-card .nm{font-size:16px;font-weight:bold;color:#fff}
+.ch-card .ds{font-size:12px;color:#a5b4fc;line-height:1.65;padding-left:44px}
+.ch-card .meta{display:flex;justify-content:space-between;align-items:center;margin-top:11px;padding-left:44px;font-size:11.5px;color:#818cf8}
+.ch-card .done-tag{background:rgba(16,185,129,.18);color:#34d399;border:1px solid rgba(16,185,129,.45);padding:2px 9px;border-radius:9px;font-size:11px}
+.ch-card .pbar{height:5px;background:#312e81;border-radius:3px;margin-top:9px;margin-left:44px;overflow:hidden}
+.ch-card .pbar i{display:block;height:100%;background:linear-gradient(90deg,#34d399,#10b981);width:0}
+.tip-card{margin:16px;padding:14px;background:rgba(30,27,75,.75);border:1px dashed rgba(139,92,246,.45);border-radius:14px}
+.tip-card b{color:#c4b5fd;font-size:13px;display:block;margin-bottom:8px}
+.tip-card p{color:#94a3b8;font-size:12px;line-height:1.9}
+.menu-foot{text-align:center;color:#475569;font-size:11px;margin-top:14px;line-height:1.9}
+.menu-foot a{color:#64748b;text-decoration:none}
+
+/* ---------- 答题 ---------- */
+.body{padding:16px 16px 60px;flex:1}
+.qhead{display:flex;align-items:center;gap:9px;margin-bottom:11px;flex-wrap:wrap}
+.qtag{background:linear-gradient(135deg,#f472b6,#ec4899);color:#fff;font-size:11.5px;font-weight:bold;padding:3px 11px;border-radius:9px}
+.qname{font-size:15px;font-weight:bold;color:#e0e7ff}
+.qtext{background:#1e1b4b;border-left:4px solid #8b5cf6;border-radius:0 12px 12px 0;padding:14px 15px;font-size:15.5px;line-height:2;color:#e8ecff;letter-spacing:.2px}
+.hint-btn{width:100%;margin-top:12px;padding:11px;background:rgba(251,191,36,.1);border:1px dashed rgba(251,191,36,.5);color:#fbbf24;border-radius:12px;font-size:13.5px;font-family:inherit;cursor:pointer}
+.hint-btn.on{background:rgba(251,191,36,.2);border-style:solid}
+/* 小提示：气泡 */
+.bubble-wrap{display:none;margin-top:14px;position:relative}
+.bubble-wrap.on{display:block;animation:bubblePop .3s cubic-bezier(.34,1.4,.64,1)}
+@keyframes bubblePop{from{opacity:0;transform:translateY(-8px) scale(.94)}to{opacity:1;transform:none}}
+.bubble{position:relative;background:linear-gradient(165deg,#fffbeb,#fde68a);border:1px solid #fbbf24;border-radius:16px;padding:14px 34px 14px 16px;font-size:13.5px;line-height:2;color:#3f2a08;box-shadow:0 10px 26px rgba(0,0,0,.4)}
+.bubble:before{content:'';position:absolute;top:-7px;left:26px;width:13px;height:13px;background:#fffbeb;border-left:1px solid #fbbf24;border-top:1px solid #fbbf24;transform:rotate(45deg);border-radius:2px 0 0 0}
+.bubble .bl{display:block;font-size:11px;font-weight:bold;color:#b45309;letter-spacing:1px;margin-bottom:5px}
+.bubble b{color:#92400e}
+.bubble .bx{position:absolute;top:7px;right:9px;width:22px;height:22px;border:none;background:rgba(180,83,9,.12);color:#92400e;border-radius:50%;font-size:13px;line-height:1;cursor:pointer;font-family:inherit;padding:0}
+.bubble .bx:active{transform:scale(.92)}
+.bubble .bplay{display:inline-block;margin-top:10px;padding:5px 13px;border:1px solid rgba(180,83,9,.32);background:rgba(255,255,255,.62);color:#92400e;font-size:11.5px;border-radius:20px;font-family:inherit;cursor:pointer}
+.bubble .bplay:active{transform:scale(.96)}
+.ta-label{font-size:12.5px;color:#a5b4fc;margin:16px 0 8px}
+textarea#ans-input{width:100%;min-height:170px;background:#151a33;border:2px solid #3730a3;border-radius:14px;padding:13px 14px;color:#e8ecff;font-size:15px;line-height:1.95;font-family:inherit;resize:vertical;outline:none}
+textarea#ans-input::placeholder{color:#4c5480}
+textarea#ans-input:focus{border-color:#8b5cf6;box-shadow:0 0 0 3px rgba(139,92,246,.16)}
+.btn-answer{width:100%;margin-top:14px;padding:15px;border:none;border-radius:14px;background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff;font-size:16px;font-weight:bold;font-family:inherit;cursor:pointer;box-shadow:0 5px 18px rgba(217,119,6,.35)}
+.btn-answer:active{transform:scale(.985)}
+.btn-answer:disabled{background:#334155;box-shadow:none;color:#64748b}
+
+/* ---------- 解答 ---------- */
+.answer{margin-top:20px;background:#101a2b;border:1px solid rgba(16,185,129,.32);border-radius:16px;padding:0 0 18px;overflow:hidden;animation:fadeUp .35s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.ans-hd{background:linear-gradient(90deg,rgba(16,185,129,.22),rgba(16,185,129,.04));padding:11px 15px;font-size:14.5px;font-weight:bold;color:#6ee7b7;border-bottom:1px solid rgba(16,185,129,.2)}
+.sec-t{font-size:13.5px;font-weight:bold;color:#c4b5fd;margin:16px 15px 9px}
+ul.pts{margin:0 15px;padding-left:0;list-style:none}
+ul.pts li{position:relative;padding-left:18px;font-size:13.5px;line-height:1.95;color:#cbd5e1;margin-bottom:7px}
+ul.pts li:before{content:'';position:absolute;left:4px;top:9px;width:6px;height:6px;border-radius:50%;background:#8b5cf6}
+ul.pts li b{color:#fbbf24;font-weight:bold}
+.dia{margin:14px 15px;background:#0b1120;border:1px solid #1e293b;border-radius:12px;padding:12px 8px 8px}
+.dia svg{width:100%;height:auto;display:block}
+.dia-cap{font-size:11.5px;color:#7c8bb0;text-align:center;line-height:1.7;margin-top:7px;padding:0 6px}
+.step{display:flex;gap:11px;margin:0 15px 12px}
+.sn{width:23px;height:23px;border-radius:50%;background:linear-gradient(135deg,#8b5cf6,#6366f1);color:#fff;font-size:12px;font-weight:bold;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.sb{flex:1;min-width:0}
+.st{font-size:13.5px;color:#e2e8f7;line-height:1.7;font-weight:bold}
+.sm{display:inline-block;margin-top:6px;background:rgba(139,92,246,.16);border:1px solid rgba(139,92,246,.35);border-radius:8px;padding:5px 11px;font-size:14px;color:#ddd6fe;font-family:'Consolas',monospace;letter-spacing:.5px;line-height:1.6}
+.sd{font-size:12.5px;color:#8b98b8;line-height:1.8;margin-top:6px}
+.check{margin:4px 15px 0;background:rgba(16,185,129,.08);border:1px dashed rgba(16,185,129,.4);border-radius:12px;padding:4px 13px 12px}
+.check .sec-t{margin-left:0;margin-right:0;color:#6ee7b7}
+.ck{font-size:13px;color:#a7f3d0;line-height:1.9}
+.final{margin:16px 15px 0;background:linear-gradient(135deg,rgba(236,72,153,.2),rgba(139,92,246,.2));border:1px solid rgba(236,72,153,.5);border-radius:12px;padding:13px 15px;font-size:16px;font-weight:bold;color:#fff;line-height:1.7}
+.pitfall{margin:14px 15px 0;background:rgba(239,68,68,.08);border-left:3px solid #ef4444;border-radius:0 10px 10px 0;padding:11px 13px;font-size:12.5px;color:#fca5a5;line-height:1.9}
+.pitfall b{color:#f87171}
+.btn-next{display:block;width:calc(100% - 30px);margin:18px 15px 0;padding:15px;border:none;border-radius:14px;background:linear-gradient(135deg,#34d399,#10b981);color:#04231a;font-size:16px;font-weight:bold;font-family:inherit;cursor:pointer;box-shadow:0 5px 18px rgba(16,185,129,.35)}
+.btn-next:active{transform:scale(.985)}
+.btn-next.fin{background:linear-gradient(135deg,#f472b6,#a855f7);color:#fff;box-shadow:0 5px 20px rgba(168,85,247,.4)}
+
+/* ---------- 完成页 ---------- */
+#done{align-items:center;justify-content:center;padding:30px 22px;text-align:center}
+#done .big{font-size:72px;animation:bounce 2s infinite}
+#done h2{font-size:23px;color:#fff;margin:16px 0 10px;text-shadow:0 0 18px rgba(139,92,246,.6)}
+#done p{color:#a5b4fc;font-size:14px;line-height:2}
+.done-acts{margin-top:28px;width:100%;max-width:330px}
+.done-acts button{width:100%;padding:14px;border:none;border-radius:13px;font-size:15px;font-weight:bold;font-family:inherit;cursor:pointer;margin-bottom:11px;color:#fff}
+.bp{background:linear-gradient(135deg,#6366f1,#8b5cf6)}
+.bs{background:#334155;color:#cbd5e1 !important}
+
+.toast{position:fixed;left:50%;bottom:40px;transform:translateX(-50%);background:rgba(30,27,75,.96);border:1px solid #8b5cf6;color:#e0e7ff;padding:10px 20px;border-radius:22px;font-size:13px;opacity:0;pointer-events:none;transition:opacity .3s;z-index:99}
+.toast.show{opacity:1}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- ========== 主菜单 ========== -->
+  <div id="menu" class="screen active">
+    <div class="hero">
+      <span class="ico">📝</span>
+      <h1>奥数应用题闯关</h1>
+      <p>四年级上册 · 第 5~6 讲<br/>把题目读懂 → 画线段 → 数份数 → 算出来</p>
+    </div>
+    <div class="ch-list" id="ch-list"></div>
+    <div class="tip-card">
+      <b>🔑 解题三句口诀</b>
+      <p>1. 谁最小，谁当 1 份；<br/>2. 其他对象都翻译成"几份 + 多几（或少几）"；<br/>3. 份数相加，零头相减，剩下的平均分。</p>
+    </div>
+    <div class="menu-foot">
+      不会做也没关系，先随便写一写自己的想法，<br/>再点"参考答案"看看别人是怎么想的。<br/><br/>
+      <a href="index.html">← 返回游戏大厅</a>
+    </div>
+  </div>
+
+  <!-- ========== 章节答题 ========== -->
+  <div id="ch" class="screen">
+    <div class="top-bar">
+      <button class="back-btn" onclick="backToMenu()">←</button>
+      <div class="ttl" id="ch-title">章节</div>
+      <div class="cnt" id="ch-count">1 / 6</div>
+    </div>
+    <div class="prog"><div class="prog-fill" id="prog-fill"></div></div>
+    <div class="body" id="ch-body"></div>
+  </div>
+
+  <!-- ========== 完成页 ========== -->
+  <div id="done" class="screen">
+    <div class="big">🎉</div>
+    <h2 id="done-title">第三章全部拿下！</h2>
+    <p id="done-sub"></p>
+    <div class="done-acts">
+      <button class="bp" id="done-next" onclick="nextChapter()">挑战下一章 →</button>
+      <button class="bs" onclick="backToMenu()">返回章节列表</button>
+    </div>
+  </div>
+
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* =========================================================
+   一、线段图渲染器
+   rows: [{name, segs:[{w,t,k,top}]}]
+   k: c1紫 c2蓝 c3青 c4绿 tail橙(零头) ghost红虚线(少) q紫虚线(未知)
+   ========================================================= */
+const SEG = {
+  c1:{fill:'#6d28d9',stroke:'#a78bfa'},
+  c2:{fill:'#1d4ed8',stroke:'#60a5fa'},
+  c3:{fill:'#0e7490',stroke:'#22d3ee'},
+  c4:{fill:'#4d7c0f',stroke:'#a3e635'},
+  tail:{fill:'#b45309',stroke:'#fbbf24'},
+  ghost:{fill:'rgba(239,68,68,.10)',stroke:'#ef4444'},
+  q:{fill:'#1e1b4b',stroke:'#c4b5fd'}
+};
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function bar(cfg){
+  const W=470, LEFT=96, RIGHT=12, TOP=26, ROW=58, BARH=27;
+  const rows=cfg.rows||[];
+  let maxW=0;
+  rows.forEach(r=>{let s=0;(r.segs||[]).forEach(g=>{s+=(g.w||0)});if(s>maxW)maxW=s;});
+  if(!maxW)maxW=1;
+  const px=(W-LEFT-RIGHT)/maxW;
+  const H=TOP+rows.length*ROW+4;
+  const o=[]; const info=[]; let y=TOP;
+  rows.forEach(r=>{
+    const ry=y; let x=LEFT; const end0={x:LEFT};
+    const nfs=Math.min(12.5, 84/Math.max(4, String(r.name).length));
+    o.push('<text x="'+(LEFT-10)+'" y="'+(ry+BARH/2+4.5)+'" text-anchor="end" font-size="'+nfs.toFixed(1)+'" fill="#c7d2fe">'+esc(r.name)+'</text>');
+    (r.segs||[]).forEach(g=>{
+      const w=(g.w||0)*px;
+      const st=SEG[g.k||'c1'];
+      const dash=(g.k==='ghost'||g.k==='q')?' stroke-dasharray="5 4"':'';
+      // cut: 这一段末尾"缺掉"的长度（"几份少几"要画成完整份数 + 末尾虚线缺口）
+      const cutW=(g.cut||0)*px;
+      const solidW=Math.max(0,w-cutW);
+      if(solidW>0.4) o.push('<rect x="'+x.toFixed(1)+'" y="'+ry+'" width="'+solidW.toFixed(1)+'" height="'+BARH+'" rx="5" fill="'+st.fill+'" stroke="'+st.stroke+'" stroke-width="1.4"'+dash+'/>');
+      if(cutW>0.4){
+        const cx0=x+solidW;
+        o.push('<rect x="'+cx0.toFixed(1)+'" y="'+ry+'" width="'+cutW.toFixed(1)+'" height="'+BARH+'" rx="5" fill="rgba(239,68,68,.14)" stroke="#ef4444" stroke-width="1.3" stroke-dasharray="4 3"/>');
+        o.push('<line x1="'+cx0.toFixed(1)+'" y1="'+(ry-6)+'" x2="'+cx0.toFixed(1)+'" y2="'+(ry+BARH+6)+'" stroke="#ef4444" stroke-width="1.4" stroke-dasharray="3 3"/>');
+        if(g.cutLbl){
+          o.push('<text x="'+Math.min(x+w,W-RIGHT).toFixed(1)+'" y="'+(ry+BARH+14)+'" text-anchor="end" font-size="10.5" fill="#fca5a5" stroke="#0b1120" stroke-width="3" paint-order="stroke">'+esc(g.cutLbl)+'</text>');
+        }
+      }
+      if(g.t){
+        const avail=cutW>0.4?solidW:w;
+        const fs=avail>70?11.5:(avail>46?10.5:9.5);
+        // 估一下文字宽度：汉字按 1 个字号，字母数字按 0.56
+        let tw=0; String(g.t).split('').forEach(ch=>{tw+=/[\x00-\xff]/.test(ch)?0.56*fs:fs;});
+        const onLine=(g.div>1 && g.div%2===0 && cutW<=0.4);   // 偶数份时中点落在分格线上
+        if(cutW>30 || onLine || (avail>30 && tw>avail-8)){
+          // 缺口明显 / 中点在分格线上 / 色块装不下：标签放到整条上方，不压住格子
+          o.push('<text x="'+Math.min(x+w/2,W-RIGHT-2).toFixed(1)+'" y="'+(ry-6)+'" text-anchor="middle" font-size="10.5" fill="#c7d2fe" stroke="#0b1120" stroke-width="3" paint-order="stroke">'+esc(g.t)+'</text>');
+        }else if(avail>30){
+          const cx=x+avail/2;
+          o.push('<text x="'+cx.toFixed(1)+'" y="'+(ry+BARH/2+4)+'" text-anchor="middle" font-size="'+fs+'" fill="'+(g.k==='ghost'?'#fca5a5':'#ffffff')+'" stroke="#0b1120" stroke-width="2.6" paint-order="stroke">'+esc(g.t)+'</text>');
+        }else{
+          // 太窄放不进色块：写到色块上方，右端对齐，避免超出画布
+          const tx=Math.min(x+w, W-RIGHT);
+          o.push('<text x="'+tx.toFixed(1)+'" y="'+(ry-6)+'" text-anchor="end" font-size="10.5" fill="#fbbf24" stroke="#0b1120" stroke-width="3" paint-order="stroke">'+esc(g.t)+'</text>');
+        }
+      }
+      // 分格线画在文字之上，保证格子数得清
+      if(g.div&&g.div>1&&w>16){
+        for(var di=1;di<g.div;di++){
+          var dx=x+w*di/g.div;
+          if(dx>solidW+x-0.5) continue;   // 缺口里不画分格线
+          o.push('<line x1="'+dx.toFixed(1)+'" y1="'+(ry+1.5)+'" x2="'+dx.toFixed(1)+'" y2="'+(ry+BARH-1.5)+'" stroke="rgba(8,10,26,.85)" stroke-width="1.4" stroke-dasharray="3 2.5"/>');
+        }
+      }
+      if(g.top) o.push('<text x="'+(x+w/2).toFixed(1)+'" y="'+(ry-7)+'" text-anchor="middle" font-size="10.5" fill="#a5b4fc">'+esc(g.top)+'</text>');
+      x+=w;
+    });
+    info.push({y:ry,end:x});
+    y+=ROW;
+  });
+  (cfg.vlines||[]).forEach(v=>{
+    const a=info[v.from], b=info[v.to];
+    if(!a||!b) return;
+    const x=a.end;
+    const maxLen=W-RIGHT-x-4;
+    const est=v.label.length*10.2;
+    const anchor=est>maxLen?'end':'start';
+    const lx=anchor==='end'?(x-6):(x+6);
+    o.push('<line x1="'+x.toFixed(1)+'" y1="'+(a.y+BARH)+'" x2="'+x.toFixed(1)+'" y2="'+b.y+'" stroke="#f87171" stroke-width="1.3" stroke-dasharray="4 4"/>');
+    const ly=Math.min((a.y+BARH+b.y)/2+4, a.y+BARH+13);
+    o.push('<text x="'+lx.toFixed(1)+'" y="'+ly.toFixed(1)+'" text-anchor="'+anchor+'" font-size="10.5" fill="#f87171" stroke="#0b1120" stroke-width="3" paint-order="stroke">'+esc(v.label)+'</text>');
+  });
+  return '<svg viewBox="0 0 '+W+' '+H+'" xmlns="http://www.w3.org/2000/svg">'+o.join('')+'</svg>';
+}
+
+/* =========================================================
+   二、题库
+   ========================================================= */
+const DATA = [
+{
+  id:'c5',
+  title:'第 5 讲',
+  full:'第 5 讲　和差倍中的隐藏条件',
+  desc:'题目里的数量一直在变，但总有一个量偷偷没变。抓住它，题目就变简单了。',
+  qs:[
+  {
+    id:'c5q1', tag:'例题 1', name:'棋子对局',
+    text:'小高和墨莫玩游戏，每玩一局，输的就要给赢的一枚棋子。一开始小高有 18 枚棋子，墨莫则有 22 枚。玩了若干局之后，小高反而比墨莫多了 10 枚棋子。请问：此时小高有多少枚棋子？',
+    hint:'只问"现在小高有多少枚"，不用管到底玩了几局。想一想：每玩一局，两个人手里的棋子总数变了吗？',
+    points:[
+      '每玩一局，只是把 <b>1 枚棋子</b> 从输的人手里，交到赢的人手里。谁也没有多出来，谁也没有少下去——<b>两个人的棋子总数一直不变</b>。',
+      '总数 = 18 + 22 = <b>40 枚</b>，玩多少局都是 40 枚。这就是本题"藏起来的"那个不变量。',
+      '现在知道"和 = 40"、"差 = 10"，就能求了：<b>先把多出来的 10 枚拿走，剩下的两人一样多，再平均分。</b>'
+    ],
+    diagrams:[
+      {svg:bar({rows:[
+        {name:'墨莫（现在）',segs:[{w:1,t:'1 份',k:'c2'}]},
+        {name:'小高（现在）',segs:[{w:1,t:'1 份',k:'c1'},{w:0.67,t:'+10 枚',k:'tail'}]}
+      ]}),
+      cap:'两条横条合起来永远是 40 枚；小高那条比墨莫长出来的部分，就是 10 枚。'}
+    ],
+    steps:[
+      {h:'先抓住不变的总数',m:'18 + 22 = 40（枚）',d:'棋子只在两人之间换手，总数不会变，所以"和"永远是 40 枚。'},
+      {h:'把多出来的 10 枚先拿走',m:'40 − 10 = 30（枚）',d:'拿走 10 枚以后，小高和墨莫就一样多了。'},
+      {h:'剩下的平均分成两份',m:'30 ÷ 2 = 15（枚）',d:'这 15 枚就是墨莫现在的棋子数。'},
+      {h:'小高的 = 墨莫的 + 10',m:'15 + 10 = 25（枚）',d:'多出来的那 10 枚还回去，小高就是 25 枚。'}
+    ],
+    check:['25 + 15 = 40 ✓ 总数还是 40 枚，没变','25 − 15 = 10 ✓ 小高正好比墨莫多 10 枚'],
+    answer:'此时小高有 25 枚棋子（墨莫有 15 枚）。',
+    pitfall:'很多孩子卡在"到底玩了几局"。题目没给局数，也不需要有——因为不管玩几局，总数都是 40。看到"你给我、我给你"这种来回换手的题，第一反应就该是：<b>总数不变</b>。'
+  },
+  {
+    id:'c5q2', tag:'练习 1', name:'两个水桶',
+    text:'有大、小两个水桶，分别装有 690 毫升和 210 毫升水。现在从大桶中倒了一些水到小桶后（水没有溢出），大桶里的水量变成了小桶的 2 倍。请问：从大桶中倒了多少毫升水到小桶？',
+    hint:'水只是从大桶"搬"到小桶，一滴也没有多、没有少。两桶水的总量是不变的。',
+    points:[
+      '倒水 = <b>搬运</b>。水从大桶跑到小桶，两桶水加起来的总量一点没变：690 + 210 = <b>900 毫升</b>。',
+      '倒完以后"大桶是小桶的 2 倍" → 小桶画 <b>1 份</b>，大桶画 <b>2 份</b>，合起来 <b>3 份</b>。',
+      '3 份 = 900 毫升 → 1 份 = 300 毫升。算出倒完以后的水量，再和原来比，就知道倒了多少。'
+    ],
+    diagrams:[
+      {svg:bar({rows:[
+        {name:'大桶（原来）',segs:[{w:690,t:'690 毫升',k:'c1'}]},
+        {name:'小桶（原来）',segs:[{w:210,t:'210 毫升',k:'c2'}]}
+      ]}),
+      cap:'原来一共 900 毫升 —— 倒来倒去，这个数一直不变。'},
+      {svg:bar({rows:[
+        {name:'小桶（倒完）',segs:[{w:1,t:'1 份',k:'c2'}]},
+        {name:'大桶（倒完）',segs:[{w:2,t:'2 份',k:'c1',div:2}]}
+      ]}),
+      cap:'大桶是小桶的 2 倍，合起来正好 3 份，3 份就是那 900 毫升。'}
+    ],
+    steps:[
+      {h:'抓住不变的总水量',m:'690 + 210 = 900（毫升）',d:'水只是换了个桶，总量不变。'},
+      {h:'倒完以后一共几份',m:'1 + 2 = 3（份）',d:'小桶 1 份，大桶是小桶的 2 倍，就是 2 份。'},
+      {h:'求 1 份（小桶现在的水）',m:'900 ÷ 3 = 300（毫升）'},
+      {h:'大桶现在的水',m:'300 × 2 = 600（毫升）'},
+      {h:'和原来比一比，就知道倒了多少',m:'690 − 600 = 90（毫升）',d:'用小桶看也一样：300 − 210 = 90 毫升。'}
+    ],
+    check:['600 + 300 = 900 ✓ 总水量没变','600 正好是 300 的 2 倍 ✓'],
+    answer:'从大桶倒了 90 毫升水到小桶。',
+    pitfall:'常见错误是拿 690 ÷ 2 − 210 直接算。要记住：<b>"2 倍"说的是倒完以后的关系</b>，必须先求出倒完以后每一份是多少，再倒推倒了多少。'
+  },
+  {
+    id:'c5q3', tag:'小故事', name:'包子陷阱题',
+    text:'阿呆和阿瓜去包子铺买包子，一共买了 250 个包子。阿呆看阿瓜不够吃，分了 10 个包子给阿瓜；阿瓜不好意思，把自己的一半拿出来给了阿呆；阿呆不高兴了，把自己的包子分成 10 份，挑了其中的 8 份给阿瓜；阿瓜执拗不过阿呆，最后给了阿呆一个包子。这么折腾下来，现在两人一共有多少个包子？',
+    hint:'这题看着要算半天，其实只要盯住两个字——"一共"。包子从一个人手里跑到另一个人手里，总数会变吗？',
+    points:[
+      '不管怎么给、给几次、给多少，包子都还在阿呆和阿瓜手里，既没有跑掉，也没有多出来。',
+      '所以"两人一共有多少个"从头到尾都是 <b>250 个</b>。',
+      '这道题考的不是计算，是<b>敢不敢停下来想一想</b>：题目到底问的是什么？'
+    ],
+    diagrams:[
+      {svg:bar({rows:[
+        {name:'刚开始',segs:[{w:1,t:'两人一共 250 个',k:'c1'}]},
+        {name:'分了 10 个',segs:[{w:1,t:'两人一共 250 个',k:'c1'}]},
+        {name:'给出一半',segs:[{w:1,t:'两人一共 250 个',k:'c1'}]},
+        {name:'给了 8 份',segs:[{w:1,t:'两人一共 250 个',k:'c1'}]},
+        {name:'最后给 1 个',segs:[{w:1,t:'两人一共 250 个',k:'c1'}]}
+      ]}),
+      cap:'换来换去，横条一点没变长，也一点没变短。'}
+    ],
+    steps:[
+      {h:'分清"给了多少"和"一共有多少"',m:'250（个）',d:'"给来给去"只改变两个人各有多少，不改变两人一共有多少。'},
+      {h:'逐次检查一遍，确认真的没变',m:'250 → 250 → 250 → 250 → 250',d:'分 10 个：总数还是 250；给出一半：还是 250；给出 8 份：还是 250；最后给 1 个：还是 250。'}
+    ],
+    check:['从头到尾，两个人数量的"和"一次都没有变过 ✓'],
+    answer:'现在两人一共有 250 个包子。',
+    pitfall:'孩子容易一头扎进去算"阿呆原来几个、阿瓜原来几个"。题目只问"一共"，属于典型的<b>陷阱题</b>——只要总数不变，中间所有过程都可以不看。'
+  },
+  {
+    id:'c5q4', tag:'例题 2', name:'两根绳子',
+    text:'小高家有两根绳子，长的那根有 163 米，短的只有 97 米。他把两根绳子剪去同样多的长度，结果长绳所剩的长度比短绳所剩长度的 7 倍还多 6 米。那么两根绳子都剪去了几米？',
+    hint:'两根绳子剪掉的是一样长的。想一想：一个减掉 5 米，另一个也减掉 5 米，它们之间"相差多少"会变吗？',
+    points:[
+      '两根剪掉<b>同样多</b> → 就像两个人同时各长高 1 厘米，谁也没追上谁，<b>长度差永远不变</b>：163 − 97 = 66 米。',
+      '剪完以后：长绳 = 短绳的 7 倍 + 6 米 → 长绳比短绳多出来的部分是 <b>"6 份 + 6 米"</b>。',
+      '这个"6 份 + 6 米"正好等于不变的 66 米 → 6 份 = 60 米 → 1 份 = 10 米（短绳剩下的长度）。',
+      '最后用"原来 − 剩下"就得到剪去的长度。'
+    ],
+    diagrams:[
+      {svg:bar({rows:[
+        {name:'短绳（原来）',segs:[{w:97,t:'97 米',k:'c2'}]},
+        {name:'长绳（原来）',segs:[{w:163,t:'163 米',k:'c1'}]}
+      ],vlines:[{from:0,to:1,label:'差 66 米'}]}),
+      cap:'剪掉一样长，两条横条的"头"一起往回收，这个差就一直是 66 米。'},
+      {svg:bar({rows:[
+        {name:'短绳（剩下）',segs:[{w:1,t:'1 份',k:'c2'}]},
+        {name:'长绳（剩下）',segs:[{w:7,t:'7 份',k:'c1',div:7},{w:0.6,t:'+6米',k:'tail'}]}
+      ],vlines:[{from:0,to:1,label:'多 6 份 + 6 米 = 66 米'}]}),
+      cap:'长绳比短绳多出来的，就是"6 份 再加 6 米"，它等于 66 米。'}
+    ],
+    steps:[
+      {h:'先求长度差（这是不变量）',m:'163 − 97 = 66（米）',d:'剪掉一样长，差永远不变。'},
+      {h:'画线段：把剩下的短绳看成 1 份',m:'长绳 = 7 份 + 6 米'},
+      {h:'长绳比短绳多几份',m:'7 − 1 = 6（份），再多 6 米',d:'所以"6 份 + 6 米"就是那不变的 66 米。'},
+      {h:'先把零头 6 米去掉',m:'66 − 6 = 60（米）',d:'去掉零头，剩下的 60 米正好是整齐的 6 份。'},
+      {h:'求 1 份（短绳剩下多少）',m:'60 ÷ 6 = 10（米）'},
+      {h:'原来 − 剩下 = 剪去的',m:'97 − 10 = 87（米）',d:'长绳验一下：163 − 87 = 76，而 10 × 7 + 6 = 76，对上了。'}
+    ],
+    check:['长绳剩 76 米，短绳剩 10 米，76 − 10 = 66 ✓ 差没变','10 × 7 + 6 = 76 ✓ 长绳正好是短绳的 7 倍多 6 米'],
+    answer:'两根绳子都剪去了 87 米。',
+    pitfall:'最容易错的是把"7 倍多 6"里的 6 忘了减，直接 66 ÷ 7。记住口诀：<b>份数相加，零头相减</b>——先减零头，再分份数。'
+  },
+  {
+    id:'c5q5', tag:'练习 2', name:'两只老鼠吃面条',
+    text:'两只老鼠"叽叽"和"喳喳"在吃面条，"叽叽"吃的面条比较长，有 40 厘米；"喳喳"吃的比较短，只有 25 厘米。它们吃面条的速度相同，过了一段时间后，长面条的长度是短面条的 2 倍。那么此时短面条还剩多少厘米？',
+    hint:'速度相同 → 同一段时间里，两根面条被吃掉的长度是一样的。那"两根面条相差多少"变了吗？',
+    points:[
+      '吃得一样多 → <b>长度差不变</b>：40 − 25 = 15 厘米。',
+      '吃完以后：长 = 短的 2 倍 → 长比短多 <b>1 份</b>，这 1 份就是 15 厘米。',
+      '所以短面条现在剩 15 厘米。'
+    ],
+    diagrams:[
+      {svg:bar({rows:[
+        {name:'短面条',segs:[{w:25,t:'25 厘米',k:'c2'}]},
+        {name:'长面条',segs:[{w:40,t:'40 厘米',k:'c1'}]}
+      ],vlines:[{from:0,to:1,label:'差 15 厘米'}]}),
+      cap:'两根吃得一样多，横条一起变短，差 15 厘米始终不变。'},
+      {svg:bar({rows:[
+        {name:'短（现在）',segs:[{w:1,t:'1 份',k:'c2'}]},
+        {name:'长（现在）',segs:[{w:2,t:'2 份',k:'c1',div:2}]}
+      ],vlines:[{from:0,to:1,label:'多出来的 1 份'}]}),
+      cap:'长是短的 2 倍，多出来的那 1 份，正好就是两根面条一直没变的那个差。'}
+    ],
+    steps:[
+      {h:'求长度差（这是不变量）',m:'40 − 25 = 15（厘米）'},
+      {h:'看倍数：长 = 短的 2 倍',m:'长比短多 2 − 1 = 1（份）'},
+      {h:'这 1 份 = 15 厘米',m:'短面条现在剩 15 厘米'},
+      {h:'回头检查长面条',m:'25 − 15 = 10（厘米）被吃掉；40 − 10 = 30（厘米）',d:'30 正好是 15 的 2 倍，说明两根都吃掉了 10 厘米，一样多。'}
+    ],
+    check:['两根都吃掉 10 厘米 ✓ 吃的一样多','30 正好是 15 的 2 倍 ✓'],
+    answer:'此时短面条还剩 15 厘米。',
+    pitfall:'要和"和不变"分开：这一题两条面条的总长（65 厘米）是在<b>变小</b>的，只有"差"不变。判断口诀：<b>同增同减看差，给来给去看和。</b>'
+  },
+  {
+    id:'c5q6', tag:'小判断', name:'找出不变量',
+    text:'判断下面这几种情况里，什么量是"不变量"？\n① 小山羊把 10 捆草分给大山羊。\n② 两根木头，每次锯掉的部分一样长。\n③ 小糊涂和大糊涂去炒股，最后都赚了 250 元。\n④ 儿子和爸爸比年龄，无论过了几年。',
+    hint:'两句口诀：给来给去和不变，同增同减差不变。先看每句话是"给来给去"还是"同增同减"。',
+    points:[
+      '第 ① 句是<b>"给来给去"</b>：草只是换了个主人，<b>草的总捆数</b>不变。',
+      '第 ②、④ 句是<b>"同增同减"</b>：两根木头都锯掉一样长、父子俩每年都长 1 岁，<b>差</b>不变。',
+      '第 ③ 句是<b>"同增"</b>：两个人各多 250 元，多的一样多，<b>两人钱数的差</b>不变。'
+    ],
+    diagrams:null,
+    steps:[
+      {h:'① 小山羊把 10 捆草分给大山羊',m:'不变量：草的总捆数（还是 10 捆）',d:'给来给去，和不变。'},
+      {h:'② 两根木头每次锯掉一样长',m:'不变量：两根木头的长度差',d:'同增同减，差不变。'},
+      {h:'③ 两人炒股都赚了 250 元',m:'不变量：两人钱数的差',d:'同增同减，差不变。'},
+      {h:'④ 父子比年龄，过了几年',m:'不变量：父子俩的年龄差',d:'两人每年都长 1 岁，年龄差永远是那个数。'}
+    ],
+    check:['① 是"和不变"，②③④ 都是"差不变" ✓'],
+    answer:'① 草的<b>总捆数</b>；② 两根木头的<b>长度差</b>；③ 两人的<b>钱数差</b>；④ 父子的<b>年龄差</b>。',
+    pitfall:'第 ① 句不要答成"每人分到几捆"，第 ③ 句不要答成"每人有多少钱"。不变量，要在变化里找那个<b>没被动过</b>的量。'
+  }
+  ]
+},
+{
+  id:'c6',
+  title:'第 6 讲',
+  full:'第 6 讲　复杂和差倍',
+  desc:'对象太多看不清？把几个对象"打包"捆成一个，三个变两个，就和差倍问题一样了。',
+  qs:[
+  {
+    id:'c6q1', tag:'例题 1', name:'三种书',
+    text:'小华所有的数学书、语文书和英语书一共 70 本，其中数学书和语文书的数量之和是英语书的 4 倍，数学书和英语书的数量之和比语文书的 3 倍少 2 本，那么小华有几本数学书？',
+    hint:'对象有三个，一眼看不出来。能不能把"数学书 + 语文书"用绳子捆成一包？这样三个对象就变成两个了。',
+    points:[
+      '第一句"数学 + 语文 是英语的 4 倍" → 把数学和语文<b>捆成一包</b>，一包就是 <b>4 份</b>，英语 <b>1 份</b>，一共 <b>5 份 = 70 本</b>。',
+      '5 份 = 70 本 → 1 份（英语）= 14 本，一包（数学+语文）= 56 本。',
+      '再看第二句"数学 + 英语 比 语文的 3 倍少 2 本" → 语文 1 份，它的 3 倍是 3 份，所以"数学 + 英语" = 3 份 − 2 本。',
+      '把三科合起来：语文（1 份）+ 数学和英语（3 份 − 2）= <b>4 份 − 2 = 70</b>。'
+    ],
+    diagrams:[
+      {svg:bar({rows:[
+        {name:'英语书',segs:[{w:1,t:'1 份',k:'c2'}]},
+        {name:'数学+语文',segs:[{w:4,t:'4 份',k:'c1',div:4}]}
+      ]}),
+      cap:'把数学和语文捆成一包，一包顶 4 份，加上英语 1 份，一共 5 份 = 70 本。'},
+      {svg:bar({rows:[
+        {name:'语文书',segs:[{w:1,t:'1 份',k:'c3'}]},
+        {name:'语文的 3 倍',segs:[{w:3,t:'3 份',k:'c1',div:3}]},
+        {name:'数学+英语',segs:[{w:3,t:'3 份',k:'c2',div:3,cut:0.143,cutLbl:'这里少 2 本'}]}
+      ]}),
+      cap:'"数学 + 英语"是完整的 3 份，但末尾差一点点才够 3 份——那一点点就是 2 本。'}
+    ],
+    steps:[
+      {h:'打包：把"数学书 + 语文书"捆成一包',m:'一包 = 英语书的 4 倍',d:'三个对象，变成两个对象。'},
+      {h:'数一数一共几份',m:'4 份（一包）+ 1 份（英语）= 5（份）= 70 本'},
+      {h:'求 1 份 → 英语书',m:'70 ÷ 5 = 14（本）'},
+      {h:'求一包 → 数学 + 语文',m:'14 × 4 = 56（本）',d:'所以 数学 = 56 − 语文。'},
+      {h:'把第二句话翻译成份数',m:'语文 1 份，数学 + 英语 = 3 份 − 2 本'},
+      {h:'三科合起来，求语文',m:'1 份 +（3 份 − 2）= 4 份 − 2 = 70',d:'4 份 = 72，所以 1 份（语文）= 72 ÷ 4 = 18（本）。'},
+      {h:'最后求数学',m:'56 − 18 = 38（本）'}
+    ],
+    check:['38 + 18 + 14 = 70 ✓ 三科一共 70 本','38 + 18 = 56 = 4 × 14 ✓ 数学+语文是英语的 4 倍','38 + 14 = 52 = 3 × 18 − 2 ✓ 数学+英语比语文的 3 倍少 2 本'],
+    answer:'小华有 38 本数学书。',
+    pitfall:'第 5 步最容易乱。可以让孩子用手指着线段图念："语文画 1 段，3 倍就画 3 段，再往回缩一点点（−2）。"缩掉的那一点点，就是减掉的 2 本。'
+  },
+  {
+    id:'c6q2', tag:'练习 1', name:'三种纸鹤',
+    text:'萱萱折了有大、中、小三种纸鹤共 576 只，其中大纸鹤与中纸鹤的总数要比小纸鹤多 24 只，那么萱萱折了多少只小纸鹤？',
+    hint:'还是打包。"大纸鹤 + 中纸鹤"捆成一包，这一包和小纸鹤只差 24 只。两个对象 ＋ 和差，就能解了。',
+    points:[
+      '打包：<b>大 + 中 = 小 + 24</b>。',
+      '三样合起来写成"小纸鹤"的样子：（小 + 24）+ 小 = 576。',
+      '先把多出来的 24 只拿掉，剩下就是 2 份一样多 → 平均分。'
+    ],
+    diagrams:[
+      {svg:bar({rows:[
+        {name:'小纸鹤',segs:[{w:1,t:'1 份',k:'c2'}]},
+        {name:'大 + 中',segs:[{w:1,t:'1 份',k:'c1'},{w:0.087,t:'+24',k:'tail'}]}
+      ]}),
+      cap:'先拿走多的 24 只，两条横条就一样长了，正好平分 576 − 24。'}
+    ],
+    steps:[
+      {h:'打包',m:'大 + 中 = 小 + 24（只）'},
+      {h:'三样合起来，全写成"小纸鹤"',m:'（小 + 24）+ 小 = 576'},
+      {h:'先拿走多出来的 24 只',m:'576 − 24 = 552（只）',d:'拿走以后，"大 + 中"和小纸鹤一样多了，一共 2 份。'},
+      {h:'平均分',m:'552 ÷ 2 = 276（只）',d:'这就是小纸鹤的只数。'},
+      {h:'顺便算算大 + 中',m:'276 + 24 = 300（只）'}
+    ],
+    check:['276 + 300 = 576 ✓ 三种一共 576 只','300 − 276 = 24 ✓ 大+中比小纸鹤多 24 只'],
+    answer:'萱萱折了 276 只小纸鹤。',
+    pitfall:'不能直接 576 ÷ 2 = 288。因为"大 + 中"比"小"多 24 只，两份并不一样多，<b>必须先把多的 24 拿走再平分</b>。'
+  },
+  {
+    id:'c6q3', tag:'例题 2', name:'四个人的年龄',
+    text:'四个人的年龄和等于 77，其中年龄最小的是 10 岁，他与年龄最大的人的年龄之和比另外两人的年龄之和大 7 岁，那么年龄最大的人是多少岁？',
+    hint:'四个人太多。先分成两堆：一堆是"最小的 + 最大的"，另一堆是"另外两个人"。这两堆之间，就是一道和差问题。',
+    points:[
+      '分堆：<b>A = 最小 + 最大</b>，<b>B = 另外两人</b>。四个对象 → 两个对象。',
+      'A + B = 77，A 比 B 大 7 → 去掉多的 7，平均分，得 B = 35，A = 42。',
+      '注意：42 是"最小 + 最大"<b>两个人</b>的和，还要再减掉最小的 10 岁，才是最大年龄。'
+    ],
+    diagrams:[
+      {svg:bar({rows:[
+        {name:'B（另两人）',segs:[{w:1,t:'1 份',k:'c2'}]},
+        {name:'A（最小+最大）',segs:[{w:1,t:'1 份',k:'c1'},{w:0.2,t:'+7 岁',k:'tail'}]}
+      ]}),
+      cap:'两堆一共 77 岁，A 比 B 多 7 岁，先把多的 7 拿走再平分。'}
+    ],
+    steps:[
+      {h:'分堆',m:'A = 最小 + 最大，B = 另外两人',d:'四个人 → 两堆，就变成和差问题了。'},
+      {h:'已知条件翻译一下',m:'A + B = 77，A = B + 7'},
+      {h:'先拿走多的 7 岁',m:'77 − 7 = 70（岁）',d:'拿走以后，A 和 B 一样多了。'},
+      {h:'平均分',m:'70 ÷ 2 = 35（岁）→ B = 35 岁'},
+      {h:'A 比 B 多 7 岁',m:'35 + 7 = 42（岁）'},
+      {h:'A 是最小 + 最大，减去最小的 10 岁',m:'42 − 10 = 32（岁）'}
+    ],
+    check:['10 + 32 = 42 ✓ 最小+最大 = 42 岁','42 − 35 = 7 ✓ 比另外两人的和大 7 岁','42 + 35 = 77 ✓ 四个人一共 77 岁'],
+    answer:'年龄最大的人是 32 岁。',
+    pitfall:'容易直接 77 ÷ 2，或者算到 42 就停手。要盯住：<b>42 是两个人的和</b>，题目问的是最大那一个人的年龄，还得减掉 10 岁。'
+  },
+  {
+    id:'c6q4', tag:'练习 2', name:'四块蛋糕',
+    text:'有四块重量不同的蛋糕，一共重 2000 克，其中重的两块重量之和比轻的两块多 1000 克，最轻的那块蛋糕只有 100 克重，那么第三重的蛋糕有多重？',
+    hint:'先分两堆：重的两块、轻的两块。先求出"轻的两块一共多重"，再看看这两块里面都有谁。',
+    points:[
+      '分堆：<b>重两块 + 轻两块 = 2000</b>，<b>重两块 = 轻两块 + 1000</b>。',
+      '去掉多的 1000 克 → 两堆一样重 → 平均分，轻的两块 = 500 克。',
+      '轻的两块就是"最轻的 + 第三重的"：100 + 第三重 = 500。',
+      '注意"第三重"是从重到轻排第三，也就是<b>第二轻</b>的那块。'
+    ],
+    diagrams:[
+      {svg:bar({rows:[
+        {name:'轻的两块',segs:[{w:1,t:'1 份',k:'c2'}]},
+        {name:'重的两块',segs:[{w:1,t:'1 份',k:'c1'},{w:2,t:'多 1000 克',k:'tail'}]}
+      ]}),
+      cap:'两堆一共 2000 克，重的比轻的多 1000 克，先把多的拿走。'},
+      {svg:bar({rows:[
+        {name:'轻的两块',segs:[{w:5,t:'1 份',k:'c2'}]},
+        {name:'拆开来看',segs:[{w:1,t:'100 克',k:'c3'},{w:4,t:'第三重的 ? 克',k:'q'}]}
+      ]}),
+      cap:'轻的两块一共 1 份。拆开看：里面是"最轻的 100 克"和"第三重的 ? 克"两块。'}
+    ],
+    steps:[
+      {h:'分堆：重的两块、轻的两块',m:'四块 → 两堆'},
+      {h:'拿走多的 1000 克',m:'2000 − 1000 = 1000（克）',d:'两堆一样重时，一共是 1000 克。'},
+      {h:'平均分',m:'1000 ÷ 2 = 500（克）',d:'轻的两块一共 500 克。'},
+      {h:'轻的两块里有谁',m:'最轻的 100 克 + 第三重的 = 500 克'},
+      {h:'求第三重的',m:'500 − 100 = 400（克）'}
+    ],
+    check:['100 + 400 = 500 ✓ 轻的两块一共 500 克','1500 − 500 = 1000 ✓ 重两块比轻两块多 1000 克','500 + 1500 = 2000 ✓ 四块一共 2000 克'],
+    answer:'第三重的蛋糕重 400 克。',
+    pitfall:'"第三重"是按重量从大到小排第三名，也就是<b>第二轻</b>的那一块。别把它当成最轻的，也别当成第二重的（那是 1500 克里的一块）。'
+  },
+  {
+    id:'c6q5', tag:'例题 3', name:'好声音报名',
+    text:'中国好声音比赛开始报名，一共有上海、北京和湖南 3 个赛区，总的报名人数为 600 人。其中湖南的报名人数比上海的 2 倍少 80 人，而上海的报名人数比北京的 3 倍多 20 人。问 3 个赛区各有多少人？',
+    hint:'这题打包不了，要用线段图。先找"最少的那个人"——谁最少，谁就当 1 份。',
+    points:[
+      '上海比北京多，湖南又比上海多得多 → <b>北京最少</b>，把北京当 <b>1 份</b>。',
+      '上海 = <b>3 份 + 20</b>（比北京的 3 倍多 20 人）。',
+      '湖南 = 上海的 2 倍 − 80 =（3 份 + 20）× 2 − 80 = <b>6 份 + 40 − 80 = 6 份 − 40</b>。',
+      '<b>关键：零头也要跟着翻倍！</b>20 翻倍成 40，然后再减 80。画图时先老老实实画满 <b>6 份</b>，再把最后 40 人那一段涂成"空的"，孩子才看得见"是 6 份，只是尾巴缺了一截"。',
+      '三份加起来：份数 1 + 3 + 6 = 10 份，零头 0 + 20 − 40 = <b>−20</b> → 10 份 − 20 = 600。'
+    ],
+    diagrams:[
+      {svg:bar({rows:[
+        {name:'北京',segs:[{w:1,t:'1 份',k:'c3'}]},
+        {name:'上海',segs:[{w:3,t:'3 份',k:'c1',div:3},{w:0.32,t:'+20',k:'tail'}]},
+        {name:'湖南',segs:[{w:6,t:'6 份',k:'c2',div:6,cut:0.645,cutLbl:'这里少 40 人'}]}
+      ]}),
+      cap:'北京 1 份、上海 3 份 + 20 人；湖南要画满 6 份，可最后这一段是空的——比 6 份少了 40 人。'}
+    ],
+    steps:[
+      {h:'定 1 份：北京',m:'北京 = 1 份',d:'上海、湖南都比北京多，北京最少。'},
+      {h:'把上海写成份数',m:'上海 = 3 份 + 20',d:'"比北京的 3 倍多 20 人"。'},
+      {h:'把湖南也写成份数',m:'上海 × 2 = 6 份 + 40\n湖南 = 6 份 + 40 − 80 = 6 份 − 40',d:'注意：20 也要 ×2 变成 40，然后再减 80。所以湖南不是"5 份多一点"，而是"完整的 6 份，尾巴上缺了 40 人"——看图最后那一格。'},
+      {h:'数一数总份数和总零头',m:'1 + 3 + 6 = 10（份）；零头 0 + 20 − 40 = −20（人）',d:'零头加起来是"少了 20 人"。'},
+      {h:'去掉零头',m:'10 份 − 20 = 600  →  10 份 = 620（人）',d:'原来是"少了 20"，所以要补上 20。'},
+      {h:'求 1 份',m:'620 ÷ 10 = 62（人）→ 北京 62 人'},
+      {h:'顺着关系往回算',m:'上海 = 62 × 3 + 20 = 206（人）',d:'湖南 = 206 × 2 − 80 = 332（人）'}
+    ],
+    check:['62 + 206 + 332 = 600 ✓ 三个赛区一共 600 人','206 = 62 × 3 + 20 ✓ 上海比北京的 3 倍多 20','332 = 206 × 2 − 80 ✓ 湖南比上海的 2 倍少 80'],
+    answer:'北京 62 人，上海 206 人，湖南 332 人。',
+    pitfall:'孩子最容易把湖南写成"6 份 + 80"或者"6 份"，漏掉上海那 20 人翻倍后变成的 40。可以让孩子指着图念一遍：<b>"上海的两倍，是两份上海，零头也要两份。"</b>'
+  },
+  {
+    id:'c6q6', tag:'练习 3', name:'又是三种纸鹤',
+    text:'萱萱折了一些新的纸鹤，大、中、小三种纸鹤共 740 只。其中，中纸鹤的数量要比大纸鹤的 2 倍多 20 只，而小纸鹤的数量则要比中纸鹤的 2 倍少 20 只，那么现在大纸鹤有多少只？',
+    hint:'和上一题一模一样：大纸鹤最少，让它当 1 份，然后一级一级往上翻译。',
+    points:[
+      '大纸鹤最少 → 大 = <b>1 份</b>。',
+      '中 = <b>2 份 + 20</b>。',
+      '小 = 中的 2 倍 − 20 =（2 份 + 20）× 2 − 20 = <b>4 份 + 40 − 20 = 4 份 + 20</b>。画图时先画满 <b>4 份 + 40</b>，再把尾巴挖掉 20 只。',
+      '份数 1 + 2 + 4 = 7 份，零头 20 + 20 = 40 只 → 7 份 + 40 = 740。'
+    ],
+    diagrams:[
+      {svg:bar({rows:[
+        {name:'中的 2 倍',segs:[{w:4,t:'4 份',k:'c1',div:4},{w:0.4,t:'+40',k:'tail'}]},
+        {name:'小纸鹤',segs:[{w:4,t:'4 份',k:'c2',div:4},{w:0.4,t:'+20',k:'tail',cut:0.2,cutLbl:'这里少 20 只'}]}
+      ]}),
+      cap:'先把"中的 2 倍"整整齐齐画满（4 份 + 40），再从尾巴上挖掉 20 只——剩下的就是 4 份 + 20。'},
+      {svg:bar({rows:[
+        {name:'大纸鹤',segs:[{w:1,t:'1 份',k:'c3'}]},
+        {name:'中纸鹤',segs:[{w:2,t:'2 份',k:'c1',div:2},{w:0.2,t:'+20',k:'tail'}]},
+        {name:'小纸鹤',segs:[{w:4,t:'4 份',k:'c2',div:4},{w:0.2,t:'+20',k:'tail'}]}
+      ]}),
+      cap:'大 1 份、中 2 份 + 20、小 4 份 + 20，一共 7 份，再加零头 20 + 20。'}
+    ],
+    steps:[
+      {h:'定 1 份：大纸鹤',m:'大 = 1 份'},
+      {h:'中纸鹤',m:'中 = 2 份 + 20'},
+      {h:'小纸鹤（零头要翻倍）',m:'（2 份 + 20）× 2 − 20\n= 4 份 + 40 − 20 = 4 份 + 20',d:'中的 2 倍，零头 20 也要 ×2 变成 40，再减 20。看图：先画满 4 份 + 40，尾巴上挖掉的那一小截就是少的 20 只。'},
+      {h:'数份数和零头',m:'1 + 2 + 4 = 7（份）；零头 20 + 20 = 40（只）'},
+      {h:'去掉零头',m:'740 − 40 = 700（只）'},
+      {h:'求 1 份',m:'700 ÷ 7 = 100（只）→ 大纸鹤 100 只'},
+      {h:'顺便算中和小',m:'中 = 100 × 2 + 20 = 220（只）；小 = 220 × 2 − 20 = 420（只）'}
+    ],
+    check:['100 + 220 + 420 = 740 ✓ 三种一共 740 只','220 = 100 × 2 + 20 ✓ 中比大的 2 倍多 20','420 = 220 × 2 − 20 ✓ 小比中的 2 倍少 20'],
+    answer:'现在大纸鹤有 100 只。',
+    pitfall:'"小比中的 2 倍少 20"，要先把中的 2 倍算出来（4 份 + 40），再减 20。<b>零头翻倍这一步，是这一讲最容易丢分的地方。</b>'
+  },
+  {
+    id:'c6q7', tag:'例题 4', name:'四箱苹果',
+    text:'有甲、乙、丙、丁四箱苹果，甲箱苹果数是乙的 2 倍，乙箱苹果数比丙、丁两箱和的 3 倍多 4 个，丙箱苹果数是丁的 2 倍。四箱苹果一共 132 个，那么丁箱有多少个苹果？',
+    hint:'四个箱子，从"最少的"入手。丙是丁的 2 倍，所以丁最少——让丁当 1 份，然后一个一个往上"翻译"。',
+    points:[
+      '丁 = <b>1 份</b> → 丙 = <b>2 份</b> → 丙 + 丁 = <b>3 份</b>。',
+      '乙 =（丙 + 丁）的 3 倍 + 4 = <b>9 份 + 4</b>。',
+      '甲 = 乙的 2 倍 =（9 份 + 4）× 2 = <b>18 份 + 8</b>。<b>零头 4 也要翻倍成 8。</b>',
+      '份数 1 + 2 + 9 + 18 = 30 份，零头 4 + 8 = 12 个 → 30 份 + 12 = 132。'
+    ],
+    diagrams:[
+      {svg:bar({rows:[
+        {name:'丁箱',segs:[{w:4,t:'1份',k:'c4'}]},
+        {name:'丙箱',segs:[{w:8,t:'2份',k:'c3',div:2}]},
+        {name:'乙箱',segs:[{w:36,t:'9 份',k:'c1'},{w:4,t:'+4',k:'tail'}]},
+        {name:'甲箱',segs:[{w:72,t:'18 份',k:'c2'},{w:8,t:'+8',k:'tail'}]}
+      ]}),
+      cap:'丁 1 份、丙 2 份、乙 9 份 + 4、甲 18 份 + 8。四箱一共 132 个。'}
+    ],
+    steps:[
+      {h:'定 1 份：丁箱',m:'丁 = 1 份',d:'丙是丁的 2 倍，丁最少。'},
+      {h:'丙箱',m:'丙 = 2 份'},
+      {h:'先算出"丙 + 丁"',m:'2 份 + 1 份 = 3 份',d:'这一步要单独打包算，不能直接写成"丙的 3 倍"。'},
+      {h:'乙箱 =（丙+丁）的 3 倍 + 4',m:'3 份 × 3 + 4 = 9 份 + 4'},
+
+      {h:'甲箱 = 乙的 2 倍',m:'（9 份 + 4）× 2 = 18 份 + 8',d:'零头 4 也要翻倍成 8。'},
+      {h:'数份数和零头',m:'1 + 2 + 9 + 18 = 30（份）；零头 4 + 8 = 12（个）'},
+      {h:'去掉零头',m:'132 − 12 = 120（个）'},
+      {h:'求 1 份',m:'120 ÷ 30 = 4（个）→ 丁箱 4 个'},
+      {h:'其他箱顺便算',m:'丙 = 8；乙 = 3 ×（4 + 8）+ 4 = 40；甲 = 40 × 2 = 80'}
+    ],
+    check:['4 + 8 + 40 + 80 = 132 ✓ 四箱一共 132 个','40 = 3 ×（4 + 8）+ 4 ✓ 乙比丙丁和的 3 倍多 4','80 = 40 × 2 ✓ 甲是乙的 2 倍'],
+    answer:'丁箱有 4 个苹果。',
+    pitfall:'第 4 步的"丙 + 丁"要<b>先打包算出来</b>，否则很容易把"比丙丁两箱和的 3 倍"错写成"比丙的 3 倍"。打包的意思是：先把这两箱合成一个对象，再去看倍数。'
+  },
+  {
+    id:'c6q8', tag:'练习 4', name:'四种颜色的铅笔',
+    text:'卡莉娅有四种颜色的铅笔一共 43 支，红铅笔比黄铅笔的 2 倍多 3 支，黄铅笔的数量等于蓝、绿铅笔的数量和，蓝铅笔比绿铅笔多 2 支，那么绿铅笔有多少支？',
+    hint:'绿铅笔最少（蓝比绿多 2，黄是蓝加绿）。让绿当 1 份，从下往上一级一级翻译。',
+    points:[
+      '绿 <b>1 份</b> → 蓝 = <b>1 份 + 2</b>。',
+      '黄 = 蓝 + 绿 =（1 份 + 2）+ 1 份 = <b>2 份 + 2</b>。',
+      '红 = 黄的 2 倍 + 3 =（2 份 + 2）× 2 + 3 = <b>4 份 + 4 + 3 = 4 份 + 7</b>。',
+      '份数 1 + 1 + 2 + 4 = 8 份，零头 2 + 2 + 7 = 11 支 → 8 份 + 11 = 43。'
+    ],
+    diagrams:[
+      {svg:bar({rows:[
+        {name:'绿',segs:[{w:4,t:'1份',k:'c4'}]},
+        {name:'蓝',segs:[{w:4,t:'1份',k:'c3'},{w:2,t:'+2',k:'tail'}]},
+        {name:'黄',segs:[{w:8,t:'2 份',k:'c1',div:2},{w:2,t:'+2',k:'tail'}]},
+        {name:'红',segs:[{w:16,t:'4 份',k:'c2',div:4},{w:7,t:'+7',k:'tail'}]}
+      ]}),
+      cap:'绿 1 份、蓝 1 份 + 2、黄 2 份 + 2、红 4 份 + 7。四种一共 43 支。'}
+    ],
+    steps:[
+      {h:'定 1 份：绿铅笔',m:'绿 = 1 份',d:'蓝比绿多 2，黄是蓝加绿，绿最少。'},
+      {h:'蓝铅笔',m:'蓝 = 1 份 + 2'},
+      {h:'黄铅笔 = 蓝 + 绿',m:'（1 份 + 2）+ 1 份 = 2 份 + 2'},
+      {h:'红铅笔 = 黄的 2 倍 + 3',m:'（2 份 + 2）× 2 + 3\n= 4 份 + 4 + 3 = 4 份 + 7',d:'零头 2 也要翻倍成 4，再加 3。'},
+      {h:'数份数和零头',m:'1 + 1 + 2 + 4 = 8（份）；零头 2 + 2 + 7 = 11（支）'},
+      {h:'去掉零头',m:'43 − 11 = 32（支）'},
+      {h:'求 1 份',m:'32 ÷ 8 = 4（支）→ 绿铅笔 4 支'},
+      {h:'其他颜色顺便算',m:'蓝 = 6；黄 = 6 + 4 = 10；红 = 10 × 2 + 3 = 23'}
+    ],
+    check:['4 + 6 + 10 + 23 = 43 ✓ 四种一共 43 支','6 − 4 = 2 ✓ 蓝比绿多 2 支','10 = 6 + 4 ✓ 黄等于蓝绿之和','23 = 10 × 2 + 3 ✓ 红比黄的 2 倍多 3'],
+    answer:'绿铅笔有 4 支。',
+    pitfall:'这道题的零头最乱：蓝 +2、黄 +2、红 +7，加起来是 11，不是 2 + 2 + 3。因为红里的 3 前面还有黄翻倍时多出来的 4（4 + 3 = 7）。'
+  }
+  ]
+}
+];
+
+/* =========================================================
+   三、状态与逻辑
+   ========================================================= */
+const LS='aoshuWordGame_v1';
+let store={};
+try{store=JSON.parse(localStorage.getItem(LS)||'{}');}catch(e){store={};}
+if(!store.read)store.read={};      // {qid:true} 已看解答
+if(!store.draft)store.draft={};    // {qid:text} 草稿
+function persist(){try{localStorage.setItem(LS,JSON.stringify(store));}catch(e){}}
+
+let curCh=0, curQ=0, revealed=false, noAutoScroll=false;
+
+function show(id){
+  document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active')});
+  var el=document.getElementById(id);
+  if(el)el.classList.add('active');
+  window.scrollTo(0,0);
+}
+function toast(msg){
+  var t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  clearTimeout(t._t);t._t=setTimeout(function(){t.classList.remove('show')},1600);
+}
+
+function renderMenu(){
+  var list=document.getElementById('ch-list');
+  var html='';
+  DATA.forEach(function(ch,i){
+    var total=ch.qs.length;
+    var done=ch.qs.filter(function(q){return store.read[q.id]}).length;
+    var pct=total?Math.round(done/total*100):0;
+    html+='<div class="ch-card" onclick="openChapter('+i+')">'
+      +'<div class="row1"><div class="num">'+ch.title.replace('第 ','').replace(' 讲','')+'</div>'
+      +'<div class="nm">'+ch.full+'</div></div>'
+      +'<div class="ds">'+ch.desc+'</div>'
+      +'<div class="pbar"><i style="width:'+pct+'%"></i></div>'
+      +'<div class="meta"><span>共 '+total+' 道题</span>'
+      +(done>=total?'<span class="done-tag">✓ 已全部完成</span>':'<span>已看解答 '+done+' / '+total+'</span>')
+      +'</div></div>';
+  });
+  list.innerHTML=html;
+}
+
+function openChapter(i,qi){
+  curCh=i;curQ=(qi||0);revealed=false;
+  show('ch');
+  renderQ();
+}
+function backToMenu(){renderMenu();show('menu');}
+
+/* ---------- 语音播报（提示气泡朗读） ---------- */
+var speechOK = (typeof window!=='undefined' && 'speechSynthesis' in window && typeof SpeechSynthesisUtterance!=='undefined');
+function plainText(s){
+  return String(s)
+    .replace(/<br\s*\/?>/gi,'，')
+    .replace(/<[^>]*>/g,'')
+    .replace(/&nbsp;/g,' ').replace(/&amp;/g,'&')
+    .replace(/[→➡⇒]/g,'，')
+    // 把算式符号念出来，别让 TTS 只读数字
+    .replace(/\+/g,'加').replace(/=/g,'等于')
+    .replace(/\u2212/g,'减')
+    .replace(/(\d)\s*-\s*(\d)/g,'$1减$2')
+    .replace(/×/g,'乘').replace(/÷/g,'除以')
+    .replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE0F}\u{2B00}-\u{2BFF}]/gu,'')
+    .replace(/([\u4e00-\u9fa5])\s+(?=[\u4e00-\u9fa5])/g,'$1')
+    .replace(/\s+/g,' ')
+    .trim();
+}
+function pickZhVoice(){
+  try{
+    var vs=window.speechSynthesis.getVoices()||[];
+    if(!vs.length) return null;
+    for(var i=0;i<vs.length;i++){ if(/zh[-_]?(CN|Hans)/i.test(vs[i].lang)) return vs[i]; }
+    for(var j=0;j<vs.length;j++){ if(/^zh/i.test(vs[j].lang)) return vs[j]; }
+    return null;
+  }catch(e){ return null; }
+}
+function speakText(txt){
+  if(!speechOK||!txt) return;
+  try{
+    window.speechSynthesis.cancel();
+    if(window.speechSynthesis.paused) window.speechSynthesis.resume();
+    var u=new SpeechSynthesisUtterance(txt);
+    u.lang='zh-CN'; u.rate=0.92; u.pitch=1.05; u.volume=1;
+    var v=pickZhVoice(); if(v) u.voice=v;
+    window.speechSynthesis.speak(u);
+  }catch(e){}
+}
+function stopSpeak(){
+  if(!speechOK) return;
+  try{ window.speechSynthesis.cancel(); }catch(e){}
+}
+function speakHint(){
+  var ch=DATA[curCh], q=ch&&ch.qs[curQ];
+  if(!q||!q.points||!q.points.length){ stopSpeak(); return; }
+  speakText('提示：'+plainText(q.points[0]));
+}
+
+function renderQ(){
+  stopSpeak();
+  var ch=DATA[curCh], q=ch.qs[curQ];
+  document.getElementById('ch-title').textContent=ch.title;
+  document.getElementById('ch-count').textContent=(curQ+1)+' / '+ch.qs.length;
+  document.getElementById('prog-fill').style.width=((curQ)/ch.qs.length*100)+'%';
+
+  var body=document.getElementById('ch-body');
+  var h='';
+  h+='<div class="qhead"><span class="qtag">'+q.tag+'</span><span class="qname">'+q.name+'</span></div>';
+  h+='<div class="qtext">'+esc(q.text).replace(/\n/g,'<br/>')+'</div>';
+  if(q.points&&q.points.length){
+    h+='<button class="hint-btn" id="hint-btn" onclick="toggleBubble()">💡 卡住了？点这里提示一下</button>';
+    h+='<div class="bubble-wrap" id="bubble-wrap"><div class="bubble">'
+      +'<button class="bx" onclick="toggleBubble(false)" aria-label="收起">✕</button>'
+      +'<span class="bl">💡 小提示</span>'+q.points[0]
+      +(speechOK?'<button class="bplay" id="bplay" onclick="speakHint()">🔊 再听一遍</button>':'')
+      +'</div></div>';
+  }
+  h+='<div class="ta-label">✏️ 我的做法（可以先画一画线段，再算一算）</div>';
+  h+='<textarea id="ans-input" placeholder="在这里写下你的想法和算式……&#10;不会做也没关系，随便写两句也可以。"></textarea>';
+  h+='<button class="btn-answer" id="btn-answer" onclick="revealAnswer()">📖 参考答案</button>';
+  h+='<div id="answer-box"></div>';
+  body.innerHTML=h;
+
+  var ta=document.getElementById('ans-input');
+  if(store.draft[q.id]) ta.value=store.draft[q.id];
+  ta.addEventListener('input',function(){
+    store.draft[q.id]=ta.value;persist();
+  });
+  window.scrollTo(0,0);
+}
+
+function toggleBubble(force){
+  var w=document.getElementById('bubble-wrap');
+  var b=document.getElementById('hint-btn');
+  if(!w)return;
+  var on=(typeof force==='boolean')?force:!w.classList.contains('on');
+  w.classList.toggle('on',on);
+  if(b){b.classList.toggle('on',on);b.textContent=on?'💡 收起小提示':'💡 卡住了？点这里提示一下';}
+  if(on) speakHint(); else stopSpeak();
+}
+
+function revealAnswer(){
+  if(revealed)return;
+  revealed=true;
+  toggleBubble(false);
+  var hb=document.getElementById('hint-btn');
+  if(hb) hb.style.display='none';
+  var ch=DATA[curCh], q=ch.qs[curQ];
+  var isLast=(curQ===ch.qs.length-1);
+
+  store.read[q.id]=true;persist();
+
+  if(/[?&]dia=1/.test(location.search)){
+    var dh='';
+    (q.diagrams||[]).forEach(function(d){dh+='<div class="dia">'+d.svg+'<div class="dia-cap">'+d.cap+'</div></div>';});
+    document.getElementById('answer-box').innerHTML=dh;
+    var db=document.getElementById('btn-answer');db.disabled=true;db.textContent='✓';
+    return;
+  }
+
+  var h='<div class="answer">';
+  h+='<div class="ans-hd">📖 参考解答</div>';
+  h+='<div class="sec-t">🔑 关键点</div><ul class="pts">';
+  q.points.forEach(function(p){h+='<li>'+p+'</li>'});
+  h+='</ul>';
+
+  if(q.diagrams&&q.diagrams.length){
+    h+='<div class="sec-t">📐 画个线段图想一想</div>';
+    q.diagrams.forEach(function(d){
+      h+='<div class="dia">'+d.svg+'<div class="dia-cap">'+d.cap+'</div></div>';
+    });
+  }
+
+  h+='<div class="sec-t">🧮 一步一步算</div>';
+  q.steps.forEach(function(s,i){
+    h+='<div class="step"><div class="sn">'+(i+1)+'</div><div class="sb">'
+      +'<div class="st">'+s.h+'</div>'
+      +(s.m?'<div class="sm">'+s.m.replace(/\n/g,'<br/>')+'</div>':'')
+      +(s.d?'<div class="sd">'+s.d+'</div>':'')
+      +'</div></div>';
+  });
+
+  if(q.check&&q.check.length){
+    h+='<div class="check"><div class="sec-t">✅ 回头验算一下</div>';
+    q.check.forEach(function(c){h+='<div class="ck">'+c+'</div>'});
+    h+='</div>';
+  }
+
+  h+='<div class="final">🎯 答案：'+q.answer+'</div>';
+  if(q.pitfall) h+='<div class="pitfall"><b>⚠️ 易错点</b><br/>'+q.pitfall+'</div>';
+
+  var btnTxt=isLast?'🎉 已完成本章所有题目，恭喜你！':'下一题 →';
+  h+='<button class="btn-next'+(isLast?' fin':'')+'" onclick="nextQ()">'+btnTxt+'</button>';
+  h+='</div>';
+
+  document.getElementById('answer-box').innerHTML=h;
+  var b=document.getElementById('btn-answer');
+  b.disabled=true;b.textContent='✓ 答案已展开';
+
+  setTimeout(function(){
+    if(noAutoScroll)return;
+    var box=document.getElementById('answer-box');
+    if(box)box.scrollIntoView({behavior:'smooth',block:'start'});
+  },80);
+}
+
+function nextQ(){
+  var ch=DATA[curCh];
+  if(curQ<ch.qs.length-1){
+    curQ++;revealed=false;renderQ();
+  }else{
+    finishChapter();
+  }
+}
+
+function finishChapter(){
+  var ch=DATA[curCh];
+  var done=ch.qs.filter(function(q){return store.read[q.id]}).length;
+  document.getElementById('done-title').textContent=ch.title+' 全部完成！';
+  document.getElementById('done-sub').innerHTML='共 '+ch.qs.length+' 道题，你已经看完了 '+done+' 道。<br/>'
+    +'记住这三步：<b>打包</b> → <b>定 1 份</b> → <b>份数相加、零头相减</b>。';
+  var nb=document.getElementById('done-next');
+  if(curCh<DATA.length-1){nb.style.display='block';nb.textContent='挑战下一章：'+DATA[curCh+1].title+' →';}
+  else{nb.style.display='none';}
+  if(curCh<DATA.length-1){nb.onclick=function(){openChapter(curCh+1,0)};}
+  show('done');
+}
+function nextChapter(){
+  if(curCh<DATA.length-1)openChapter(curCh+1,0);
+  else backToMenu();
+}
+
+/* =========================================================
+   四、深链接：?q=c5q2&show=1 直接打开某题的解答（便于截图/分享）
+   ========================================================= */
+function boot(){
+  renderMenu();
+  try{
+    var p=new URLSearchParams(location.search);
+    var qid=p.get('q');
+    if(qid){
+      for(var i=0;i<DATA.length;i++){
+        for(var j=0;j<DATA[i].qs.length;j++){
+          if(DATA[i].qs[j].id===qid){
+            openChapter(i,j);
+            if(p.get('show')==='1'){noAutoScroll=true;setTimeout(revealAnswer,120);}
+            return;
+          }
+        }
+      }
+    }
+  }catch(e){}
+}
+boot();
+</script>
+</body>
+</html>

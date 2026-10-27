@@ -27,6 +27,8 @@ body{font-family:'Microsoft YaHei','PingFang SC',sans-serif;background:linear-gr
 .menu-btn.p1{background:linear-gradient(135deg,#f472b6,#ec4899);box-shadow:0 4px 15px rgba(236,72,153,.4)}
 .menu-btn.p2{background:linear-gradient(135deg,#60a5fa,#3b82f6);box-shadow:0 4px 15px rgba(59,130,246,.4)}
 .menu-btn.p3{background:linear-gradient(135deg,#34d399,#10b981);box-shadow:0 4px 15px rgba(16,185,129,.4)}
+.menu-btn.p4{background:linear-gradient(135deg,#fbbf24,#f59e0b);box-shadow:0 4px 15px rgba(245,158,11,.45);position:relative}
+.menu-btn.p4 .new-tag{position:absolute;top:-7px;right:-6px;background:#ec4899;color:#fff;font-size:10px;font-weight:bold;padding:2px 8px;border-radius:9px;box-shadow:0 2px 6px rgba(236,72,153,.5)}
 .menu-foot{position:absolute;bottom:16px;color:#64748b;font-size:11px}
 
 /* 选关 */
@@ -45,6 +47,8 @@ body{font-family:'Microsoft YaHei','PingFang SC',sans-serif;background:linear-gr
 .level-name{font-size:15px;font-weight:bold;color:#e0e7ff;margin-bottom:3px}
 .level-desc{font-size:11px;color:#818cf8}
 .level-stars{font-size:14px;letter-spacing:1px}
+.level-card.wp-entry{border:2px dashed rgba(251,191,36,.6);background:linear-gradient(135deg,rgba(251,191,36,.12),#1e1b4b)}
+.wp-new{display:inline-block;background:#ec4899;color:#fff;font-size:9px;padding:1px 6px;border-radius:7px;margin-left:6px;vertical-align:2px}
 
 /* 战斗 */
 #battle{background:linear-gradient(180deg,#0f0f23,#1a1a2e)}
@@ -211,6 +215,7 @@ body{font-family:'Microsoft YaHei','PingFang SC',sans-serif;background:linear-gr
   <button class="menu-btn p1" onclick="goLevels()">⚔️ 开始挑战</button>
   <button class="menu-btn p2" onclick="goShop()">🎁 奖励商店</button>
   <button class="menu-btn p3" onclick="parentLogin()">👨‍👩‍👧 家长中心</button>
+  <button class="menu-btn p4" onclick="location.href='aoshu-word-problem-game.html'">📝 应用题闯关<span class="new-tag">NEW</span></button>
   <div class="menu-foot">每天20分钟，思维更敏捷</div>
 </div>
 
@@ -1453,7 +1458,12 @@ function renderLevels(){
       <div class="level-info"><div class="level-name">${lv.name}</div><div class="level-desc">${lv.count||5}道题 · ${done?'已通关':'未通关'}</div></div>
       <div class="level-stars">${'⭐'.repeat(st)+'☆'.repeat(3-st)}</div>
     </div>`;
-  }).join('');
+  }).join('') + `
+    <div class="level-card wp-entry" onclick="location.href='aoshu-word-problem-game.html'">
+      <div class="level-num" style="background:linear-gradient(135deg,#fbbf24,#f59e0b)">📝</div>
+      <div class="level-info"><div class="level-name">应用题闯关（第5~6讲）<span class="wp-new">NEW</span></div><div class="level-desc">读题 · 画线段 · 数份数 · 看详细解答</div></div>
+      <div class="level-stars" style="color:#fbbf24">›</div>
+    </div>`;
 }
 function switchU(u){curTab=u;renderLevels()}
 
