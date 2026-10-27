@@ -382,6 +382,7 @@ body{font-family:'Microsoft YaHei','PingFang SC',sans-serif;background:linear-gr
 </div>
 <div class="toast" id="toast"></div>
 
+<script src="sg-account.js"></script>
 <script>
 // ==================== BGM 音乐系统 ====================
 let audioCtx = null, musicOn = true, musicTimer = null, musicStep = 0;
@@ -1422,7 +1423,7 @@ let S={stars:0,totalStars:0,curUnit:1,dailyLimit:1200,todayTime:0,lastDate:'',un
 ],items:{revive:1,time:2,hint:3},stats:{tq:0,tc:0,todayQ:0,todayC:0,todayS:0},lastQs:{},earnedT:{},battle:null};
 
 const SK='aoshu_classroom_test_save_v1';
-function save(){S.lastDate=todayStr();localStorage.setItem(SK,JSON.stringify(S))}
+function save(){if(window.SG){try{SG.push(S)}catch(e){}}S.lastDate=todayStr();localStorage.setItem(SK,JSON.stringify(S))}
 function load(){
   let d=localStorage.getItem(SK);
   if(!d){ // 首次运行：自动继承旧版游戏（奥数勇士大冒险）的存档——家长设置、游玩进度、星星、道具全部保留
@@ -1430,6 +1431,7 @@ function load(){
     if(old){try{const o=JSON.parse(old);o.battle=null;Object.assign(S,o);localStorage.setItem(SK,JSON.stringify(S));d=localStorage.getItem(SK)}catch(e){}}
   }
   if(d){try{S=Object.assign(S,JSON.parse(d));if(S.lastDate!==todayStr()){S.todayTime=0;S.stats.todayQ=0;S.stats.todayC=0;S.stats.todayS=0;S.items.revive=Math.min(3,S.items.revive+1)}}catch(e){}}
+  if(window.SG){try{SG.pull(S);if(SG.unlockAll()){var mx=0;LEVELS.forEach(function(l){if(l.unit>mx)mx=l.unit});LEVELS.forEach(function(l){if(S.unlocked.indexOf(l.id)<0)S.unlocked.push(l.id)});S.curUnit=Math.max(S.curUnit,mx)}}catch(e){}}
 }
 function todayStr(){const d=new Date();return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate()}
 function resetAll(){if(confirm('确定重置所有数据？不可恢复！')){localStorage.removeItem(SK);location.reload()}}
@@ -1686,7 +1688,7 @@ function nextLevel(){
 }
 
 // ==================== 商店 ====================
-function goShop(){show('shop');renderShop()}
+function goShop(){location.href='reward-shop.html'}
 function renderShop(){
   document.getElementById('shop-stars').textContent=S.stars;
   let h='';
@@ -1718,11 +1720,7 @@ function redeem(id){
 function useReward(id){if(confirm('确定使用这个奖励？')){S.used.push(id);save();renderShop();showToast('🎉 奖励已使用！')}}
 
 // ==================== 家长后台 ====================
-function parentLogin(){
-  const p=prompt('请输入家长密码（默认：1234）');
-  if(p==='1234'||p===null){show('parent');renderPSettings();renderRewards();renderAudit();renderReport()}
-  else showToast('密码错误')
-}
+function parentLogin(){location.href='parent-center.html'}
 function pTab(name,el){
   document.querySelectorAll('.p-tab').forEach(t=>t.classList.remove('active'));
   document.querySelectorAll('.p-sec').forEach(s=>s.classList.remove('active'));

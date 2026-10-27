@@ -385,6 +385,7 @@ body{font-family:'Microsoft YaHei','PingFang SC',sans-serif;background:linear-gr
 </div>
 <div class="toast" id="toast"></div>
 
+<script src="sg-account.js"></script>
 <script>
 // ==================== BGM 音乐系统 ====================
 let audioCtx = null, musicOn = true, musicTimer = null, musicStep = 0;
@@ -764,7 +765,7 @@ let S={stars:0,totalStars:0,curUnit:7,dailyLimit:1200,todayTime:0,lastDate:'',un
 ],items:{revive:1,time:2,hint:3},stats:{tq:0,tc:0,todayQ:0,todayC:0,todayS:0},battle:null};
 
 const SK='english_quest_save_v1';
-function save(){S.lastDate=todayStr();localStorage.setItem(SK,JSON.stringify(S))}
+function save(){if(window.SG){try{SG.push(S)}catch(e){}}S.lastDate=todayStr();localStorage.setItem(SK,JSON.stringify(S))}
 function load(){
   let d=localStorage.getItem(SK);
   if(!d){ // 首次运行：自动继承旧版游戏（奥数勇士大冒险）的存档——家长设置、智慧星、道具、奖励全部保留；关卡进度按英语从第1关重新开始
@@ -773,6 +774,7 @@ function load(){
   }
   if(d){try{S=Object.assign(S,JSON.parse(d));if(S.curUnit>7)S.curUnit=7;if(S.curUnit<7)S.curUnit=7;['7-1','7-2','7-3','7-4','7-5','7-6'].forEach(function(id){if(!S.unlocked.includes(id))S.unlocked.push(id)});if(S.lastDate!==todayStr()){S.todayTime=0;S.stats.todayQ=0;S.stats.todayC=0;S.stats.todayS=0;S.items.revive=Math.min(3,S.items.revive+1)}}catch(e){}}
   if(!Array.isArray(S.earnedQ))S.earnedQ=[];
+  if(window.SG){try{SG.pull(S);if(SG.unlockAll()){var mx=0;LEVELS.forEach(function(l){if(l.unit>mx)mx=l.unit});LEVELS.forEach(function(l){if(S.unlocked.indexOf(l.id)<0)S.unlocked.push(l.id)});S.curUnit=Math.max(S.curUnit,mx)}}catch(e){}}
 }
 function todayStr(){const d=new Date();return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate()}
 function resetAll(){if(confirm('确定重置所有数据？不可恢复！')){localStorage.removeItem(SK);location.reload()}}
@@ -1006,7 +1008,7 @@ function nextLevel(){
 }
 
 // ==================== 商店 ====================
-function goShop(){show('shop');renderShop()}
+function goShop(){location.href='reward-shop.html'}
 function renderShop(){
   document.getElementById('shop-stars').textContent=S.stars;
   let h='';
@@ -1038,11 +1040,7 @@ function redeem(id){
 function useReward(id){if(confirm('确定使用这个奖励？')){S.used.push(id);save();renderShop();showToast('🎉 奖励已使用！')}}
 
 // ==================== 家长后台 ====================
-function parentLogin(){
-  const p=prompt('请输入家长密码（默认：1234）');
-  if(p==='1234'||p===null){show('parent');renderPSettings();renderRewards();renderAudit();renderReport()}
-  else showToast('密码错误')
-}
+function parentLogin(){location.href='parent-center.html'}
 function pTab(name,el){
   document.querySelectorAll('.p-tab').forEach(t=>t.classList.remove('active'));
   document.querySelectorAll('.p-sec').forEach(s=>s.classList.remove('active'));

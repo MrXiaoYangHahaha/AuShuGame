@@ -27,6 +27,7 @@ body{font-family:'Microsoft YaHei','PingFang SC',system-ui,-apple-system,sans-se
 @keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-9px)}}
 .hero h1{font-size:26px;color:#fff;text-shadow:0 0 22px rgba(139,92,246,.65);letter-spacing:1px}
 .hero p{color:#a5b4fc;font-size:13px;margin-top:8px;line-height:1.7}
+.sg-chip{display:inline-flex;align-items:center;gap:6px;margin-top:14px;padding:8px 16px;border-radius:20px;background:rgba(251,191,36,.13);border:1px solid rgba(251,191,36,.4);color:#fcd34d;font-size:13px;font-weight:bold;cursor:pointer}
 .ch-list{padding:6px 16px}
 .ch-card{background:linear-gradient(135deg,rgba(67,56,202,.34),rgba(30,27,75,.95));border:1px solid rgba(139,92,246,.4);border-radius:16px;padding:16px;margin-bottom:13px;cursor:pointer;transition:transform .15s,box-shadow .15s;position:relative;overflow:hidden}
 .ch-card:active{transform:scale(.985)}
@@ -124,6 +125,7 @@ ul.pts li b{color:#fbbf24;font-weight:bold}
       <span class="ico">📝</span>
       <h1>奥数应用题闯关</h1>
       <p>四年级上册 · 第 5~6 讲<br/>把题目读懂 → 画线段 → 数份数 → 算出来</p>
+      <div class="sg-chip" onclick="location.href='reward-shop.html'">⭐ <span id="sg-stars">0</span> 颗智慧星</div>
     </div>
     <div class="ch-list" id="ch-list"></div>
     <div class="tip-card">
@@ -161,6 +163,7 @@ ul.pts li b{color:#fbbf24;font-weight:bold}
 </div>
 <div class="toast" id="toast"></div>
 
+<script src="sg-account.js"></script>
 <script>
 /* =========================================================
    一、线段图渲染器
@@ -855,7 +858,12 @@ function revealAnswer(){
   var ch=DATA[curCh], q=ch.qs[curQ];
   var isLast=(curQ===ch.qs.length-1);
 
+  var firstRead=!store.read[q.id];
   store.read[q.id]=true;persist();
+  // 第一次看这道题的解答，给 5 颗智慧星（存入统一账户，三个游戏共用）
+  if(firstRead&&window.SG&&!/[?&]dia=1/.test(location.search)){
+    try{SG.addStars(5,'应用题 '+q.id);renderStars();}catch(e){}
+  }
 
   if(/[?&]dia=1/.test(location.search)){
     var dh='';
@@ -940,8 +948,15 @@ function nextChapter(){
 /* =========================================================
    四、深链接：?q=c5q2&show=1 直接打开某题的解答（便于截图/分享）
    ========================================================= */
+function renderStars(){
+  var el=document.getElementById('sg-stars');
+  if(!el)return;
+  try{el.textContent=(window.SG?SG.refresh():0)}catch(e){el.textContent=0}
+}
+
 function boot(){
   renderMenu();
+  renderStars();
   try{
     var p=new URLSearchParams(location.search);
     var qid=p.get('q');
