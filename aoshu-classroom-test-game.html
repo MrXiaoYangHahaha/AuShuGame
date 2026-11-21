@@ -449,7 +449,8 @@ function mkTOpts(c,others){
   const os=SH(arr);
   return{options:os,answer:os.indexOf(c)};
 }
-function st(t,d,data){return{t,d,type:'calc',data}}
+// data 统一成数组：个别题目只传了一个字符串，直接 .map 会崩
+function st(t,d,data){return{t,d,type:'calc',data:Array.isArray(data)?data:(data==null?[]:[String(data)])}}
 function tt(t,d,data){return{t,d,type:'text',data}}
 function fillQ(q,ans,exp,demo){return{type:'fill',diff:'n',q,answer:String(ans),exp,demo}}
 function choiceQ(q,opts,exp,demo){return Object.assign({type:'choice',diff:'n',q,exp,demo},opts)}
@@ -1573,6 +1574,11 @@ function showFStar(n){
 // ==================== 图形化解题演示 ====================
 function showFB(ok,e,q){
   const b=S.battle;
+  try{renderFBBody(ok,e,q,b)}catch(err){try{console.warn('[答题反馈渲染失败]',err)}catch(_){}}
+  // 无论演示步骤渲染是否出错，反馈层都必须弹出来，否则会卡在原地无法继续
+  document.getElementById('fb').classList.add('show');
+}
+function renderFBBody(ok,e,q,b){
   document.getElementById('fb-icon').textContent=ok?'🎉':'💡';
   document.getElementById('fb-title').textContent=ok?'回答正确！':'答错了，看看解法';
   document.getElementById('fb-title').className='fb-title '+(ok?'c':'w');
@@ -1590,22 +1596,24 @@ function showFB(ok,e,q){
       let inner=`<div class="demo-step-hd">${step.t}</div><div class="demo-step-bd">${step.d}</div>`;
       // 根据类型渲染
       if(step.type==='calc'){
-        inner+=`<div style="margin-top:6px">`+step.data.map(c=>`<div class="calc-step">${c}</div>`).join('')+`</div>`;
+        const calcs=Array.isArray(step.data)?step.data:(step.data==null?[]:[String(step.data)]);
+        inner+=`<div style="margin-top:6px">`+calcs.map(c=>`<div class="calc-step">${c}</div>`).join('')+`</div>`;
       }else if(step.type==='line'){
+        const lines=Array.isArray(step.data)?step.data:[];
         inner+=`<div class="line-diagram">`;
-        step.data.forEach(line=>{
+        lines.forEach(line=>{
           inner+=`<div style="width:100%;margin-bottom:8px"><div style="display:flex;width:100%;height:26px;border-radius:4px;overflow:hidden">`;
-          line.parts.forEach(p=>{
+          (line.parts||[]).forEach(p=>{
             inner+=`<div style="width:${p.w}%;background:${p.c};display:flex;align-items:center;justify-content:center;font-size:10px;color:#fff;font-weight:bold">${p.t}</div>`;
           });
           inner+=`</div><div class="seg-label">${line.label}</div></div>`;
         });
         inner+=`</div>`;
-      }else if(step.type==='table'){
+      }else if(step.type==='table'&&step.data&&step.data.head){
         inner+=`<table class="demo-table"><thead><tr>`+step.data.head.map(h=>`<th>${h}</th>`).join('')+`</tr></thead><tbody>`;
-        step.data.rows.forEach(r=>{inner+=`<tr>`+r.map(c=>`<td>${c}</td>`).join('')+`</tr>`});
+        (step.data.rows||[]).forEach(r=>{inner+=`<tr>`+r.map(c=>`<td>${c}</td>`).join('')+`</tr>`});
         inner+=`</tbody></table>`;
-      }else if(step.type==='grid'){
+      }else if(step.type==='grid'&&step.data){
         const cols=step.data.cols||4;
         inner+=`<div class="grid-demo" style="grid-template-columns:repeat(${cols},1fr)">`;
         for(let i=0;i<cols*(step.data.rows||1);i++){
@@ -1625,7 +1633,6 @@ function showFB(ok,e,q){
     demoTitle.style.display='none';
     demoSteps.innerHTML='';
   }
-  document.getElementById('fb').classList.add('show');
 }
 function nextQ(){
   document.getElementById('fb').classList.remove('show');
